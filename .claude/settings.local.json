@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(node --input-type=module --eval \":*)",
+      "Bash(npx --yes acorn --ecma2020 --module src/App.jsx)",
+      "Bash(node -e \":*)",
+      "Bash(npx vite:*)"
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "ria — rent it all",
+  "short_name": "ria",
+  "description": "Nachhaltig mieten & vermieten in deiner Stadt.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F3EC",
+  "theme_color": "#1C3A2E",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
