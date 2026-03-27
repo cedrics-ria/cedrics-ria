@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ria-rentitall.de/sitemap.xml
