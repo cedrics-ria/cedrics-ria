@@ -310,13 +310,17 @@ export default function App() {
   }
 
   async function updateListing(id, updates) {
+    if (!currentUser) { addToast('Nicht angemeldet.', 'error'); return false; }
     const payload = {
       title: updates.title, price: updates.price, location: updates.location,
       image: updates.image, category: updates.category, description: updates.description,
       kaution: updates.kaution || null, payment_methods: updates.paymentMethods || [],
       plz: updates.plz || null,
     };
-    const { error } = await supabase.from('listings').update(payload).eq('id', id).select().single();
+    // Admins can edit any listing; regular users only their own (enforced in DB query)
+    let query = supabase.from('listings').update(payload).eq('id', id);
+    if (!isAdmin) query = query.eq('user_id', currentUser.id);
+    const { error } = await query.select().single();
     if (error) { addToast('Fehler beim Speichern: ' + error.message, 'error'); return false; }
     setListings((prev) => prev.map((l) => (l.id === id ? { ...l, ...updates } : l)));
     addToast('Inserat gespeichert.', 'info');
@@ -324,7 +328,11 @@ export default function App() {
   }
 
   async function deleteListing(id) {
-    const { error } = await supabase.from('listings').delete().eq('id', id);
+    if (!currentUser) return;
+    // Admins can delete any listing; regular users only their own (enforced in DB query)
+    let query = supabase.from('listings').delete().eq('id', id);
+    if (!isAdmin) query = query.eq('user_id', currentUser.id);
+    const { error } = await query;
     if (error) { addToast('Fehler beim Löschen.', 'error'); return; }
     setListings((prev) => prev.filter((l) => l.id !== id));
     addToast('Inserat gelöscht.', 'info');
@@ -352,15 +360,23 @@ export default function App() {
   }
 
   async function updateProfile(updates) {
+    // Whitelist: only allow safe user-controlled fields, never is_admin / is_banned
+    const safeUpdates = {
+      ...(updates.name      !== undefined && { name:       String(updates.name).trim().slice(0, 100) }),
+      ...(updates.phone     !== undefined && { phone:      String(updates.phone).trim().slice(0, 30) }),
+      ...(updates.bio       !== undefined && { bio:        String(updates.bio).trim().slice(0, 500) }),
+      ...(updates.avatar_url !== undefined && { avatar_url: String(updates.avatar_url).slice(0, 500) }),
+    };
     const { error } = await supabase.from('profiles').upsert({
-      id: currentUser.id, name: currentUser.name, ...updates, updated_at: new Date().toISOString(),
+      id: currentUser.id, name: currentUser.name, ...safeUpdates, updated_at: new Date().toISOString(),
     });
     if (error) { addToast('Fehler: ' + error.message, 'error'); return; }
-    setProfile((prev) => ({ ...prev, ...updates }));
+    setProfile((prev) => ({ ...prev, ...safeUpdates }));
     addToast('Profil gespeichert.', 'info');
   }
 
   async function banUser(userId, banned) {
+    if (!isAdmin) { addToast('Keine Berechtigung.', 'error'); return; }
     const { error } = await supabase.from('profiles').update({ is_banned: banned }).eq('id', userId);
     if (error) { addToast('Fehler: ' + error.message, 'error'); return; }
     addToast(banned ? 'Nutzer gesperrt.' : 'Sperre aufgehoben.', 'info');
@@ -369,6 +385,7 @@ export default function App() {
   // ── Message / booking actions ─────────────────────────────────────────────
   async function saveMessage(newMessage) {
     if (!currentUser) return false;
+    if (newMessage.toUserId === currentUser.id) return false; // can't message yourself
     const { data, error } = await supabase.from('messages').insert({
       listing_id: newMessage.listingId, listing_title: newMessage.listingTitle,
       from_user_id: currentUser.id, from_name: currentUser.name, from_email: currentUser.email,
@@ -397,14 +414,20 @@ export default function App() {
   }
 
   async function acceptBookingRecord(bookingId) {
-    const { error } = await supabase.from('bookings').update({ status: 'accepted' }).eq('id', bookingId);
+    const booking = bookings.find((b) => b.id === bookingId);
+    if (!booking || booking.owner_id !== currentUser?.id) { addToast('Keine Berechtigung.', 'error'); return; }
+    const { error } = await supabase.from('bookings').update({ status: 'accepted' })
+      .eq('id', bookingId).eq('owner_id', currentUser.id);
     if (error) { addToast('Fehler: ' + error.message, 'error'); return; }
     setBookings((prev) => prev.map((b) => (b.id === bookingId ? { ...b, status: 'accepted' } : b)));
     addToast('Buchung angenommen ✓', 'info');
   }
 
   async function declineBookingRecord(bookingId) {
-    const { error } = await supabase.from('bookings').update({ status: 'declined' }).eq('id', bookingId);
+    const booking = bookings.find((b) => b.id === bookingId);
+    if (!booking || booking.owner_id !== currentUser?.id) { addToast('Keine Berechtigung.', 'error'); return; }
+    const { error } = await supabase.from('bookings').update({ status: 'declined' })
+      .eq('id', bookingId).eq('owner_id', currentUser.id);
     if (error) { addToast('Fehler: ' + error.message, 'error'); return; }
     setBookings((prev) => prev.map((b) => (b.id === bookingId ? { ...b, status: 'declined' } : b)));
     addToast('Buchung abgelehnt.', 'info');

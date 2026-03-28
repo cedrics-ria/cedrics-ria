@@ -173,6 +173,15 @@ export default function AdminPage({
     setDeletingId(null);
   }
 
+  // Secondary guard after all hooks — prevents rendering admin UI for non-admins
+  if (!isAdmin) {
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: C.muted }}>Keine Berechtigung.</p>
+      </div>
+    );
+  }
+
   const filteredListings = listings.filter((l) => {
     if (!listingSearch.trim()) return true;
     const q = listingSearch.toLowerCase();
