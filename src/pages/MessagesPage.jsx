@@ -27,7 +27,28 @@ export default function MessagesPage({
   const [contracts, setContracts] = useState({}); // thread.key -> contract obj or null
   const [contractModal, setContractModal] = useState(null); // { thread, isOwner }
   const [readThreads, setReadThreads] = useState(new Set());
+  const [otherAvatars, setOtherAvatars] = useState({}); // userId -> avatar_url
   const mountTimeRef = useRef(new Date());
+
+  // Load avatars for all conversation partners
+  useEffect(() => {
+    const ids = [...new Set(threads.map(t => t.otherUserId).filter(Boolean))];
+    if (!ids.length) return;
+    const missing = ids.filter(id => !(id in otherAvatars));
+    if (!missing.length) return;
+    supabase
+      .from('profiles')
+      .select('id, avatar_url')
+      .in('id', missing)
+      .then(({ data }) => {
+        if (!data) return;
+        setOtherAvatars(prev => {
+          const next = { ...prev };
+          data.forEach(p => { next[p.id] = p.avatar_url || null; });
+          return next;
+        });
+      });
+  }, [threads]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Stable ref so the effect runs only once on mount, regardless of onOpen identity
   const onOpenRef = useRef(onOpen);
@@ -283,9 +304,18 @@ export default function MessagesPage({
                         fontSize: '1.1rem',
                         fontWeight: 800,
                         flexShrink: 0,
+                        overflow: 'hidden',
                       }}
                     >
-                      {(thread.otherName || '?').charAt(0).toUpperCase()}
+                      {otherAvatars[thread.otherUserId] ? (
+                        <img
+                          src={otherAvatars[thread.otherUserId]}
+                          alt={thread.otherName}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        (thread.otherName || '?').charAt(0).toUpperCase()
+                      )}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div
