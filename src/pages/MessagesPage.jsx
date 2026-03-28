@@ -560,30 +560,32 @@ export default function MessagesPage({
                             📋 Protokoll ansehen
                           </button>
                         )}
-                        {/* Contract button — visible to owner always, to renter when pending */}
-                        {!threadContract ? (
-                          isOwner && (
+                        {/* Contract button — only after booking is accepted */}
+                        {isAccepted && (
+                          !threadContract ? (
+                            isOwner && (
+                              <button
+                                onClick={() => setContractModal({ thread, isOwner: true })}
+                                style={{ padding:'0.6rem 1rem', borderRadius:12, border:`1px solid rgba(196,113,74,0.35)`, background:'rgba(196,113,74,0.07)', color:C.terra, fontWeight:700, cursor:'pointer', fontSize:'0.84rem', display:'flex', alignItems:'center', gap:'0.4rem' }}
+                              >
+                                📄 Vertrag erstellen
+                              </button>
+                            )
+                          ) : threadContract.status === 'completed' ? (
                             <button
-                              onClick={() => setContractModal({ thread, isOwner: true })}
+                              onClick={() => setContractModal({ thread, isOwner })}
+                              style={{ padding:'0.6rem 1rem', borderRadius:12, border:`1px solid ${C.sage}`, background:C.sageLight, color:C.forest, fontWeight:700, cursor:'pointer', fontSize:'0.84rem', display:'flex', alignItems:'center', gap:'0.4rem' }}
+                            >
+                              ✅ Vertrag ansehen
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setContractModal({ thread, isOwner })}
                               style={{ padding:'0.6rem 1rem', borderRadius:12, border:`1px solid rgba(196,113,74,0.35)`, background:'rgba(196,113,74,0.07)', color:C.terra, fontWeight:700, cursor:'pointer', fontSize:'0.84rem', display:'flex', alignItems:'center', gap:'0.4rem' }}
                             >
-                              📄 Vertrag erstellen
+                              {isOwner ? '⏳ Vertrag — wartet auf Mieter' : '📄 Vertrag bestätigen'}
                             </button>
                           )
-                        ) : threadContract.status === 'completed' ? (
-                          <button
-                            onClick={() => setContractModal({ thread, isOwner })}
-                            style={{ padding:'0.6rem 1rem', borderRadius:12, border:`1px solid ${C.sage}`, background:C.sageLight, color:C.forest, fontWeight:700, cursor:'pointer', fontSize:'0.84rem', display:'flex', alignItems:'center', gap:'0.4rem' }}
-                          >
-                            ✅ Vertrag ansehen
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => setContractModal({ thread, isOwner })}
-                            style={{ padding:'0.6rem 1rem', borderRadius:12, border:`1px solid rgba(196,113,74,0.35)`, background:'rgba(196,113,74,0.07)', color:C.terra, fontWeight:700, cursor:'pointer', fontSize:'0.84rem', display:'flex', alignItems:'center', gap:'0.4rem' }}
-                          >
-                            {isOwner ? '⏳ Vertrag — wartet auf Mieter' : '📄 Vertrag bestätigen'}
-                          </button>
                         )}
                       </div>
 
