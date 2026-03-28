@@ -702,9 +702,14 @@ export default function ProfilePage({
                           {item.price}
                         </span>
                       </div>
-                      <p style={{ color: C.muted, margin: '0 0 0.85rem', fontSize: '0.82rem' }}>
-                        {item.location}
-                      </p>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '0 0 0.85rem' }}>
+                        <p style={{ color: C.muted, margin: 0, fontSize: '0.82rem' }}>
+                          {item.location}
+                        </p>
+                        <span style={{ color: C.muted, fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          👁 {item.views || 0} {item.views === 1 ? 'Aufruf' : 'Aufrufe'}
+                        </span>
+                      </div>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <button
                           onClick={() => onEditListing(item)}

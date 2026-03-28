@@ -37,6 +37,7 @@ function mapListing(row) {
     kaution: row.kaution || '',
     paymentMethods: row.payment_methods || [],
     plz: row.plz || '',
+    views: row.views || 0,
   };
 }
 

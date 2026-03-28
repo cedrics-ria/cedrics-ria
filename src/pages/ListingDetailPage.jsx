@@ -56,6 +56,13 @@ export default function ListingDetailPage({
       });
   }, [listing?.userId]);
 
+  // Increment view counter — only for non-owners
+  useEffect(() => {
+    if (!listing?.id || listing.userId === 'demo') return;
+    if (currentUser?.id === listing.userId) return; // don't count own views
+    supabase.rpc('increment_listing_views', { p_listing_id: listing.id }).then(() => {});
+  }, [listing?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!listing) {
     return (
       <div style={{ minHeight: '100vh', background: C.cream, padding: '4rem 1.5rem' }}>
