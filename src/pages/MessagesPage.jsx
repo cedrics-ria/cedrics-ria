@@ -36,7 +36,7 @@ export default function MessagesPage({
     if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
       Notification.requestPermission();
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Group messages into threads by listing
   const threads = useMemo(() => {
@@ -97,47 +97,57 @@ export default function MessagesPage({
     const hasAccepted = thread.msgs.some(
       (m) => m.text && m.text.includes('Buchungsanfrage angenommen')
     );
-    if (!hasAccepted) return;
 
-    // Check if already reviewed
+    // Always load contract, regardless of booking status
+    // Load review / protocol / contract data
+    let cancelled = false;
     (async () => {
-      const { data: reviewData } = await supabase
-        .from('reviews')
-        .select('id')
-        .eq('listing_id', String(thread.listingId))
-        .eq('reviewer_id', currentUser.id)
-        .limit(1);
-      if (reviewData && reviewData.length > 0) {
-        setReviewedThreads((prev) => ({ ...prev, [openThread]: true }));
-      }
+      try {
+        // Check if already reviewed (only if booking accepted)
+        if (hasAccepted) {
+          const { data: reviewData } = await supabase
+            .from('reviews')
+            .select('id')
+            .eq('listing_id', String(thread.listingId))
+            .eq('reviewer_id', currentUser.id)
+            .limit(1);
+          if (!cancelled && reviewData && reviewData.length > 0) {
+            setReviewedThreads((prev) => ({ ...prev, [openThread]: true }));
+          }
 
-      // Check if protocol exists
-      const { data: protocolData } = await supabase
-        .from('handover_protocols')
-        .select('*')
-        .eq('listing_id', String(thread.listingId))
-        .or(`lender_id.eq.${currentUser.id},borrower_id.eq.${currentUser.id}`)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-      if (protocolData) {
-        setHandoverProtocols((prev) => ({ ...prev, [openThread]: protocolData }));
-      }
+          // Check if protocol exists
+          const { data: protocolData } = await supabase
+            .from('handover_protocols')
+            .select('*')
+            .eq('listing_id', String(thread.listingId))
+            .or(`lender_id.eq.${currentUser.id},borrower_id.eq.${currentUser.id}`)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (!cancelled && protocolData) {
+            setHandoverProtocols((prev) => ({ ...prev, [openThread]: protocolData }));
+          }
+        }
 
-      // Load contract for this thread
-      const { data: contractData } = await supabase
-        .from('contracts')
-        .select('*')
-        .eq('listing_id', String(thread.listingId))
-        .or(`owner_id.eq.${currentUser.id},renter_id.eq.${currentUser.id}`)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (contractData) {
-        setContracts(prev => ({ ...prev, [thread.key]: contractData }));
+        // Load contract for this thread (always)
+        const { data: contractData } = await supabase
+          .from('contracts')
+          .select('*')
+          .eq('listing_id', String(thread.listingId))
+          .or(`owner_id.eq.${currentUser.id},renter_id.eq.${currentUser.id}`)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (!cancelled && contractData) {
+          setContracts(prev => ({ ...prev, [thread.key]: contractData }));
+        }
+      } catch (_) {
+        // silently handle network or table errors
       }
     })();
-  }, [openThread]);
+
+    return () => { cancelled = true; };
+  }, [openThread, currentUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleReply(e) {
     e.preventDefault();
@@ -219,7 +229,7 @@ export default function MessagesPage({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {threads.map((thread) => {
               const isOpen = openThread === thread.key;
-              const lastMsg = thread.msgs[thread.msgs.length - 1];
+              const lastMsg = thread.msgs.length > 0 ? thread.msgs[thread.msgs.length - 1] : null;
               const isAccepted = thread.msgs.some(
                 (m) => m.text && m.text.includes('Buchungsanfrage angenommen')
               );
@@ -342,7 +352,7 @@ export default function MessagesPage({
                           textOverflow: 'ellipsis',
                         }}
                       >
-                        {lastMsg.text}
+                        {lastMsg?.text ?? ''}
                       </div>
                     </div>
                     <div
@@ -550,7 +560,7 @@ export default function MessagesPage({
                             📋 Protokoll ansehen
                           </button>
                         )}
-                        {/* Contract button */}
+                        {/* Contract button — visible to owner always, to renter when pending */}
                         {!threadContract ? (
                           isOwner && (
                             <button
@@ -695,12 +705,13 @@ export default function MessagesPage({
                 .or(`lender_id.eq.${currentUser.id},borrower_id.eq.${currentUser.id}`)
                 .order('created_at', { ascending: false })
                 .limit(1)
-                .single()
+                .maybeSingle()
                 .then(({ data }) => {
                   if (data) {
                     setHandoverProtocols((prev) => ({ ...prev, [thread.key]: data }));
                   }
-                });
+                })
+                .catch(() => {});
             }
             setHandoverModal(null);
           }}

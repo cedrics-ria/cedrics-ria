@@ -21,16 +21,21 @@ export default function HandoverProtocolModal({
 
   useEffect(() => {
     async function loadExisting() {
-      const { data } = await supabase
-        .from('handover_protocols')
-        .select('*')
-        .eq('listing_id', String(listingId))
-        .or(`lender_id.eq.${currentUser.id},borrower_id.eq.${currentUser.id}`)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-      if (data) setExisting(data);
-      setLoadingExisting(false);
+      try {
+        const { data } = await supabase
+          .from('handover_protocols')
+          .select('*')
+          .eq('listing_id', String(listingId))
+          .or(`lender_id.eq.${currentUser.id},borrower_id.eq.${currentUser.id}`)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (data) setExisting(data);
+      } catch (_) {
+        // table may not exist yet — silently ignore
+      } finally {
+        setLoadingExisting(false);
+      }
     }
     loadExisting();
   }, [listingId, currentUser.id]);
@@ -40,13 +45,13 @@ export default function HandoverProtocolModal({
     if (!condition.trim() || !date) return;
     setSaving(true);
 
-    // Determine roles: if otherUserId is the listing owner, current user is borrower; otherwise lender
+    // Determine roles: if current user is the listing owner, they are the lender
     const { data: listing } = await supabase
       .from('listings')
       .select('user_id')
       .eq('id', String(listingId))
-      .single();
-    const isLender = listing?.user_id === currentUser.id;
+      .maybeSingle();
+    const isLender = listing ? listing.user_id === currentUser.id : otherUserId !== currentUser.id;
 
     const payload = {
       listing_id: String(listingId),
