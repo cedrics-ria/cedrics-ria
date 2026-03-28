@@ -504,6 +504,7 @@ export default function App() {
           favorites={favorites}
           toggleFavorite={toggleFavorite}
           messages={sortedMessages}
+          setMessages={setMessages}
           bookings={bookings}
           supportRequests={supportRequests}
           handledBookings={handledBookings}

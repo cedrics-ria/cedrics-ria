@@ -89,6 +89,7 @@ export default function AppRouter(props) {
     favorites,
     toggleFavorite,
     messages,
+    setMessages,
     bookings,
     supportRequests,
     handledBookings,
@@ -206,6 +207,7 @@ export default function AppRouter(props) {
       return (
         <MessagesPage
           messages={messages}
+          setMessages={setMessages}
           currentUser={currentUser}
           goTo={navigate}
           listings={enrichedListings}

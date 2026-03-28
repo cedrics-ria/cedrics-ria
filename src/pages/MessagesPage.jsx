@@ -9,6 +9,7 @@ import { supabase } from '../supabase';
 
 export default function MessagesPage({
   messages,
+  setMessages,
   currentUser,
   goTo,
   listings,
@@ -27,6 +28,10 @@ export default function MessagesPage({
   const [contracts, setContracts] = useState({}); // thread.key -> contract obj or null
   const [contractModal, setContractModal] = useState(null); // { thread, isOwner }
   const [readThreads, setReadThreads] = useState(new Set());
+  const [hiddenThreads, setHiddenThreads] = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('ria-hidden-threads') || '[]')); }
+    catch { return new Set(); }
+  });
   const [otherAvatars, setOtherAvatars] = useState({}); // userId -> avatar_url
   const mountTimeRef = useRef(new Date());
 
@@ -101,7 +106,7 @@ export default function MessagesPage({
             (mx, m) => (new Date(m.createdAt) > new Date(mx) ? m.createdAt : mx),
             '0'
           ),
-          unread: readThreads.has(t.key) ? 0 : t.msgs.filter((m) => m.toUserId === currentUser?.id && new Date(m.createdAt) > mountTimeRef.current).length,
+          unread: readThreads.has(t.key) ? 0 : t.msgs.filter((m) => m.toUserId === currentUser?.id && !m.read).length,
         };
       })
       .sort((a, b) => new Date(b.lastAt) - new Date(a.lastAt));
@@ -239,7 +244,7 @@ export default function MessagesPage({
           Nachrichten
         </h1>
 
-        {threads.length === 0 ? (
+        {threads.filter(t => !hiddenThreads.has(t.key)).length === 0 ? (
           <EmptyState
             title="Noch keine Nachrichten"
             text="Schreib einem Verleiher oder erstelle ein Inserat, um Anfragen zu bekommen."
@@ -248,7 +253,7 @@ export default function MessagesPage({
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {threads.map((thread) => {
+            {threads.filter(t => !hiddenThreads.has(t.key)).map((thread) => {
               const isOpen = openThread === thread.key;
               const lastMsg = thread.msgs.length > 0 ? thread.msgs[thread.msgs.length - 1] : null;
               const isAccepted = thread.msgs.some(
@@ -270,6 +275,7 @@ export default function MessagesPage({
                     boxShadow: isOpen ? '0 8px 32px rgba(28,58,46,0.12)' : C.shadow,
                     overflow: 'hidden',
                     transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+                    position: 'relative',
                   }}
                 >
                   {/* Thread header */}
@@ -277,7 +283,25 @@ export default function MessagesPage({
                     onClick={() => {
                       const newOpen = isOpen ? null : thread.key;
                       setOpenThread(newOpen);
-                      if (newOpen) setReadThreads(prev => new Set([...prev, newOpen]));
+                      if (newOpen) {
+                        setReadThreads(prev => new Set([...prev, newOpen]));
+                        // Mark messages as read in DB
+                        if (thread.unread > 0) {
+                          supabase.from('messages')
+                            .update({ read: true })
+                            .eq('to_user_id', currentUser.id)
+                            .eq('listing_id', thread.listingId)
+                            .eq('read', false)
+                            .then(() => {
+                              if (setMessages) {
+                                setMessages(prev => prev.map(m =>
+                                  m.toUserId === currentUser.id && String(m.listingId) === thread.key
+                                    ? { ...m, read: true } : m
+                                ));
+                              }
+                            });
+                        }
+                      }
                     }}
                     style={{
                       width: '100%',
@@ -397,16 +421,35 @@ export default function MessagesPage({
                       <span style={{ fontSize: '0.75rem', color: C.muted }}>
                         {formatDate(thread.lastAt)}
                       </span>
-                      <span
-                        style={{
-                          fontSize: '0.7rem',
-                          color: C.muted,
-                          transform: isOpen ? 'rotate(180deg)' : 'none',
-                          transition: 'transform 0.2s ease',
-                        }}
-                      >
-                        ▼
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!window.confirm('Chat ausblenden?')) return;
+                            const next = new Set([...hiddenThreads, thread.key]);
+                            setHiddenThreads(next);
+                            localStorage.setItem('ria-hidden-threads', JSON.stringify([...next]));
+                            if (openThread === thread.key) setOpenThread(null);
+                          }}
+                          style={{
+                            background: 'none', border: 'none', cursor: 'pointer',
+                            color: C.muted, padding: '2px', lineHeight: 1, opacity: 0.6,
+                          }}
+                          title="Chat ausblenden"
+                        >
+                          🗑
+                        </button>
+                        <span
+                          style={{
+                            fontSize: '0.7rem',
+                            color: C.muted,
+                            transform: isOpen ? 'rotate(180deg)' : 'none',
+                            transition: 'transform 0.2s ease',
+                          }}
+                        >
+                          ▼
+                        </span>
+                      </div>
                     </div>
                   </button>
 

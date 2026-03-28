@@ -7,6 +7,7 @@ export function mapMessageFromDb(row: Record<string, unknown>): Message {
   return {
     id: row.id as string,
     fromUserId: row.from_user_id as string,
+    fromName: (row.from_name as string) ?? '',
     toUserId: row.to_user_id as string,
     text: (row.text as string) ?? '',
     messageType: (row.message_type as Message['messageType']) ?? 'normal',
