@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { C } from '../constants';
 import { inputBaseStyle, primaryButtonStyle, applyInputFocus, resetInputFocus } from '../styles';
 import EmptyState from '../components/EmptyState';
@@ -30,6 +30,8 @@ export default function ProfilePage({
   const [profileForm, setProfileForm] = useState({ bio: '', location: '', phone: '' });
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('listings');
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (profile)
@@ -171,7 +173,7 @@ export default function ProfilePage({
           <div
             style={{ display: 'flex', alignItems: 'flex-start', gap: '1.5rem', flexWrap: 'wrap' }}
           >
-            <label style={{ position: 'relative', cursor: 'pointer', flexShrink: 0 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
               <div
                 style={{
                   width: 72,
@@ -198,35 +200,9 @@ export default function ProfilePage({
                 ) : (
                   currentUser.name.charAt(0).toUpperCase()
                 )}
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'rgba(0,0,0,0.35)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    opacity: 0,
-                    transition: 'opacity 0.2s',
-                  }}
-                  className="avatar-overlay"
-                >
-                  <svg
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                    <circle cx="12" cy="13" r="4" />
-                  </svg>
-                </div>
               </div>
               <input
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 style={{ display: 'none' }}
@@ -237,20 +213,42 @@ export default function ProfilePage({
                     addToast?.('Bild zu groß (max. 3 MB)', 'error');
                     return;
                   }
-                  const ext = file.name.split('.').pop().toLowerCase();
-                  const path = `public/${currentUser.id}.${ext}`;
+                  const fileExtension = file.name.split('.').pop().toLowerCase();
+                  const fileName = `${currentUser.id}-${Date.now()}.${fileExtension}`;
+                  setAvatarUploading(true);
                   const { error } = await supabase.storage
                     .from('avatars')
-                    .upload(path, file, { upsert: true });
+                    .upload(fileName, file, { upsert: true });
                   if (error) {
+                    setAvatarUploading(false);
                     addToast?.('Upload fehlgeschlagen: ' + error.message, 'error');
                     return;
                   }
-                  const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
-                  await onUpdateProfile({ avatar_url: urlData.publicUrl + '?t=' + Date.now() });
+                  const publicUrl = supabase.storage.from('avatars').getPublicUrl(fileName).data.publicUrl;
+                  await onUpdateProfile({ avatar_url: publicUrl });
+                  setAvatarUploading(false);
                 }}
               />
-            </label>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={avatarUploading}
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '0.3rem 0.7rem',
+                  borderRadius: 8,
+                  border: `1px solid ${C.line}`,
+                  background: 'white',
+                  color: C.forest,
+                  cursor: avatarUploading ? 'not-allowed' : 'pointer',
+                  fontWeight: 600,
+                  opacity: avatarUploading ? 0.7 : 1,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {avatarUploading ? 'Wird hochgeladen…' : 'Foto ändern'}
+              </button>
+            </div>
             <div style={{ flex: 1, minWidth: 160 }}>
               <div
                 style={{

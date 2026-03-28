@@ -14,6 +14,7 @@ export default function LoginPage({ onLogin, currentUser }) {
   const [forgotMode, setForgotMode] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSent, setForgotSent] = useState(false);
+  const [agbAccepted, setAgbAccepted] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -239,6 +240,7 @@ export default function LoginPage({ onLogin, currentUser }) {
                 onClick={() => {
                   setMode(m);
                   setError('');
+                  setAgbAccepted(false);
                 }}
                 style={{
                   flex: 1,
@@ -413,9 +415,26 @@ export default function LoginPage({ onLogin, currentUser }) {
                 style={inputBaseStyle}
               />
             </div>
+            {mode === 'register' && (
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
+                <input
+                  id="agb-checkbox"
+                  type="checkbox"
+                  checked={agbAccepted}
+                  onChange={(e) => setAgbAccepted(e.target.checked)}
+                  style={{ marginTop: '0.2rem', cursor: 'pointer', accentColor: C.forest, flexShrink: 0 }}
+                />
+                <label htmlFor="agb-checkbox" style={{ fontSize: '0.88rem', color: C.ink, lineHeight: 1.5, cursor: 'pointer' }}>
+                  Ich akzeptiere die{' '}
+                  <a href="#" onClick={(e) => e.preventDefault()} style={{ color: C.terra, fontWeight: 600, textDecoration: 'underline' }}>AGB</a>
+                  {' '}und{' '}
+                  <a href="#" onClick={(e) => e.preventDefault()} style={{ color: C.terra, fontWeight: 600, textDecoration: 'underline' }}>Datenschutzerklärung</a>
+                </label>
+              </div>
+            )}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (mode === 'register' && !agbAccepted)}
               style={{
                 background: loading ? C.muted : 'linear-gradient(135deg, #163126, #1C3A2E)',
                 color: 'white',
@@ -424,10 +443,11 @@ export default function LoginPage({ onLogin, currentUser }) {
                 border: 'none',
                 fontSize: '1rem',
                 fontWeight: 700,
-                cursor: loading ? 'not-allowed' : 'pointer',
+                cursor: (loading || (mode === 'register' && !agbAccepted)) ? 'not-allowed' : 'pointer',
                 boxShadow: '0 14px 34px rgba(28,58,46,0.25)',
                 marginTop: '0.25rem',
                 letterSpacing: '-0.01em',
+                opacity: (mode === 'register' && !agbAccepted) ? 0.5 : 1,
               }}
             >
               {loading ? 'Bitte warten…' : mode !== 'login' ? 'Konto erstellen' : 'Einloggen'}
@@ -534,6 +554,7 @@ export default function LoginPage({ onLogin, currentUser }) {
               onClick={() => {
                 setMode(mode === 'login' ? 'register' : 'login');
                 setError('');
+                setAgbAccepted(false);
               }}
               style={{
                 background: 'none',

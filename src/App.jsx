@@ -229,23 +229,21 @@ export default function App() {
 
   // ── Realtime: messages ───────────────────────────────────────────────────
   useEffect(() => {
-    if (!currentUser) return;
-    const ch = supabase
-      .channel('messages-live')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (p) => {
-        const msg = mapMessageFromDb(p.new);
-        if (msg.toUserId !== currentUser.id && msg.fromUserId !== currentUser.id) return;
+    if (!currentUser?.id) return;
+    const userId = currentUser.id;
+    const channel = supabase
+      .channel('messages:' + userId)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `to_user_id=eq.${userId}` }, (payload) => {
+        const msg = mapMessageFromDb(payload.new);
         setMessages((prev) => (prev.find((m) => m.id === msg.id) ? prev : [msg, ...prev]));
-        if (msg.toUserId === currentUser.id) {
-          addToast('Neue Nachricht', 'info');
-          if (Notification?.permission === 'granted') {
-            try { new Notification('ria – Neue Nachricht', { body: msg.text.slice(0, 80), icon: '/favicon.ico' }); }
-            catch (_) {}
-          }
+        addToast('Neue Nachricht', 'info');
+        if (Notification?.permission === 'granted') {
+          try { new Notification('ria – Neue Nachricht', { body: msg.text.slice(0, 80), icon: '/favicon.ico' }); }
+          catch (_) {}
         }
       })
       .subscribe();
-    return () => supabase.removeChannel(ch);
+    return () => supabase.removeChannel(channel);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.id]);
 
