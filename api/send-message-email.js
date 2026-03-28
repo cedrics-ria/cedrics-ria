@@ -69,7 +69,7 @@ function buildEmailHtml({ senderName, messagePreview, appUrl }) {
   <div class="wrapper">
     <div class="card">
       <div class="header">
-        <div class="header-logo">ria</div>
+        <img src="https://ria-rentitall.de/icon-192.png" width="56" height="56" alt="ria" style="border-radius:14px; margin-bottom:10px; display:block; margin-left:auto; margin-right:auto;" />
         <div class="header-tagline">rent it all.</div>
       </div>
       <div class="body">
