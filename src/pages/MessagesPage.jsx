@@ -521,7 +521,7 @@ export default function MessagesPage({
                               ✓ Bewertet
                             </span>
                           ))}
-                        {!hasProtocol ? (
+                        {isAccepted && (!hasProtocol ? (
                           <button
                             onClick={() => openHandoverModal(thread)}
                             style={{
@@ -559,7 +559,7 @@ export default function MessagesPage({
                           >
                             📋 Protokoll ansehen
                           </button>
-                        )}
+                        ))}
                         {/* Contract button — only after booking is accepted */}
                         {isAccepted && (
                           !threadContract ? (
