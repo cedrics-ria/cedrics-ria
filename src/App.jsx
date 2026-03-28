@@ -90,13 +90,16 @@ export default function App() {
   // ── Computed ──────────────────────────────────────────────────────────────
   const isAdmin = currentUser?.email === ADMIN_EMAIL || profile?.is_admin === true;
 
-  const unreadCount = useMemo(
-    () =>
-      currentUser
-        ? messages.filter((m) => m.toUserId === currentUser.id && !m.read).length
-        : 0,
-    [messages, currentUser]
-  );
+  const unreadCount = useMemo(() => {
+    if (!currentUser) return 0;
+    // Exclude messages from hidden (deleted) threads
+    const hiddenKey = `ria-hidden-threads-${currentUser.id}`;
+    let hidden = new Set();
+    try { hidden = new Set(JSON.parse(localStorage.getItem(hiddenKey) || '[]')); } catch (_) {}
+    return messages.filter(
+      (m) => m.toUserId === currentUser.id && !m.read && !hidden.has(String(m.listingId))
+    ).length;
+  }, [messages, currentUser]);
 
   const unreadSupportCount = useMemo(
     () => supportRequests.filter((r) => !r.read).length,
