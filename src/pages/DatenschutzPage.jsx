@@ -24,6 +24,7 @@ ria wird als privates, nicht-gewerbliches Projekt betrieben.`,
 • Nachrichten zwischen Nutzern
 • Buchungsanfragen (Zeitraum, Inseratreferenz)
 • Push-Benachrichtigungs-Token (optional, nur bei Zustimmung im Browser)
+• Digitale Mietverträge (optional): Mietgegenstand, Zeitraum, Preis, Kaution, Zustandsbeschreibung, Anmerkungen sowie Zeitstempel der Unterzeichnung beider Parteien
 • Technische Daten: IP-Adresse, Browser-Typ, Zugriffszeiten (via Supabase)`,
   ],
   [
@@ -35,9 +36,10 @@ ria wird als privates, nicht-gewerbliches Projekt betrieben.`,
 • Kommunikation zwischen Nutzern (Nachrichten, Buchungsanfragen)
 • Versand von Benachrichtigungs-E-Mails bei neuen Nachrichten
 • Push-Benachrichtigungen (nur mit ausdrücklicher Browser-Erlaubnis)
+• Erstellung und Speicherung digitaler Mietverträge zwischen Nutzern (nur auf Wunsch beider Parteien)
 • Verbesserung der Plattform
 
-Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung) sowie Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse). Push-Benachrichtigungen: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung).`,
+Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung) sowie Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse). Push-Benachrichtigungen: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung). Digitale Mietverträge: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung zwischen den beteiligten Nutzern).`,
   ],
   [
     '4. Auftragsverarbeiter & Dienstleister',
@@ -63,7 +65,9 @@ Push-Tokens werden in unserer Datenbank gespeichert und dienen ausschließlich d
   ],
   [
     '5. Speicherdauer',
-    `Wir speichern deine Daten solange, wie dein Konto aktiv ist. Nach Kontolöschung werden personenbezogene Daten innerhalb von 30 Tagen gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen. Push-Tokens werden sofort bei Abmeldung entfernt.`,
+    `Wir speichern deine Daten solange, wie dein Konto aktiv ist. Nach Kontolöschung werden personenbezogene Daten innerhalb von 30 Tagen gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen. Push-Tokens werden sofort bei Abmeldung entfernt.
+
+Digitale Mietverträge werden für die Dauer der Konten beider beteiligten Parteien gespeichert. Da Mietverträge als rechtsverbindliche Dokumente dienen können, behalten wir uns vor, diese auch nach Kontolöschung für einen Zeitraum von bis zu 3 Jahren aufzubewahren, sofern ein berechtigtes Interesse besteht (z. B. zur Beweissicherung bei Streitigkeiten).`,
   ],
   [
     '6. Deine Rechte (DSGVO)',

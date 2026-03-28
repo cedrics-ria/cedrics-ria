@@ -83,7 +83,16 @@ export default function AGBPage({ goTo }) {
               ],
             ],
             [
-              '§ 5 Haftungsausschluss',
+              '§ 5 Digitaler Mietvertrag',
+              [
+                'ria stellt Nutzern optional eine Funktion zur Erstellung eines digitalen Mietvertrags zur Verfügung. Dieser Vertrag wird ausschließlich zwischen Verleiher und Mieter geschlossen. ria ist nicht Vertragspartei.',
+                'Der digitale Mietvertrag erfüllt die Anforderungen der Textform gemäß § 126b BGB. Beide Parteien bestätigen den Vertragsabschluss durch eine aktive Handlung (Erstellen bzw. Unterzeichnen) innerhalb der Plattform. Datum und Uhrzeit der jeweiligen Bestätigung werden mit Zeitstempel gespeichert.',
+                'Der Inhalt des Vertrags (Mietgegenstand, Zeitraum, Preis, Kaution, Zustand, Anmerkungen) sowie die Bestätigungs-Zeitstempel werden in der Datenbank von ria gespeichert und sind ausschließlich für die beiden beteiligten Vertragsparteien einsehbar.',
+                'ria übernimmt keine Haftung für die rechtliche Wirksamkeit, Vollständigkeit oder Durchsetzbarkeit von Verträgen, die über die Plattform erstellt werden. Nutzer sind selbst verantwortlich, die Vertragsdetails vor Unterzeichnung zu prüfen.',
+              ],
+            ],
+            [
+              '§ 6 Haftungsausschluss',
               [
                 'ria ist ausschließlich eine Vermittlungsplattform und wird nicht Vertragspartei der zwischen Nutzern geschlossenen Mietverträge. Sämtliche Vereinbarungen über Mietbedingungen, Übergabe, Rückgabe und etwaige Schäden werden ausschließlich zwischen Verleiher und Mieter getroffen.',
                 'Für Schäden an Gegenständen, Personen oder Dritten, die im Rahmen eines Mietverhältnisses zwischen Nutzern entstehen, übernimmt ria keinerlei Haftung. Dies gilt insbesondere für:',
@@ -93,13 +102,13 @@ export default function AGBPage({ goTo }) {
               ],
             ],
             [
-              '§ 6 Datenschutz',
+              '§ 7 Datenschutz',
               [
                 'Die Verarbeitung personenbezogener Daten erfolgt gemäß unserer Datenschutzerklärung und der DSGVO.',
               ],
             ],
             [
-              '§ 7 Änderungen',
+              '§ 8 Änderungen',
               [
                 'ria behält sich vor, diese AGB jederzeit zu ändern. Nutzer werden über wesentliche Änderungen per E-Mail informiert.',
               ],
