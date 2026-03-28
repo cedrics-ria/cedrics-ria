@@ -113,7 +113,7 @@ export default function AGBPage({ goTo }) {
             [
               '§ 8 Kündigung & Kontolöschung',
               [
-                'Nutzer können ihr Konto jederzeit durch Kontaktaufnahme unter hallo@ria-rentitall.de löschen lassen. Mit der Kontolöschung werden alle personenbezogenen Daten innerhalb von 30 Tagen gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.',
+                'Nutzer können ihr Konto jederzeit durch Kontaktaufnahme unter ria.rentitall@web.de löschen lassen. Mit der Kontolöschung werden alle personenbezogenen Daten innerhalb von 30 Tagen gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.',
                 'ria behält sich vor, Nutzerkonten bei Verstößen gegen diese AGB fristlos zu sperren oder zu löschen.',
               ],
             ],

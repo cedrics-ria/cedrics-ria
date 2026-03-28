@@ -139,7 +139,7 @@ export default async function handler(req, res) {
     const appUrl = process.env.APP_URL || 'https://ria-rentitall.de';
 
     const { data, error } = await resend.emails.send({
-      from: 'ria <hallo@ria-rentitall.de>',
+      from: 'ria <ria.rentitall@web.de>',
       to: [finalEmail],
       subject: `${senderName} hat dir eine Nachricht geschickt — ria`,
       html: buildEmailHtml({

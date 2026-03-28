@@ -38,7 +38,7 @@ const FAQS = [
   },
   {
     q: 'Kann ich mein Konto löschen?',
-    a: 'Schreib uns eine E-Mail an support@ria-rentitall.de mit dem Betreff Konto loeschen und wir löschen deinen Account und alle deine Daten innerhalb von 48 Stunden.',
+    a: 'Schreib uns eine E-Mail an ria.rentitall@web.de mit dem Betreff Konto loeschen und wir löschen deinen Account und alle deine Daten innerhalb von 48 Stunden.',
   },
   {
     q: 'Was mache ich wenn jemand nicht zurückgibt?',
@@ -79,7 +79,7 @@ export default function SupportPage({ goTo, currentUser }) {
     });
     setSending(false);
     if (dbError) {
-      setError('Fehler beim Senden. Schreib uns direkt: support@ria-rentitall.de');
+      setError('Fehler beim Senden. Schreib uns direkt: ria.rentitall@web.de');
       return;
     }
     setSent(true);
@@ -164,7 +164,7 @@ export default function SupportPage({ goTo, currentUser }) {
             </div>
           </div>
           <a
-            href="mailto:support@ria-rentitall.de"
+            href="mailto:ria.rentitall@web.de"
             style={{
               background: 'white',
               color: C.forest,
@@ -176,7 +176,7 @@ export default function SupportPage({ goTo, currentUser }) {
               whiteSpace: 'nowrap',
             }}
           >
-            support@ria-rentitall.de
+            ria.rentitall@web.de
           </a>
         </div>
 

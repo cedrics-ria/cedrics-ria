@@ -9,7 +9,7 @@ Cedric Renner
 Piepenturmweg 5a
 33100 Paderborn
 Deutschland
-E-Mail: hallo@ria-rentitall.de
+E-Mail: ria.rentitall@web.de
 
 ria wird als privates, nicht-gewerbliches Projekt betrieben.`,
   ],
@@ -81,7 +81,7 @@ Digitale Mietverträge werden für die Dauer der Konten beider beteiligten Parte
 • Widerspruch gegen die Verarbeitung (Art. 21 DSGVO)
 • Widerruf einer Einwilligung (z. B. Push-Benachrichtigungen) jederzeit
 
-Anfragen an: hallo@ria-rentitall.de
+Anfragen an: ria.rentitall@web.de
 
 Beschwerderecht bei der Aufsichtsbehörde:
 Landesbeauftragte für Datenschutz und Informationsfreiheit NRW
@@ -108,7 +108,7 @@ Da kein Tracking stattfindet, ist ein Cookie-Banner nicht erforderlich.`,
   ],
   [
     '10. Minderjährige',
-    `ria richtet sich ausschließlich an Nutzer ab 18 Jahren. Wir erheben wissentlich keine Daten von Personen unter 18 Jahren. Bitte wende dich an hallo@ria-rentitall.de, wenn du vermutest, dass ein minderjähriger Nutzer ein Konto erstellt hat.`,
+    `ria richtet sich ausschließlich an Nutzer ab 18 Jahren. Wir erheben wissentlich keine Daten von Personen unter 18 Jahren. Bitte wende dich an ria.rentitall@web.de, wenn du vermutest, dass ein minderjähriger Nutzer ein Konto erstellt hat.`,
   ],
   [
     '11. Änderungen dieser Erklärung',
@@ -119,7 +119,7 @@ Stand: März 2026`,
   [
     '12. Kontakt bei Datenschutzfragen',
     `Cedric Renner
-E-Mail: hallo@ria-rentitall.de
+E-Mail: ria.rentitall@web.de
 Antwortzeit: in der Regel innerhalb von 7 Werktagen`,
   ],
 ];

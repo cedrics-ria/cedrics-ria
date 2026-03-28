@@ -67,8 +67,8 @@ export default function ImpressumPage({ goTo }) {
             <h2 style={h2Style}>Kontakt</h2>
             <p style={mutedText}>
               E-Mail:{' '}
-              <a href="mailto:hallo@ria-rentitall.de" style={{ color: C.terra }}>
-                hallo@ria-rentitall.de
+              <a href="mailto:ria.rentitall@web.de" style={{ color: C.terra }}>
+                ria.rentitall@web.de
               </a>
               <br />
               Website:{' '}
