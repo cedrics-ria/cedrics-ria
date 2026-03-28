@@ -77,6 +77,7 @@ export default function App() {
     try { return new Date(localStorage.getItem('ria-last-msg-check') || 0); }
     catch { return new Date(0); }
   });
+  const [hiddenThreads, setHiddenThreads] = useState(new Set());
 
   const pendingListingIdRef = useRef(null);
 
@@ -92,14 +93,10 @@ export default function App() {
 
   const unreadCount = useMemo(() => {
     if (!currentUser) return 0;
-    // Exclude messages from hidden (deleted) threads
-    const hiddenKey = `ria-hidden-threads-${currentUser.id}`;
-    let hidden = new Set();
-    try { hidden = new Set(JSON.parse(localStorage.getItem(hiddenKey) || '[]')); } catch (_) {}
     return messages.filter(
-      (m) => m.toUserId === currentUser.id && !m.read && !hidden.has(String(m.listingId))
+      (m) => m.toUserId === currentUser.id && !m.read && !hiddenThreads.has(String(m.listingId))
     ).length;
-  }, [messages, currentUser]);
+  }, [messages, currentUser, hiddenThreads]);
 
   const unreadSupportCount = useMemo(
     () => supportRequests.filter((r) => !r.read).length,
@@ -176,6 +173,10 @@ export default function App() {
         loadFavorites(u.id);
         loadBookings(u.id);
         if (u.email === ADMIN_EMAIL) loadSupportRequests();
+        try {
+          const key = `ria-hidden-threads-${u.id}`;
+          setHiddenThreads(new Set(JSON.parse(localStorage.getItem(key) || '[]')));
+        } catch (_) { setHiddenThreads(new Set()); }
       } else {
         setCurrentUser(null);
         setMessages([]);
@@ -183,6 +184,7 @@ export default function App() {
         setProfile(null);
         setBookings([]);
         setSupportRequests([]);
+        setHiddenThreads(new Set());
         localStorage.removeItem('ria-current-user');
       }
     });
@@ -535,6 +537,8 @@ export default function App() {
           toggleFavorite={toggleFavorite}
           messages={sortedMessages}
           setMessages={setMessages}
+          hiddenThreads={hiddenThreads}
+          setHiddenThreads={setHiddenThreads}
           bookings={bookings}
           supportRequests={supportRequests}
           handledBookings={handledBookings}

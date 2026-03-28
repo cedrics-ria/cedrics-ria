@@ -56,6 +56,8 @@ function OwnerRatingForm({ currentUser, ownerReviewModal, onDone, onClose }) {
 export default function MessagesPage({
   messages,
   setMessages,
+  hiddenThreads: hiddenThreadsProp,
+  setHiddenThreads: setHiddenThreadsProp,
   currentUser,
   goTo,
   listings,
@@ -78,10 +80,13 @@ export default function MessagesPage({
   const [contractModal, setContractModal] = useState(null); // { thread, isOwner }
   const [readThreads, setReadThreads] = useState(new Set());
   const hiddenKey = `ria-hidden-threads-${currentUser?.id || 'guest'}`;
-  const [hiddenThreads, setHiddenThreads] = useState(() => {
+  // Use lifted state from App.jsx if provided, else fall back to local state
+  const [hiddenThreadsLocal, setHiddenThreadsLocal] = useState(() => {
     try { return new Set(JSON.parse(localStorage.getItem(`ria-hidden-threads-${currentUser?.id || 'guest'}`) || '[]')); }
     catch { return new Set(); }
   });
+  const hiddenThreads = hiddenThreadsProp ?? hiddenThreadsLocal;
+  const setHiddenThreads = setHiddenThreadsProp ?? setHiddenThreadsLocal;
   const [otherAvatars, setOtherAvatars] = useState({}); // userId -> avatar_url
 
   // Stable ref so the effect runs only once on mount, regardless of onOpen identity

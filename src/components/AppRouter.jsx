@@ -90,6 +90,8 @@ export default function AppRouter(props) {
     toggleFavorite,
     messages,
     setMessages,
+    hiddenThreads,
+    setHiddenThreads,
     bookings,
     supportRequests,
     handledBookings,
@@ -209,6 +211,8 @@ export default function AppRouter(props) {
         <MessagesPage
           messages={messages}
           setMessages={setMessages}
+          hiddenThreads={hiddenThreads}
+          setHiddenThreads={setHiddenThreads}
           currentUser={currentUser}
           goTo={navigate}
           listings={enrichedListings}
