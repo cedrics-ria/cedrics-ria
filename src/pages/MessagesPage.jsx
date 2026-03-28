@@ -83,27 +83,6 @@ export default function MessagesPage({
     catch { return new Set(); }
   });
   const [otherAvatars, setOtherAvatars] = useState({}); // userId -> avatar_url
-  const mountTimeRef = useRef(new Date());
-
-  // Load avatars for all conversation partners
-  useEffect(() => {
-    const ids = [...new Set(threads.map(t => t.otherUserId).filter(Boolean))];
-    if (!ids.length) return;
-    const missing = ids.filter(id => !(id in otherAvatars));
-    if (!missing.length) return;
-    supabase
-      .from('profiles')
-      .select('id, avatar_url')
-      .in('id', missing)
-      .then(({ data }) => {
-        if (!data) return;
-        setOtherAvatars(prev => {
-          const next = { ...prev };
-          data.forEach(p => { next[p.id] = p.avatar_url || null; });
-          return next;
-        });
-      });
-  }, [threads]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Stable ref so the effect runs only once on mount, regardless of onOpen identity
   const onOpenRef = useRef(onOpen);
@@ -163,6 +142,26 @@ export default function MessagesPage({
   }, [messages, currentUser, listings, readThreads]);
 
   const active = threads.find((t) => t.key === openThread);
+
+  // Load avatars for all conversation partners (must be after threads is defined)
+  useEffect(() => {
+    const ids = [...new Set(threads.map(t => t.otherUserId).filter(Boolean))];
+    if (!ids.length) return;
+    const missing = ids.filter(id => !(id in otherAvatars));
+    if (!missing.length) return;
+    supabase
+      .from('profiles')
+      .select('id, avatar_url')
+      .in('id', missing)
+      .then(({ data }) => {
+        if (!data) return;
+        setOtherAvatars(prev => {
+          const next = { ...prev };
+          data.forEach(p => { next[p.id] = p.avatar_url || null; });
+          return next;
+        });
+      });
+  }, [threads]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // When a thread is opened, check if booking was accepted and load review/protocol status
   useEffect(() => {

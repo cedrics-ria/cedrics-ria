@@ -24,7 +24,9 @@
       "Bash(npx prettier:*)",
       "Bash(rm /Users/cedricrenner/ria-app/.git/index.lock)",
       "Bash(git commit:*)",
-      "Bash(ls /Users/cedricrenner/ria-app/src/constants*)"
+      "Bash(ls /Users/cedricrenner/ria-app/src/constants*)",
+      "Bash(rm -f /Users/cedricrenner/ria-app/.git/index.lock)",
+      "Bash(git -C /Users/cedricrenner/ria-app status)"
     ]
   }
 }
