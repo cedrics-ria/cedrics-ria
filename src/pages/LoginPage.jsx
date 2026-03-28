@@ -528,7 +528,7 @@ export default function LoginPage({ onLogin, currentUser }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 type="email"
-                placeholder="du@uni-paderborn.de"
+                placeholder="deine@email.de"
                 autoComplete="email"
                 aria-required="true"
                 aria-invalid={!!error}
