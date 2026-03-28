@@ -568,6 +568,7 @@ export default function ListingDetailPage({
               {[
                 ['Direkt anfragen', 'Kläre alles persönlich mit dem Verleiher'],
                 ['Übergabe vor Ort', 'Treffe dich lokal – kein Versand, kein Mittelsmann'],
+                ['Digitaler Mietvertrag', 'Schütze dich mit einem rechtssicheren Vertrag direkt im Chat (§126b BGB)'],
                 ['Gut fürs Klima', 'Mieten statt kaufen spart bis zu 80 % CO₂'],
               ].map(([t, d]) => (
                 <div

@@ -477,6 +477,134 @@ export default function HomePage({
         </div>
       </section>
 
+      {/* Sicherheit & Vertrauen */}
+      <section style={{ padding: '4rem 1.5rem 2rem' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <p
+            style={{
+              fontSize: '0.78rem',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: C.sage,
+              fontWeight: 700,
+              marginBottom: '0.75rem',
+            }}
+          >
+            Dein Schutz
+          </p>
+          <h2
+            style={{
+              fontSize: '2.35rem',
+              color: C.forest,
+              marginTop: 0,
+              marginBottom: '2rem',
+              letterSpacing: '-0.03em',
+            }}
+          >
+            Sicher mieten — von Anfang an.
+          </h2>
+          <div
+            className="ria-grid-3"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+              gap: '1rem',
+            }}
+          >
+            {[
+              {
+                icon: (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={C.forest} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  </svg>
+                ),
+                title: 'Direkt kommunizieren',
+                desc: 'Kläre alle Details direkt per Chat mit dem Verleiher — transparent, schnell und ohne Umwege.',
+                bg: 'white',
+              },
+              {
+                icon: (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={C.forest} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                  </svg>
+                ),
+                title: 'Digitaler Mietvertrag',
+                desc: 'Schütze dich mit einem rechtssicheren Online-Vertrag (§126b BGB). Beide Parteien unterzeichnen direkt im Chat — mit Zeitstempel.',
+                bg: C.sageLight,
+                highlight: true,
+              },
+              {
+                icon: (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={C.forest} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                ),
+                title: 'Verifikation & Bewertungen',
+                desc: 'Nutzerbewertungen und verifizierte Profile geben dir Sicherheit — du weißt, mit wem du es zu tun hast.',
+                bg: 'white',
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="hover-card"
+                style={{
+                  background: item.bg,
+                  border: item.highlight ? `1.5px solid ${C.sage}` : `1px solid ${C.line}`,
+                  borderRadius: 24,
+                  padding: '1.75rem',
+                  boxShadow: item.highlight ? `0 4px 24px rgba(122,158,126,0.13)` : C.shadow,
+                  position: 'relative',
+                }}
+              >
+                {item.highlight && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 16,
+                      right: 16,
+                      background: C.forest,
+                      color: 'white',
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      padding: '0.2rem 0.55rem',
+                      borderRadius: 999,
+                      letterSpacing: '0.06em',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    NEU
+                  </div>
+                )}
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 14,
+                    background: 'rgba(28,58,46,0.08)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  {item.icon}
+                </div>
+                <h3 style={{ color: C.forest, marginTop: 0, marginBottom: '0.5rem', fontSize: '1.1rem' }}>
+                  {item.title}
+                </h3>
+                <p style={{ color: C.muted, lineHeight: 1.65, margin: 0, fontSize: '0.93rem' }}>
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section style={{ background: '#EAF0EB', padding: '5.5rem 1.5rem' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div
