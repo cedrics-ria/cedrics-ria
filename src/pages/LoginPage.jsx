@@ -15,6 +15,7 @@ export default function LoginPage({ onLogin, currentUser }) {
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSent, setForgotSent] = useState(false);
   const [agbAccepted, setAgbAccepted] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -47,7 +48,8 @@ export default function LoginPage({ onLogin, currentUser }) {
         setError('Registrierung fehlgeschlagen.');
         return;
       }
-      onLogin({ id: data.user.id, name: name.trim(), email: data.user.email }, true);
+      // Email confirmation required – show verification screen instead of logging in
+      setRegisteredEmail(data.user.email);
       return;
     }
 
@@ -78,6 +80,140 @@ export default function LoginPage({ onLogin, currentUser }) {
     ['Direkt kontaktieren', 'Kein Mittelsmann — kommuniziere direkt mit Verleihern und Mietern.'],
     ['Nachhaltig & lokal', 'Jede Miete spart CO₂. Gut für dich und den Planeten.'],
   ];
+
+  // ── Email-verification screen ─────────────────────────────────────────────
+  if (registeredEmail) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          background: C.cream,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '2rem 1.5rem',
+        }}
+      >
+        <div
+          style={{
+            width: '100%',
+            maxWidth: 480,
+            background: 'white',
+            borderRadius: 24,
+            padding: '3rem 2.5rem',
+            boxShadow: '0 8px 40px rgba(28,58,46,0.1)',
+            textAlign: 'center',
+          }}
+        >
+          {/* Icon */}
+          <div
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #e8f4ec, #d4ead9)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1.75rem',
+            }}
+          >
+            <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+              <rect x="3" y="7" width="28" height="20" rx="3" stroke="#1C3A2E" strokeWidth="2" fill="none"/>
+              <polyline points="3,7 17,19 31,7" stroke="#1C3A2E" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+
+          <Logo size={1.6} />
+          <h1
+            style={{
+              fontSize: '1.65rem',
+              color: C.forest,
+              margin: '1.25rem 0 0.6rem',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            Fast geschafft!
+          </h1>
+          <p style={{ color: C.muted, lineHeight: 1.7, marginBottom: '1.75rem', fontSize: '0.95rem' }}>
+            Wir haben eine Bestätigungs-E-Mail an{' '}
+            <strong style={{ color: C.forest }}>{registeredEmail}</strong> gesendet.
+            <br />
+            Klicke auf den Link in der E-Mail, um deinen Account zu aktivieren.
+          </p>
+
+          {/* Steps */}
+          <div
+            style={{
+              background: C.cream,
+              borderRadius: 14,
+              padding: '1.25rem 1.5rem',
+              textAlign: 'left',
+              marginBottom: '2rem',
+            }}
+          >
+            {[
+              ['1', 'Öffne dein E-Mail-Postfach'],
+              ['2', 'Suche nach einer E-Mail von ria'],
+              ['3', 'Klicke auf „E-Mail bestätigen"'],
+              ['4', 'Melde dich dann hier an'],
+            ].map(([num, text]) => (
+              <div
+                key={num}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.85rem',
+                  marginBottom: num === '4' ? 0 : '0.85rem',
+                }}
+              >
+                <div
+                  style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: '50%',
+                    background: C.forest,
+                    color: 'white',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  {num}
+                </div>
+                <span style={{ fontSize: '0.9rem', color: C.ink }}>{text}</span>
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={() => { setRegisteredEmail(''); setMode('login'); }}
+            style={{
+              width: '100%',
+              background: 'linear-gradient(135deg, #163126, #1C3A2E)',
+              color: 'white',
+              padding: '1rem',
+              borderRadius: 14,
+              border: 'none',
+              fontSize: '1rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 8px 24px rgba(28,58,46,0.2)',
+            }}
+          >
+            Zum Login
+          </button>
+
+          <p style={{ color: C.muted, fontSize: '0.82rem', marginTop: '1.25rem', lineHeight: 1.6 }}>
+            Keine E-Mail erhalten? Schau auch im Spam-Ordner nach.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: C.cream, display: 'flex' }}>
