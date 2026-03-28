@@ -125,7 +125,7 @@ export default function AppRouter(props) {
 
   function renderPage() {
     if (currentPage === 'login')
-      return <LoginPage onLogin={onLogin} currentUser={currentUser} />;
+      return <LoginPage onLogin={onLogin} currentUser={currentUser} goTo={navigate} />;
 
     if (currentPage === 'listings')
       return (

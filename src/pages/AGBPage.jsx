@@ -71,15 +71,18 @@ export default function AGBPage({ goTo }) {
               ],
             ],
             [
-              '§ 3 Registrierung',
+              '§ 3 Registrierung & Mindestalter',
               [
-                'Die Nutzung erfordert eine Registrierung mit gültiger E-Mail-Adresse. Jede Person darf nur ein Konto anlegen. Die Zugangsdaten sind vertraulich zu behandeln.',
+                'Die Nutzung erfordert eine Registrierung mit gültiger E-Mail-Adresse. Die Plattform richtet sich ausschließlich an Personen ab 18 Jahren. Jede Person darf nur ein Konto anlegen. Die Zugangsdaten sind vertraulich zu behandeln. ria behält sich vor, Konten bei Verdacht auf Missbrauch oder Falschangaben zu sperren.',
               ],
             ],
             [
-              '§ 4 Inserate',
+              '§ 4 Inserate & verbotene Inhalte',
               [
-                'Nutzer sind verantwortlich für die Richtigkeit ihrer Inserate. Illegale oder gefährliche Gegenstände dürfen nicht eingestellt werden. ria behält sich vor, Inserate ohne Angabe von Gründen zu entfernen.',
+                'Nutzer sind verantwortlich für die Richtigkeit und Vollständigkeit ihrer Inserate. ria behält sich vor, Inserate ohne Angabe von Gründen zu entfernen.',
+                'Folgende Gegenstände und Inhalte sind ausdrücklich verboten:',
+                '• Waffen, Munition, Sprengstoff oder Kampfmittel jeglicher Art\n• Betäubungsmittel und illegale Substanzen\n• Gestohlene oder aus illegalen Quellen stammende Gegenstände\n• Gegenstände, deren Vermietung einer behördlichen Genehmigung bedarf, ohne dass diese vorliegt\n• Pornografische oder jugendgefährdende Inhalte\n• Gegenstände oder Dienstleistungen, die gegen geltendes Recht verstoßen\n• Persönliche Daten Dritter ohne deren Einwilligung',
+                'Nutzer, die verbotene Inhalte einstellen, haften für alle daraus entstehenden Schäden. ria erstattet bei Bedarf Anzeige bei den zuständigen Behörden.',
               ],
             ],
             [
@@ -108,9 +111,28 @@ export default function AGBPage({ goTo }) {
               ],
             ],
             [
-              '§ 8 Änderungen',
+              '§ 8 Kündigung & Kontolöschung',
               [
-                'ria behält sich vor, diese AGB jederzeit zu ändern. Nutzer werden über wesentliche Änderungen per E-Mail informiert.',
+                'Nutzer können ihr Konto jederzeit durch Kontaktaufnahme unter hallo@ria-rentitall.de löschen lassen. Mit der Kontolöschung werden alle personenbezogenen Daten innerhalb von 30 Tagen gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.',
+                'ria behält sich vor, Nutzerkonten bei Verstößen gegen diese AGB fristlos zu sperren oder zu löschen.',
+              ],
+            ],
+            [
+              '§ 9 Änderungen der AGB',
+              [
+                'ria behält sich vor, diese AGB zu ändern. Über wesentliche Änderungen werden Nutzer mindestens 30 Tage vor Inkrafttreten per E-Mail informiert. Wird der Nutzung nach Ablauf der Frist nicht widersprochen, gelten die neuen AGB als akzeptiert. Das Widerspruchsrecht bleibt unberührt.',
+              ],
+            ],
+            [
+              '§ 10 Anwendbares Recht & Gerichtsstand',
+              [
+                'Es gilt das Recht der Bundesrepublik Deutschland. Gerichtsstand für Streitigkeiten mit Unternehmern ist Paderborn. Für Verbraucher gelten die gesetzlichen Zuständigkeitsregelungen.',
+              ],
+            ],
+            [
+              '§ 11 Salvatorische Klausel',
+              [
+                'Sollten einzelne Bestimmungen dieser AGB ganz oder teilweise unwirksam sein oder werden, berührt dies die Wirksamkeit der übrigen Bestimmungen nicht. Anstelle der unwirksamen Bestimmung gilt eine wirksame Regelung, die dem wirtschaftlichen Zweck der unwirksamen Klausel am nächsten kommt.',
               ],
             ],
           ].map(([title, paragraphs]) => (

@@ -22,7 +22,7 @@ function mapAuthError(msg) {
   return msg;
 }
 
-export default function LoginPage({ onLogin, currentUser }) {
+export default function LoginPage({ onLogin, currentUser, goTo }) {
   const [mode, setMode] = useState('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -580,9 +580,9 @@ export default function LoginPage({ onLogin, currentUser }) {
                 />
                 <label htmlFor="agb-checkbox" style={{ fontSize: '0.88rem', color: C.ink, lineHeight: 1.5, cursor: 'pointer' }}>
                   Ich akzeptiere die{' '}
-                  <a href="#" onClick={(e) => e.preventDefault()} style={{ color: C.terra, fontWeight: 600, textDecoration: 'underline' }}>AGB</a>
-                  {' '}und{' '}
-                  <a href="#" onClick={(e) => e.preventDefault()} style={{ color: C.terra, fontWeight: 600, textDecoration: 'underline' }}>Datenschutzerklärung</a>
+                  <button type="button" onClick={() => goTo?.('agb')} style={{ background: 'none', border: 'none', padding: 0, color: C.terra, fontWeight: 600, textDecoration: 'underline', cursor: 'pointer', fontSize: 'inherit' }}>AGB</button>
+                  {' '}und die{' '}
+                  <button type="button" onClick={() => goTo?.('datenschutz')} style={{ background: 'none', border: 'none', padding: 0, color: C.terra, fontWeight: 600, textDecoration: 'underline', cursor: 'pointer', fontSize: 'inherit' }}>Datenschutzerklärung</button>
                 </label>
               </div>
             )}

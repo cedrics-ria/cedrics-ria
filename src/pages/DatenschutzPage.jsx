@@ -93,7 +93,7 @@ ldi.nrw.de`,
 
 • Login-Status (Sitzungsverwaltung)
 • Favoriten-Liste
-• Zuletzt gelesene Nachrichten (Zeitstempel)
+• Ausgeblendete Chat-Threads (nutzerspezifisch)
 • Buchungsbestätigungen (lokal gecacht)
 
 Da kein Tracking stattfindet, ist ein Cookie-Banner nicht erforderlich.`,
