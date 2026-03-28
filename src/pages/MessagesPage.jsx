@@ -4,6 +4,7 @@ import { inputBaseStyle, primaryButtonStyle, applyInputFocus, resetInputFocus } 
 import EmptyState from '../components/EmptyState';
 import ReviewModal from '../components/ReviewModal';
 import HandoverProtocolModal from '../components/HandoverProtocolModal';
+import ContractModal from '../components/ContractModal';
 import { supabase } from '../supabase';
 
 export default function MessagesPage({
@@ -23,6 +24,10 @@ export default function MessagesPage({
   const [handoverModal, setHandoverModal] = useState(null); // { listingId, listingTitle, otherUserId, otherUserName }
   const [reviewedThreads, setReviewedThreads] = useState({}); // listingId -> true if current user already reviewed
   const [handoverProtocols, setHandoverProtocols] = useState({}); // listingId -> protocol obj or null
+  const [contracts, setContracts] = useState({}); // thread.key -> contract obj or null
+  const [contractModal, setContractModal] = useState(null); // { thread, isOwner }
+  const [readThreads, setReadThreads] = useState(new Set());
+  const mountTimeRef = useRef(new Date());
 
   // Stable ref so the effect runs only once on mount, regardless of onOpen identity
   const onOpenRef = useRef(onOpen);
@@ -75,11 +80,11 @@ export default function MessagesPage({
             (mx, m) => (new Date(m.createdAt) > new Date(mx) ? m.createdAt : mx),
             '0'
           ),
-          unread: t.msgs.filter((m) => m.toUserId === currentUser?.id).length,
+          unread: readThreads.has(t.key) ? 0 : t.msgs.filter((m) => m.toUserId === currentUser?.id && new Date(m.createdAt) > mountTimeRef.current).length,
         };
       })
       .sort((a, b) => new Date(b.lastAt) - new Date(a.lastAt));
-  }, [messages, currentUser, listings]);
+  }, [messages, currentUser, listings, readThreads]);
 
   const active = threads.find((t) => t.key === openThread);
 
@@ -117,6 +122,19 @@ export default function MessagesPage({
         .single();
       if (protocolData) {
         setHandoverProtocols((prev) => ({ ...prev, [openThread]: protocolData }));
+      }
+
+      // Load contract for this thread
+      const { data: contractData } = await supabase
+        .from('contracts')
+        .select('*')
+        .eq('listing_id', String(thread.listingId))
+        .or(`owner_id.eq.${currentUser.id},renter_id.eq.${currentUser.id}`)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (contractData) {
+        setContracts(prev => ({ ...prev, [thread.key]: contractData }));
       }
     })();
   }, [openThread]);
@@ -207,6 +225,9 @@ export default function MessagesPage({
               );
               const alreadyReviewed = reviewedThreads[thread.key];
               const hasProtocol = handoverProtocols[thread.key];
+              const relListing = listings.find(l => String(l.id) === thread.key);
+              const isOwner = relListing ? relListing.userId === currentUser?.id : false;
+              const threadContract = contracts[thread.key];
 
               return (
                 <div
@@ -222,7 +243,11 @@ export default function MessagesPage({
                 >
                   {/* Thread header */}
                   <button
-                    onClick={() => setOpenThread(isOpen ? null : thread.key)}
+                    onClick={() => {
+                      const newOpen = isOpen ? null : thread.key;
+                      setOpenThread(newOpen);
+                      if (newOpen) setReadThreads(prev => new Set([...prev, newOpen]));
+                    }}
                     style={{
                       width: '100%',
                       padding: '1.25rem 1.5rem',
@@ -525,6 +550,31 @@ export default function MessagesPage({
                             📋 Protokoll ansehen
                           </button>
                         )}
+                        {/* Contract button */}
+                        {!threadContract ? (
+                          isOwner && (
+                            <button
+                              onClick={() => setContractModal({ thread, isOwner: true })}
+                              style={{ padding:'0.6rem 1rem', borderRadius:12, border:`1px solid rgba(196,113,74,0.35)`, background:'rgba(196,113,74,0.07)', color:C.terra, fontWeight:700, cursor:'pointer', fontSize:'0.84rem', display:'flex', alignItems:'center', gap:'0.4rem' }}
+                            >
+                              📄 Vertrag erstellen
+                            </button>
+                          )
+                        ) : threadContract.status === 'completed' ? (
+                          <button
+                            onClick={() => setContractModal({ thread, isOwner })}
+                            style={{ padding:'0.6rem 1rem', borderRadius:12, border:`1px solid ${C.sage}`, background:C.sageLight, color:C.forest, fontWeight:700, cursor:'pointer', fontSize:'0.84rem', display:'flex', alignItems:'center', gap:'0.4rem' }}
+                          >
+                            ✅ Vertrag ansehen
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => setContractModal({ thread, isOwner })}
+                            style={{ padding:'0.6rem 1rem', borderRadius:12, border:`1px solid rgba(196,113,74,0.35)`, background:'rgba(196,113,74,0.07)', color:C.terra, fontWeight:700, cursor:'pointer', fontSize:'0.84rem', display:'flex', alignItems:'center', gap:'0.4rem' }}
+                          >
+                            {isOwner ? '⏳ Vertrag — wartet auf Mieter' : '📄 Vertrag bestätigen'}
+                          </button>
+                        )}
                       </div>
 
                       {/* Reply */}
@@ -594,6 +644,34 @@ export default function MessagesPage({
           onClose={() => setReviewModal(null)}
         />
       )}
+
+      {/* Contract Modal */}
+      {contractModal && (() => {
+        const { thread, isOwner: modalIsOwner } = contractModal;
+        const relListing = listings.find(l => String(l.id) === thread.key);
+        const ownerId = relListing?.userId || '';
+        const ownerName = relListing?.ownerName || thread.otherName || '';
+        const renterId = modalIsOwner ? thread.otherUserId : currentUser?.id;
+        const renterName = modalIsOwner ? thread.otherName : currentUser?.name;
+        return (
+          <ContractModal
+            contract={contracts[thread.key] || null}
+            listingId={thread.listingId}
+            listingTitle={thread.listingTitle}
+            ownerId={ownerId}
+            ownerName={ownerName}
+            renterId={renterId}
+            renterName={renterName}
+            currentUser={currentUser}
+            isOwner={modalIsOwner}
+            addToast={addToast || (() => {})}
+            onClose={() => setContractModal(null)}
+            onContractUpdated={(newContract) => {
+              setContracts(prev => ({ ...prev, [thread.key]: newContract }));
+            }}
+          />
+        );
+      })()}
 
       {/* Handover Protocol Modal */}
       {handoverModal && (
