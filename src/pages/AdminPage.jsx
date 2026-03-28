@@ -49,6 +49,7 @@ export default function AdminPage({
   onDeleteListing,
   onMarkSupportRead,
   onBanUser,
+  onViewOwner,
 }) {
   const isAdmin = currentUser?.email === 'cedric.s.renner@gmail.com' || profile?.is_admin === true;
 
@@ -129,7 +130,7 @@ export default function AdminPage({
     const { data } = await supabase
       .from('profiles')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('updated_at', { ascending: false });
     setUsers(data || []);
     setLoadingUsers(false);
   }
@@ -971,163 +972,99 @@ export default function AdminPage({
         {/* Users management */}
         {activeSection === 'users' && (
           <div>
-            <h2
-              style={{
-                color: C.forest,
-                margin: '0 0 1.5rem',
-                fontSize: '1.5rem',
-                letterSpacing: '-0.02em',
-              }}
-            >
-              Nutzer
+            <h2 style={{ color: C.forest, margin: '0 0 1.5rem', fontSize: '1.5rem', letterSpacing: '-0.02em' }}>
+              Nutzer ({users.length})
             </h2>
             {loadingUsers ? (
-              <div style={{ color: C.muted, padding: '2rem 0', textAlign: 'center' }}>
-                Wird geladen…
-              </div>
+              <div style={{ color: C.muted, padding: '2rem 0', textAlign: 'center' }}>Wird geladen…</div>
             ) : users.length === 0 ? (
-              <div
-                style={{
-                  background: 'white',
-                  borderRadius: 16,
-                  padding: '2.5rem',
-                  textAlign: 'center',
-                  color: C.muted,
-                  border: `1px solid ${C.line}`,
-                }}
-              >
+              <div style={{ background: 'white', borderRadius: 16, padding: '2.5rem', textAlign: 'center', color: C.muted, border: `1px solid ${C.line}` }}>
                 Keine Nutzer gefunden.
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                {users.map((user) => (
-                  <div
-                    key={user.id}
-                    style={{
-                      background: 'white',
-                      borderRadius: 16,
-                      border: `1px solid ${C.line}`,
-                      boxShadow: '0 2px 10px rgba(28,58,46,0.04)',
-                      padding: '1rem 1.25rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem',
-                      flexWrap: 'wrap',
-                    }}
-                  >
+                {users.map((user) => {
+                  const userListings = listings.filter((l) => l.userId === user.id);
+                  return (
                     <div
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #163126, #1C3A2E)',
-                        color: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 800,
-                        fontSize: '1rem',
-                        flexShrink: 0,
-                        overflow: 'hidden',
-                      }}
+                      key={user.id}
+                      style={{ background: 'white', borderRadius: 16, border: `1px solid ${C.line}`, boxShadow: '0 2px 10px rgba(28,58,46,0.04)', padding: '1rem 1.25rem' }}
                     >
-                      {user.avatar_url ? (
-                        <img
-                          src={user.avatar_url}
-                          alt=""
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
-                      ) : (
-                        (user.name || '?').charAt(0).toUpperCase()
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                        {/* Avatar */}
+                        <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg, #163126, #1C3A2E)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.1rem', flexShrink: 0, overflow: 'hidden' }}>
+                          {user.avatar_url
+                            ? <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            : (user.name || '?').charAt(0).toUpperCase()
+                          }
+                        </div>
+
+                        {/* Info */}
+                        <div style={{ flex: 1, minWidth: 160 }}>
+                          <div style={{ fontWeight: 700, color: C.forest, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                            {user.name || '(kein Name)'}
+                            {user.is_admin && (
+                              <span style={{ background: C.forest, color: 'white', padding: '0.1rem 0.45rem', borderRadius: 999, fontSize: '0.62rem', fontWeight: 800 }}>ADMIN</span>
+                            )}
+                            {user.is_banned && (
+                              <span style={{ background: C.terra, color: 'white', padding: '0.1rem 0.45rem', borderRadius: 999, fontSize: '0.62rem', fontWeight: 800 }}>GESPERRT</span>
+                            )}
+                          </div>
+                          <div style={{ color: C.muted, fontSize: '0.78rem', marginTop: '0.1rem' }}>
+                            {userListings.length} Inserat{userListings.length !== 1 ? 'e' : ''}
+                            {user.location && ` · ${user.location}`}
+                          </div>
+                        </div>
+
+                        {/* Buttons */}
+                        <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0, flexWrap: 'wrap' }}>
+                          {/* Profil ansehen */}
+                          <button
+                            onClick={() => { if (onViewOwner) onViewOwner(user); }}
+                            style={{ padding: '0.55rem 1rem', borderRadius: 10, border: `1px solid ${C.line}`, background: C.sageLight, color: C.forest, fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}
+                          >
+                            Profil ansehen
+                          </button>
+                          {/* Admin toggle */}
+                          <button
+                            onClick={() => toggleAdminUser(user.id, !!user.is_admin)}
+                            disabled={user.id === currentUser?.id}
+                            style={{ padding: '0.55rem 1rem', borderRadius: 10, border: `1px solid ${user.is_admin ? 'rgba(196,113,74,0.3)' : C.line}`, background: user.is_admin ? 'rgba(196,113,74,0.07)' : 'white', color: user.is_admin ? C.terra : C.muted, fontWeight: 700, cursor: user.id === currentUser?.id ? 'not-allowed' : 'pointer', fontSize: '0.8rem', opacity: user.id === currentUser?.id ? 0.4 : 1 }}
+                          >
+                            {user.is_admin ? 'Admin weg' : 'Admin'}
+                          </button>
+                          {/* Ban toggle */}
+                          <button
+                            onClick={() => handleBanUser(user.id, !!user.is_banned)}
+                            disabled={user.id === currentUser?.id || banningId === user.id}
+                            style={{ padding: '0.55rem 1rem', borderRadius: 10, border: `1px solid ${user.is_banned ? C.line : 'rgba(196,113,74,0.35)'}`, background: user.is_banned ? C.sageLight : 'rgba(196,113,74,0.08)', color: user.is_banned ? C.forest : C.terra, fontWeight: 700, cursor: user.id === currentUser?.id ? 'not-allowed' : 'pointer', fontSize: '0.8rem', opacity: user.id === currentUser?.id || banningId === user.id ? 0.4 : 1 }}
+                          >
+                            {banningId === user.id ? '…' : user.is_banned ? 'Entsperren' : 'Sperren'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Inserate des Nutzers */}
+                      {userListings.length > 0 && (
+                        <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: `1px solid ${C.line}`, display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          {userListings.map((l) => (
+                            <div key={l.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: C.cream, borderRadius: 10, padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>
+                              <span style={{ color: C.forest, fontWeight: 600 }}>{l.title}</span>
+                              <span style={{ color: C.muted }}>{l.price}</span>
+                              <button
+                                onClick={() => handleDeleteListing(l.id)}
+                                disabled={deletingId === l.id}
+                                style={{ background: 'none', border: 'none', color: C.terra, cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700, padding: '0 0.2rem' }}
+                              >
+                                {deletingId === l.id ? '…' : '✕'}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </div>
-                    <div style={{ flex: 1, minWidth: 180 }}>
-                      <div
-                        style={{
-                          fontWeight: 700,
-                          color: C.forest,
-                          fontSize: '0.95rem',
-                          marginBottom: '0.1rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                        }}
-                      >
-                        {user.name || '(kein Name)'}
-                        {user.is_admin && (
-                          <span
-                            style={{
-                              background: C.forest,
-                              color: 'white',
-                              padding: '0.1rem 0.5rem',
-                              borderRadius: 999,
-                              fontSize: '0.65rem',
-                              fontWeight: 800,
-                            }}
-                          >
-                            ADMIN
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ color: C.muted, fontSize: '0.78rem' }}>
-                        {user.email || user.id}
-                        {user.created_at && (
-                          <span style={{ marginLeft: '0.5rem' }}>
-                            · seit {fmtDate(user.created_at)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div
-                      style={{ display: 'flex', gap: '0.5rem', flexShrink: 0, flexWrap: 'wrap' }}
-                    >
-                      <button
-                        onClick={() => toggleAdminUser(user.id, !!user.is_admin)}
-                        disabled={user.id === currentUser?.id}
-                        style={{
-                          padding: '0.55rem 1rem',
-                          borderRadius: 10,
-                          border: `1px solid ${user.is_admin ? 'rgba(196,113,74,0.3)' : C.line}`,
-                          background: user.is_admin ? 'rgba(196,113,74,0.07)' : C.sageLight,
-                          color: user.is_admin ? C.terra : C.forest,
-                          fontWeight: 700,
-                          cursor: user.id === currentUser?.id ? 'not-allowed' : 'pointer',
-                          fontSize: '0.8rem',
-                          opacity: user.id === currentUser?.id ? 0.5 : 1,
-                        }}
-                        title={
-                          user.id === currentUser?.id
-                            ? 'Eigene Rechte können nicht geändert werden'
-                            : ''
-                        }
-                      >
-                        {user.is_admin ? 'Admin entfernen' : 'Admin machen'}
-                      </button>
-                      <button
-                        onClick={() => handleBanUser(user.id, !!user.is_banned)}
-                        disabled={user.id === currentUser?.id || banningId === user.id}
-                        style={{
-                          padding: '0.55rem 1rem',
-                          borderRadius: 10,
-                          border: `1px solid ${user.is_banned ? C.line : 'rgba(196,113,74,0.35)'}`,
-                          background: user.is_banned ? C.sageLight : 'rgba(196,113,74,0.08)',
-                          color: user.is_banned ? C.forest : C.terra,
-                          fontWeight: 700,
-                          cursor: user.id === currentUser?.id ? 'not-allowed' : 'pointer',
-                          fontSize: '0.8rem',
-                          opacity: user.id === currentUser?.id || banningId === user.id ? 0.5 : 1,
-                        }}
-                        title={
-                          user.id === currentUser?.id
-                            ? 'Eigenes Konto kann nicht gesperrt werden'
-                            : ''
-                        }
-                      >
-                        {banningId === user.id ? '…' : user.is_banned ? 'Entsperren' : 'Sperren'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

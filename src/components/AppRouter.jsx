@@ -251,6 +251,7 @@ export default function AppRouter(props) {
           supportRequests={supportRequests}
           onMarkSupportRead={onMarkSupportRead}
           onBanUser={onBanUser}
+          onViewOwner={onViewOwner}
         />
       );
 
