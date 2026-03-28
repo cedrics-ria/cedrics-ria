@@ -4,6 +4,24 @@ import { inputBaseStyle, primaryButtonStyle, applyInputFocus, resetInputFocus } 
 import Logo from '../components/Logo';
 import { supabase } from '../supabase';
 
+function mapAuthError(msg) {
+  if (!msg) return 'Ein Fehler ist aufgetreten.';
+  const m = msg.toLowerCase();
+  if (m.includes('invalid login credentials') || m.includes('invalid credentials') || m.includes('email not confirmed'))
+    return 'E-Mail oder Passwort ist falsch. Hast du deine E-Mail bereits bestätigt?';
+  if (m.includes('user already registered') || m.includes('already registered'))
+    return 'Diese E-Mail-Adresse ist bereits registriert. Bitte melde dich an.';
+  if (m.includes('password') && (m.includes('short') || m.includes('characters')))
+    return 'Das Passwort muss mindestens 6 Zeichen lang sein.';
+  if (m.includes('too many requests') || m.includes('rate limit'))
+    return 'Zu viele Versuche. Bitte warte kurz und versuche es erneut.';
+  if (m.includes('network') || m.includes('fetch'))
+    return 'Netzwerkfehler. Bitte überprüfe deine Internetverbindung.';
+  if (m.includes('email') && m.includes('valid'))
+    return 'Bitte gib eine gültige E-Mail-Adresse ein.';
+  return msg;
+}
+
 export default function LoginPage({ onLogin, currentUser }) {
   const [mode, setMode] = useState('login');
   const [name, setName] = useState('');
@@ -41,7 +59,7 @@ export default function LoginPage({ onLogin, currentUser }) {
       });
       setLoading(false);
       if (error) {
-        setError(error.message);
+        setError(mapAuthError(error.message));
         return;
       }
       if (!data.user) {
@@ -59,7 +77,7 @@ export default function LoginPage({ onLogin, currentUser }) {
     });
     setLoading(false);
     if (error) {
-      setError(error.message);
+      setError(mapAuthError(error.message));
       return;
     }
     if (!data.user) {

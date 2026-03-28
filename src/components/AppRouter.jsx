@@ -203,7 +203,8 @@ export default function AppRouter(props) {
       );
     }
 
-    if (currentPage === 'messages')
+    if (currentPage === 'messages') {
+      if (!currentUser) { setCurrentPage('login'); return null; }
       return (
         <MessagesPage
           messages={messages}
@@ -217,8 +218,10 @@ export default function AppRouter(props) {
           addToast={addToast}
         />
       );
+    }
 
-    if (currentPage === 'profile')
+    if (currentPage === 'profile') {
+      if (!currentUser) { setCurrentPage('login'); return null; }
       return (
         <ProfilePage
           currentUser={currentUser}
@@ -240,6 +243,7 @@ export default function AppRouter(props) {
           onDeclineBookingRecord={onDeclineBookingRecord}
         />
       );
+    }
 
     if (currentPage === 'admin')
       return (

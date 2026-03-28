@@ -28,8 +28,9 @@ export default function MessagesPage({
   const [contracts, setContracts] = useState({}); // thread.key -> contract obj or null
   const [contractModal, setContractModal] = useState(null); // { thread, isOwner }
   const [readThreads, setReadThreads] = useState(new Set());
+  const hiddenKey = `ria-hidden-threads-${currentUser?.id || 'guest'}`;
   const [hiddenThreads, setHiddenThreads] = useState(() => {
-    try { return new Set(JSON.parse(localStorage.getItem('ria-hidden-threads') || '[]')); }
+    try { return new Set(JSON.parse(localStorage.getItem(`ria-hidden-threads-${currentUser?.id || 'guest'}`) || '[]')); }
     catch { return new Set(); }
   });
   const [otherAvatars, setOtherAvatars] = useState({}); // userId -> avatar_url
@@ -428,7 +429,7 @@ export default function MessagesPage({
                             if (!window.confirm('Chat ausblenden?')) return;
                             const next = new Set([...hiddenThreads, thread.key]);
                             setHiddenThreads(next);
-                            localStorage.setItem('ria-hidden-threads', JSON.stringify([...next]));
+                            localStorage.setItem(hiddenKey, JSON.stringify([...next]));
                             if (openThread === thread.key) setOpenThread(null);
                           }}
                           style={{

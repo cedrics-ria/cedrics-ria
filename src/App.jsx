@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { C, categoryImages } from './constants';
+import { C, ADMIN_EMAIL } from './constants';
 import { supabase } from './supabase';
 import { useMessages } from './hooks/useMessages.js';
 import { useBookings } from './hooks/useBookings.js';
@@ -14,8 +14,6 @@ import Toaster from './components/Toaster';
 import OnboardingModal from './components/OnboardingModal';
 import AppRouter from './components/AppRouter';
 import AppFooter from './components/AppFooter';
-
-const ADMIN_EMAIL = 'cedric.s.renner@gmail.com';
 
 // ── Map raw DB row → app listing shape ─────────────────────────────────────
 function mapListing(row) {
@@ -93,11 +91,9 @@ export default function App() {
   const unreadCount = useMemo(
     () =>
       currentUser
-        ? messages.filter(
-            (m) => m.toUserId === currentUser.id && new Date(m.createdAt) > lastMessagesCheck
-          ).length
+        ? messages.filter((m) => m.toUserId === currentUser.id && !m.read).length
         : 0,
-    [messages, currentUser, lastMessagesCheck]
+    [messages, currentUser]
   );
 
   const unreadSupportCount = useMemo(

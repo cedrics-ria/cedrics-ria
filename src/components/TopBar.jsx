@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { C } from '../constants';
+import { C, ADMIN_EMAIL } from '../constants';
 import Logo from './Logo';
 import NavButton from './NavButton';
-
-const ADMIN_EMAIL = 'cedric.s.renner@gmail.com';
 
 export default function TopBar({
   currentPage,

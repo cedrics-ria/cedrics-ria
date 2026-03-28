@@ -1,3 +1,5 @@
+export const ADMIN_EMAIL = 'cedric.s.renner@gmail.com';
+
 export const C = {
   forest: '#1C3A2E',
   sage: '#7A9E7E',
