@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { C, ADMIN_EMAIL } from './constants';
 import { supabase } from './supabase';
 import { useMessages } from './hooks/useMessages.js';
@@ -78,6 +78,8 @@ export default function App() {
     catch { return new Date(0); }
   });
 
+  const pendingListingIdRef = useRef(null);
+
   // ── Hooks ─────────────────────────────────────────────────────────────────
   const { messages, setMessages, loadMessages, saveMessage: saveMsg } = useMessages();
   const { bookings, setBookings, loadBookings } = useBookings();
@@ -139,6 +141,10 @@ export default function App() {
     if (savedUser) setCurrentUser(JSON.parse(savedUser));
 
     async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const inseratId = params.get('inserat');
+      if (inseratId) pendingListingIdRef.current = inseratId;
+
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         const u = buildSessionUser(session.user);
@@ -265,6 +271,15 @@ export default function App() {
     }
     setListings((data || []).map(mapListing));
     setLoading(false);
+    if (pendingListingIdRef.current) {
+      const target = (data || []).map(mapListing).find(l => String(l.id) === pendingListingIdRef.current);
+      pendingListingIdRef.current = null;
+      if (target) {
+        setSelectedListing(target);
+        window.history.replaceState({ page: 'listing-detail' }, '');
+        setCurrentPage('listing-detail');
+      }
+    }
   }
 
   async function loadAllReviews() {
@@ -387,6 +402,22 @@ export default function App() {
     }).select().single();
     if (error) { addToast('Fehler beim Senden: ' + error.message, 'error'); return false; }
     setMessages((prev) => [mapMessageFromDb(data), ...prev]);
+    // Fire-and-forget email notification
+    fetch('/api/send-message-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || ''}`,
+      },
+      body: JSON.stringify({
+        record: {
+          to_user_id: newMessage.toUserId,
+          from_name: currentUser.name,
+          text: newMessage.text,
+          listing_title: newMessage.listingTitle,
+        },
+      }),
+    }).catch(() => {});
     return true;
   }
 

@@ -7,6 +7,52 @@ import HandoverProtocolModal from '../components/HandoverProtocolModal';
 import ContractModal from '../components/ContractModal';
 import { supabase } from '../supabase';
 
+function OwnerRatingForm({ currentUser, ownerReviewModal, onDone, onClose }) {
+  const [rating, setRating] = useState(5);
+  const [text, setText] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  async function handleSubmit() {
+    setSaving(true);
+    const { error } = await supabase.from('user_reviews').insert({
+      reviewer_id: currentUser.id,
+      reviewee_id: ownerReviewModal.revieweeId,
+      listing_id: String(ownerReviewModal.listingId),
+      rating,
+      text: text.trim(),
+    });
+    setSaving(false);
+    if (!error) onDone();
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ display: 'flex', gap: '0.4rem' }}>
+        {[1,2,3,4,5].map(s => (
+          <button key={s} type="button" onClick={() => setRating(s)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.6rem', opacity: s <= rating ? 1 : 0.3 }}>
+            ⭐
+          </button>
+        ))}
+      </div>
+      <textarea
+        value={text}
+        onChange={e => setText(e.target.value)}
+        placeholder="Optional: Wie war die Erfahrung mit diesem Mieter?"
+        rows={3}
+        style={{ width: '100%', padding: '0.75rem', borderRadius: 12, border: '1px solid rgba(28,58,46,0.15)', fontSize: '0.9rem', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }}
+      />
+      <div style={{ display: 'flex', gap: '0.6rem' }}>
+        <button type="button" onClick={onClose} style={{ flex: 1, padding: '0.8rem', borderRadius: 12, border: '1px solid rgba(28,58,46,0.15)', background: 'white', fontWeight: 600, cursor: 'pointer' }}>Abbrechen</button>
+        <button type="button" onClick={handleSubmit} disabled={saving}
+          style={{ flex: 2, padding: '0.8rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #163126, #1C3A2E)', color: 'white', fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1 }}>
+          {saving ? 'Wird gespeichert…' : 'Bewertung speichern'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function MessagesPage({
   messages,
   setMessages,
@@ -25,6 +71,8 @@ export default function MessagesPage({
   const [reviewModal, setReviewModal] = useState(null); // { listingId, listingTitle, revieweeId, revieweeName }
   const [handoverModal, setHandoverModal] = useState(null); // { listingId, listingTitle, otherUserId, otherUserName }
   const [reviewedThreads, setReviewedThreads] = useState({}); // listingId -> true if current user already reviewed
+  const [reviewedAsOwner, setReviewedAsOwner] = useState({}); // thread.key -> true
+  const [ownerReviewModal, setOwnerReviewModal] = useState(null);
   const [handoverProtocols, setHandoverProtocols] = useState({}); // listingId -> protocol obj or null
   const [contracts, setContracts] = useState({}); // thread.key -> contract obj or null
   const [contractModal, setContractModal] = useState(null); // { thread, isOwner }
@@ -141,6 +189,21 @@ export default function MessagesPage({
             .limit(1);
           if (!cancelled && reviewData && reviewData.length > 0) {
             setReviewedThreads((prev) => ({ ...prev, [openThread]: true }));
+          }
+
+          // Check if owner already rated the renter
+          const relListingForEffect = listings.find(l => String(l.id) === String(thread.listingId));
+          const isOwnerForEffect = relListingForEffect?.userId === currentUser?.id;
+          if (isOwnerForEffect) {
+            const { data: ownerReviewData } = await supabase
+              .from('user_reviews')
+              .select('id')
+              .eq('listing_id', String(thread.listingId))
+              .eq('reviewer_id', currentUser.id)
+              .limit(1);
+            if (!cancelled && ownerReviewData && ownerReviewData.length > 0) {
+              setReviewedAsOwner(prev => ({ ...prev, [openThread]: true }));
+            }
           }
 
           // Check if protocol exists
@@ -618,6 +681,32 @@ export default function MessagesPage({
                               ✓ Bewertet
                             </span>
                           ))}
+                        {isAccepted && isOwner && !reviewedAsOwner[thread.key] && thread.otherUserId && (
+                          <button
+                            onClick={() => setOwnerReviewModal({
+                              revieweeId: thread.otherUserId,
+                              revieweeName: thread.otherName,
+                              listingId: thread.listingId,
+                              threadKey: thread.key,
+                            })}
+                            style={{
+                              padding: '0.6rem 1.1rem',
+                              borderRadius: 10,
+                              border: `1px solid ${C.gold}`,
+                              background: 'rgba(200,169,107,0.08)',
+                              color: C.gold,
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              fontSize: '0.82rem',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            ⭐ Mieter bewerten
+                          </button>
+                        )}
+                        {isAccepted && isOwner && reviewedAsOwner[thread.key] && (
+                          <span style={{ fontSize: '0.8rem', color: C.muted }}>✓ Mieter bewertet</span>
+                        )}
                         {isAccepted && (!hasProtocol ? (
                           <button
                             onClick={() => openHandoverModal(thread)}
@@ -752,6 +841,25 @@ export default function MessagesPage({
           }}
           onClose={() => setReviewModal(null)}
         />
+      )}
+
+      {ownerReviewModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9000, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+          <div style={{ background: 'white', borderRadius: 24, padding: '2rem', maxWidth: 440, width: '100%', boxShadow: '0 30px 60px rgba(0,0,0,0.2)' }}>
+            <h3 style={{ color: C.forest, margin: '0 0 0.5rem', fontSize: '1.3rem' }}>Mieter bewerten</h3>
+            <p style={{ color: C.muted, margin: '0 0 1.25rem', fontSize: '0.9rem' }}>{ownerReviewModal.revieweeName}</p>
+            <OwnerRatingForm
+              currentUser={currentUser}
+              ownerReviewModal={ownerReviewModal}
+              onDone={() => {
+                setReviewedAsOwner(prev => ({ ...prev, [ownerReviewModal.threadKey]: true }));
+                setOwnerReviewModal(null);
+                addToast('Bewertung gespeichert ✓');
+              }}
+              onClose={() => setOwnerReviewModal(null)}
+            />
+          </div>
+        </div>
       )}
 
       {/* Contract Modal */}

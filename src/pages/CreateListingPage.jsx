@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { C, allCategoryNames } from '../constants';
 import { inputBaseStyle, applyInputFocus, resetInputFocus, getFallbackImage } from '../styles';
 import { supabase } from '../supabase';
+import { compressImage } from '../lib/compressImage';
 
 export default function CreateListingPage({ onAddListing, goTo, currentUser, addToast }) {
   const [formData, setFormData] = useState({
@@ -546,11 +547,11 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
                         return;
                       }
                       setUploading(true);
-                      const ext = file.name.split('.').pop().toLowerCase();
-                      const path = `public/${Date.now()}.${ext}`;
+                      const compressed = await compressImage(file);
+                      const path = `public/${Date.now()}.jpg`;
                       const { error } = await supabase.storage
                         .from('listing-images')
-                        .upload(path, file, { upsert: true });
+                        .upload(path, compressed, { upsert: true });
                       if (error) {
                         addToast('Upload fehlgeschlagen: ' + error.message, 'error');
                         setUploading(false);
@@ -650,11 +651,11 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
                       addToast('Bild zu groß – max. 8 MB erlaubt.', 'error');
                       return;
                     }
-                    const ext = file.name.split('.').pop().toLowerCase();
-                    const path = `public/${Date.now()}_extra.${ext}`;
+                    const compressed = await compressImage(file);
+                    const path = `public/${Date.now()}_extra.jpg`;
                     const { error } = await supabase.storage
                       .from('listing-images')
-                      .upload(path, file, { upsert: true });
+                      .upload(path, compressed, { upsert: true });
                     if (error) {
                       addToast('Upload fehlgeschlagen: ' + error.message, 'error');
                       return;

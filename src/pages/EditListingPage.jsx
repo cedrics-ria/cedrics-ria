@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { C, allCategoryNames } from '../constants';
 import { inputBaseStyle, applyInputFocus, resetInputFocus, getFallbackImage } from '../styles';
 import { supabase } from '../supabase';
+import { compressImage } from '../lib/compressImage';
 
 export default function EditListingPage({ listing, onUpdateListing, goTo, currentUser, addToast }) {
   const [formData, setFormData] = useState({
@@ -413,11 +414,11 @@ export default function EditListingPage({ listing, onUpdateListing, goTo, curren
                         return;
                       }
                       setUploading(true);
-                      const ext = file.name.split('.').pop().toLowerCase();
-                      const path = `public/${Date.now()}.${ext}`;
+                      const compressed = await compressImage(file);
+                      const path = `public/${Date.now()}.jpg`;
                       const { error } = await supabase.storage
                         .from('listing-images')
-                        .upload(path, file, { upsert: true });
+                        .upload(path, compressed, { upsert: true });
                       if (error) {
                         addToast('Upload fehlgeschlagen: ' + error.message, 'error');
                         setUploading(false);

@@ -21,7 +21,10 @@
       "Bash(ls /Users/cedricrenner/ria-app/*.js /Users/cedricrenner/ria-app/scripts/)",
       "Bash(grep -r \"448\\\\|leaf\\\\|font-size\\\\|Georgia\" /Users/cedricrenner/.claude/projects/-Users-cedricrenner-ria-app/ --include=*.jsonl -l)",
       "Bash(python3 -c \":*)",
-      "Bash(npx prettier:*)"
+      "Bash(npx prettier:*)",
+      "Bash(rm /Users/cedricrenner/ria-app/.git/index.lock)",
+      "Bash(git commit:*)",
+      "Bash(ls /Users/cedricrenner/ria-app/src/constants*)"
     ]
   }
 }

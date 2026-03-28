@@ -5,6 +5,7 @@ import EmptyState from '../components/EmptyState';
 import VerifiedBadge from '../components/VerifiedBadge';
 import { supabase } from '../supabase';
 import { smartImageUrl } from '../lib/getImageUrl';
+import { compressImage } from '../lib/compressImage';
 
 export default function ProfilePage({
   currentUser,
@@ -216,12 +217,12 @@ export default function ProfilePage({
                     addToast?.('Bild zu groß (max. 3 MB)', 'error');
                     return;
                   }
-                  const fileExtension = file.name.split('.').pop().toLowerCase();
-                  const fileName = `${currentUser.id}-${Date.now()}.${fileExtension}`;
+                  const compressed = await compressImage(file);
+                  const fileName = `${currentUser.id}-${Date.now()}.jpg`;
                   setAvatarUploading(true);
                   const { error } = await supabase.storage
                     .from('avatars')
-                    .upload(fileName, file, { upsert: true });
+                    .upload(fileName, compressed, { upsert: true });
                   if (error) {
                     setAvatarUploading(false);
                     addToast?.('Upload fehlgeschlagen: ' + error.message, 'error');
