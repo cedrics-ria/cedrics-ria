@@ -31,6 +31,9 @@ export default function ProfilePage({
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('listings');
   const [avatarUploading, setAvatarUploading] = useState(false);
+  const [listingFilter, setListingFilter] = useState('');
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [accountDeleteConfirm, setAccountDeleteConfirm] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -442,6 +445,61 @@ export default function ProfilePage({
               >
                 {saving ? 'Wird gespeichert...' : 'Speichern'}
               </button>
+              <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: `1px solid rgba(196,113,74,0.2)` }}>
+                <p style={{ margin: '0 0 0.75rem', fontSize: '0.82rem', color: C.muted, fontWeight: 600 }}>Gefahrenzone</p>
+                {!accountDeleteConfirm ? (
+                  <button
+                    type="button"
+                    onClick={() => setAccountDeleteConfirm(true)}
+                    style={{
+                      padding: '0.6rem 1.1rem',
+                      borderRadius: 10,
+                      border: `1px solid rgba(196,113,74,0.4)`,
+                      background: 'rgba(196,113,74,0.06)',
+                      color: C.terra,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                    }}
+                  >
+                    Konto löschen
+                  </button>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: 400 }}>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: C.terra, lineHeight: 1.6 }}>
+                      Bist du sicher? Alle deine Daten werden unwiderruflich gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.
+                    </p>
+                    <div style={{ display: 'flex', gap: '0.6rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => setAccountDeleteConfirm(false)}
+                        style={{ flex: 1, padding: '0.7rem', borderRadius: 10, border: `1px solid ${C.line}`, background: 'white', color: C.forest, fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem' }}
+                      >
+                        Abbrechen
+                      </button>
+                      <button
+                        type="button"
+                        disabled={deletingAccount}
+                        onClick={async () => {
+                          setDeletingAccount(true);
+                          try {
+                            await supabase.from('support_requests').insert({
+                              name: currentUser.name,
+                              email: currentUser.email,
+                              subject: 'Kontolöschung',
+                              message: `Bitte lösche mein Konto und alle meine Daten. User-ID: ${currentUser.id}`,
+                            });
+                          } catch (_) {}
+                          await supabase.auth.signOut();
+                        }}
+                        style={{ flex: 2, padding: '0.7rem', borderRadius: 10, border: 'none', background: C.terra, color: 'white', fontWeight: 700, cursor: deletingAccount ? 'not-allowed' : 'pointer', fontSize: '0.85rem', opacity: deletingAccount ? 0.7 : 1 }}
+                      >
+                        {deletingAccount ? 'Wird verarbeitet…' : 'Ja, Konto löschen'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -514,6 +572,47 @@ export default function ProfilePage({
                 + Neu erstellen
               </button>
             </div>
+            {myListings.length > 0 && (() => {
+              const cats = [...new Set(myListings.map(l => l.category).filter(Boolean))];
+              if (cats.length < 2) return null;
+              return (
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                  <button
+                    onClick={() => setListingFilter('')}
+                    style={{
+                      padding: '0.35rem 0.85rem',
+                      borderRadius: 999,
+                      border: `1px solid ${listingFilter === '' ? C.forest : C.line}`,
+                      background: listingFilter === '' ? C.forest : 'white',
+                      color: listingFilter === '' ? 'white' : C.muted,
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Alle
+                  </button>
+                  {cats.map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setListingFilter(cat)}
+                      style={{
+                        padding: '0.35rem 0.85rem',
+                        borderRadius: 999,
+                        border: `1px solid ${listingFilter === cat ? C.forest : C.line}`,
+                        background: listingFilter === cat ? C.forest : 'white',
+                        color: listingFilter === cat ? 'white' : C.muted,
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              );
+            })()}
             {myListings.length === 0 ? (
               <EmptyState
                 title="Noch keine Inserate"
@@ -529,7 +628,7 @@ export default function ProfilePage({
                   gap: '1rem',
                 }}
               >
-                {myListings.map((item) => (
+                {myListings.filter(item => !listingFilter || item.category === listingFilter).map((item) => (
                   <div
                     key={item.id}
                     className="hover-card"

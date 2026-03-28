@@ -19,6 +19,7 @@ export default function MessagesPage({
   addToast,
 }) {
   const [openThread, setOpenThread] = useState(null);
+  const [search, setSearch] = useState('');
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
   const [reviewModal, setReviewModal] = useState(null); // { listingId, listingTitle, revieweeId, revieweeName }
@@ -244,8 +245,30 @@ export default function MessagesPage({
         >
           Nachrichten
         </h1>
+        {threads.filter(t => !hiddenThreads.has(t.key)).length > 1 && (
+          <div style={{ marginBottom: '1.25rem', position: 'relative' }}>
+            <input
+              type="search"
+              placeholder="Chat suchen…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem 0.75rem 2.75rem',
+                borderRadius: 14,
+                border: `1px solid ${C.line}`,
+                background: 'white',
+                fontSize: '0.9rem',
+                color: C.ink,
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+            <span style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }}>🔍</span>
+          </div>
+        )}
 
-        {threads.filter(t => !hiddenThreads.has(t.key)).length === 0 ? (
+        {threads.filter(t => !hiddenThreads.has(t.key) && (!search || t.otherName?.toLowerCase().includes(search.toLowerCase()) || t.listingTitle?.toLowerCase().includes(search.toLowerCase()))).length === 0 ? (
           <EmptyState
             title="Noch keine Nachrichten"
             text="Schreib einem Verleiher oder erstelle ein Inserat, um Anfragen zu bekommen."
@@ -254,7 +277,7 @@ export default function MessagesPage({
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {threads.filter(t => !hiddenThreads.has(t.key)).map((thread) => {
+            {threads.filter(t => !hiddenThreads.has(t.key) && (!search || t.otherName?.toLowerCase().includes(search.toLowerCase()) || t.listingTitle?.toLowerCase().includes(search.toLowerCase()))).map((thread) => {
               const isOpen = openThread === thread.key;
               const lastMsg = thread.msgs.length > 0 ? thread.msgs[thread.msgs.length - 1] : null;
               const isAccepted = thread.msgs.some(

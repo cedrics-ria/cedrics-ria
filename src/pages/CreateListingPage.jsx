@@ -541,8 +541,8 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      if (file.size > 5 * 1024 * 1024) {
-                        addToast('Bild zu groß (max. 5 MB)', 'error');
+                      if (file.size > 8 * 1024 * 1024) {
+                        addToast('Bild zu groß – max. 8 MB erlaubt.', 'error');
                         return;
                       }
                       setUploading(true);
@@ -646,8 +646,8 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    if (file.size > 5 * 1024 * 1024) {
-                      addToast('Bild zu groß (max. 5 MB)', 'error');
+                    if (file.size > 8 * 1024 * 1024) {
+                      addToast('Bild zu groß – max. 8 MB erlaubt.', 'error');
                       return;
                     }
                     const ext = file.name.split('.').pop().toLowerCase();

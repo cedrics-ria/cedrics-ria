@@ -570,6 +570,11 @@ export default function LoginPage({ onLogin, currentUser, goTo }) {
               />
             </div>
             {mode === 'register' && (
+              <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: C.muted }}>
+                Mindestens 6 Zeichen. Am besten Buchstaben, Zahlen und ein Sonderzeichen.
+              </p>
+            )}
+            {mode === 'register' && (
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
                 <input
                   id="agb-checkbox"

@@ -29,6 +29,21 @@ export default function ListingDetailPage({
   const [ownerProfile, setOwnerProfile] = useState(null);
   const [showReport, setShowReport] = useState(false);
 
+  async function handleShare() {
+    const url = `${window.location.origin}?inserat=${listing.id}`;
+    const shareText = `${listing.title} – ${listing.price} auf ria`;
+    if (navigator.share) {
+      try { await navigator.share({ title: listing.title, text: shareText, url }); } catch (_) {}
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        addToast('Link kopiert! 📋');
+      } catch (_) {
+        addToast('Link: ' + url);
+      }
+    }
+  }
+
   useEffect(() => {
     if (!listing?.userId || listing.userId === 'demo') return;
     supabase
@@ -201,6 +216,25 @@ export default function ListingDetailPage({
                   }}
                 >
                   {favorites.includes(String(listing.id)) ? '♥' : '♡'}
+                </button>
+                <button
+                  onClick={handleShare}
+                  title="Inserat teilen"
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: '50%',
+                    background: C.sageLight,
+                    border: `1px solid ${C.line}`,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.1rem',
+                    flexShrink: 0,
+                  }}
+                >
+                  ↑
                 </button>
               </div>
               <div
