@@ -309,7 +309,7 @@ export default function LoginPage({ onLogin, currentUser, goTo }) {
               fontSize: '0.95rem',
             }}
           >
-            Paderborns Plattform für nachhaltige Nachbarschaftsmietgeschäfte.
+            Die Plattform für nachhaltige Nachbarschaftsmietgeschäfte.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {benefits.map(([title, desc]) => (
