@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Einloggen – ria</title>
+</head>
+<body style="margin:0;padding:0;background:#F7F3EC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F3EC;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
+
+          <!-- Header -->
+          <tr>
+            <td align="center" style="padding-bottom:32px;">
+              <table cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background:#1C3A2E;border-radius:14px;padding:14px 24px;text-align:center;">
+                    <span style="font-family:Georgia,serif;font-style:italic;font-size:26px;font-weight:700;color:white;letter-spacing:-0.5px;">ria</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top:6px;">
+                    <span style="font-family:Georgia,serif;font-style:italic;font-size:13px;color:#7A7470;letter-spacing:0.08em;">rent it all.</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td style="background:white;border-radius:24px;padding:40px 40px 36px;box-shadow:0 8px 40px rgba(28,58,46,0.10);">
+
+              <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#7A9E7E;">Magic Link</p>
+              <h1 style="margin:0 0 16px;font-size:28px;font-weight:800;color:#1C3A2E;letter-spacing:-0.03em;line-height:1.2;">Klick zum Einloggen</h1>
+              <p style="margin:0 0 28px;font-size:16px;color:#7A7470;line-height:1.7;">
+                Dein persönlicher Login-Link für ria. Kein Passwort nötig — einfach klicken und loslegen.
+              </p>
+
+              <!-- CTA Button -->
+              <table cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom:28px;">
+                    <a href="{{ .ConfirmationURL }}"
+                       style="display:inline-block;background:linear-gradient(135deg,#163126,#1C3A2E);color:white;text-decoration:none;font-size:16px;font-weight:700;padding:16px 36px;border-radius:14px;letter-spacing:-0.01em;box-shadow:0 12px 28px rgba(28,58,46,0.28);">
+                      Jetzt einloggen →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0;font-size:13px;color:#7A7470;line-height:1.6;text-align:center;">
+                Der Link ist 1 Stunde gültig. Wenn du dich nicht einloggen wolltest, kannst du diese E-Mail ignorieren.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding-top:28px;">
+              <p style="margin:0 0 8px;font-size:12px;color:#7A7470;">
+                ria – rent it all · Cedric Renner · Piepenturmweg 5a, 33100 Paderborn
+              </p>
+              <p style="margin:0;font-size:11px;color:#aaa;">
+                Du erhältst diese E-Mail, weil ein Login-Versuch für dein ria-Konto stattgefunden hat.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

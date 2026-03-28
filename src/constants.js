@@ -1,273 +1,131 @@
 export const C = {
-  forest: "#1C3A2E",
-  sage: "#7A9E7E",
-  sageLight: "#EAF0EB",
-  terra: "#C4714A",
-  cream: "#F7F3EC",
-  ink: "#1A1714",
-  muted: "#7A7470",
-  gold: "#C8A96B",
-  line: "rgba(28,58,46,0.10)",
-  shadow: "0 18px 50px rgba(28,58,46,0.10)",
+  forest: '#1C3A2E',
+  sage: '#7A9E7E',
+  sageLight: '#EAF0EB',
+  terra: '#C4714A',
+  cream: '#F7F3EC',
+  ink: '#1A1714',
+  muted: '#7A7470',
+  gold: '#C8A96B',
+  line: 'rgba(28,58,46,0.10)',
+  shadow: '0 18px 50px rgba(28,58,46,0.10)',
 };
 
 export const categoryImages = {
-  Werkzeug: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1200&q=80",
-  Technik: "https://images.unsplash.com/photo-1528395874238-34ebe249b3f2?w=1200&q=80",
-  Outdoor: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=1200&q=80",
-  "Outdoor & Sport": "https://images.unsplash.com/photo-1533240332313-0db49b459ad6?w=1200&q=80",
-  "Foto & Technik": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1200&q=80",
-  "Party & Events": "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1200&q=80",
-  Musik: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=1200&q=80",
-  "Bücher & Uni": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1200&q=80",
-  Transport: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80",
-  Gaming: "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=1200&q=80",
-  Sonstiges: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80",
+  Werkzeug: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1200&q=80',
+  Technik: 'https://images.unsplash.com/photo-1528395874238-34ebe249b3f2?w=1200&q=80',
+  Outdoor: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=1200&q=80',
+  'Outdoor & Sport': 'https://images.unsplash.com/photo-1533240332313-0db49b459ad6?w=1200&q=80',
+  'Foto & Technik': 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1200&q=80',
+  'Party & Events': 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1200&q=80',
+  Musik: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=1200&q=80',
+  'Bücher & Uni': 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1200&q=80',
+  Transport: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
+  Gaming: 'https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=1200&q=80',
+  Sonstiges: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80',
 };
 
-export const initialListings = [
-  {
-    id: "demo-1",
-    title: "Bohrmaschine Bosch",
-    price: "5€ / Tag",
-    location: "Paderborn",
-    description: "Bosch Schlagbohrmaschine, ideal für kleine Renovierungsarbeiten. Kommt mit Koffer, diversen Bohr-Aufsätzen und ist voll funktionsfähig. Abholung in Paderborn-Mitte.",
-    image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&q=80",
-    category: "Werkzeug",
-    rating: 4.9,
-    reviews: 18,
-    featured: true,
-    userId: "demo",
-    ownerName: "Lisa M.",
-    status: "aktiv",
-  },
-  {
-    id: "demo-2",
-    title: "Beamer Full HD",
-    price: "8€ / Tag",
-    location: "Uni Paderborn",
-    description: "Epson Full-HD Beamer, perfekt für Filmabende, Präsentationen oder Partys. HDMI- und VGA-Kabel dabei, Leinwand auf Anfrage. Sehr helles Bild, auch tagsüber nutzbar.",
-    image: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=800&q=80",
-    category: "Technik",
-    rating: 4.8,
-    reviews: 11,
-    featured: true,
-    userId: "demo",
-    ownerName: "Mert K.",
-    status: "aktiv",
-  },
-  {
-    id: "demo-3",
-    title: "Campingzelt (4 Personen)",
-    price: "10€ / Tag",
-    location: "Paderborn",
-    description: "Geräumiges 4-Personen-Zelt von Coleman, wasserdicht und einfach aufzubauen. Ideal für Festivals oder Wochenendtrips. Mit Heringen, Gestänge und Tasche — alles dabei.",
-    image: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&q=80",
-    category: "Outdoor & Sport",
-    rating: 4.7,
-    reviews: 14,
-    featured: true,
-    userId: "demo",
-    ownerName: "Paul S.",
-    status: "aktiv",
-  },
-  {
-    id: "demo-4",
-    title: "Spiegelreflexkamera Canon EOS",
-    price: "15€ / Tag",
-    location: "Paderborn-Innenstadt",
-    description: "Canon EOS 800D mit 18-55mm Objektiv. Perfekt für Fotoprojekte, Events oder einfach zum Ausprobieren. Speicherkarte und Ladekabel inklusive. Bitte pfleglich behandeln.",
-    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80",
-    category: "Foto & Technik",
-    rating: 4.9,
-    reviews: 22,
-    featured: true,
-    userId: "demo",
-    ownerName: "Jana W.",
-    status: "aktiv",
-  },
-  {
-    id: "demo-5",
-    title: "Partyzelt / Pavillon 3×3m",
-    price: "12€ / Tag",
-    location: "Paderborn",
-    description: "Stabiles 3×3m Partyzelt mit Seitenteilen, ideal für Geburtstage, Grillpartys oder Märkte. Einfach aufzubauen, mit Gewichten und Heringen. Abholung und Rückgabe flexibel.",
-    image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&q=80",
-    category: "Party & Events",
-    rating: 4.6,
-    reviews: 8,
-    featured: false,
-    userId: "demo",
-    ownerName: "Tina B.",
-    status: "aktiv",
-  },
-  {
-    id: "demo-6",
-    title: "E-Gitarre + Verstärker",
-    price: "9€ / Tag",
-    location: "Paderborn-Schloß Neuhaus",
-    description: "Fender Stratocaster in sunburst + kleiner Übungsamp. Ideal zum Ausprobieren, für Bandproben oder kurze Projekte. Kabel dabei, Picks auch. Anfänger willkommen.",
-    image: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=800&q=80",
-    category: "Musik",
-    rating: 4.8,
-    reviews: 9,
-    featured: false,
-    userId: "demo",
-    ownerName: "Felix R.",
-    status: "aktiv",
-  },
-  {
-    id: "demo-7",
-    title: "Fahrrad (Cityrad, 28 Zoll)",
-    price: "4€ / Tag",
-    location: "Paderborn",
-    description: "Gepflegtes Cityrad, 7 Gänge, Licht und Gepäckträger vorhanden. Ideal für Stadttouren oder wenn das eigene Rad gerade in Reparatur ist. Helm auf Wunsch dazu.",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
-    category: "Transport",
-    rating: 4.5,
-    reviews: 31,
-    featured: true,
-    userId: "demo",
-    ownerName: "Nina T.",
-    status: "aktiv",
-  },
-  {
-    id: "demo-8",
-    title: "Nintendo Switch + Spiele",
-    price: "7€ / Tag",
-    location: "Uni-Nähe",
-    description: "Nintendo Switch mit Dock, 2 Joy-Cons und 5 Spielen (u.a. Mario Kart, Zelda). Perfekt für Spieleabende oder Reisen. Ladekabel dabei. Bitte sorgfältig behandeln.",
-    image: "https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=800&q=80",
-    category: "Gaming",
-    rating: 4.9,
-    reviews: 27,
-    featured: true,
-    userId: "demo",
-    ownerName: "Tom A.",
-    status: "aktiv",
-  },
-  {
-    id: "demo-9",
-    title: "Lernpaket Mathe / Physik (Abitur)",
-    price: "2€ / Tag",
-    location: "Paderborn",
-    description: "Vollständige Abitur-Vorbereitung: Lernhefte, Aufgabensammlungen und alte Klausuren für Mathe und Physik. Ideal zur kurzfristigen Prüfungsvorbereitung.",
-    image: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800&q=80",
-    category: "Bücher & Uni",
-    rating: 4.4,
-    reviews: 6,
-    featured: false,
-    userId: "demo",
-    ownerName: "Sarah L.",
-    status: "aktiv",
-  },
-  {
-    id: "demo-10",
-    title: "Akkuschrauber + Bit-Set",
-    price: "4€ / Tag",
-    location: "Paderborn-Elsen",
-    description: "Makita Akkuschrauber, 2 Akkus, Schnellladegerät und 50-teiliges Bit-Set. Für Möbelaufbau, Regalinstallation und Co. Immer frisch aufgeladen, wenn du ihn holst.",
-    image: "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=800&q=80",
-    category: "Werkzeug",
-    rating: 4.7,
-    reviews: 13,
-    featured: false,
-    userId: "demo",
-    ownerName: "Klaus M.",
-    status: "aktiv",
-  },
-  {
-    id: "demo-11",
-    title: "GoPro Hero 11 + Zubehör",
-    price: "12€ / Tag",
-    location: "Paderborn",
-    description: "GoPro Hero 11 mit Brustgurt, Selfie-Stick, Helmhalterung und 2 Akkus. Ideal für Sport, Reisen oder Veranstaltungen. Wasserabweisend und einfach zu bedienen.",
-    image: "https://images.unsplash.com/photo-1607462109225-6b64ae2dd3cb?w=800&q=80",
-    category: "Foto & Technik",
-    rating: 4.8,
-    reviews: 16,
-    featured: false,
-    userId: "demo",
-    ownerName: "Lukas F.",
-    status: "aktiv",
-  },
-  {
-    id: "demo-12",
-    title: "Campingkocher + Geschirr",
-    price: "5€ / Tag",
-    location: "Paderborn",
-    description: "Gaskocher mit 2 Brennern, passendes Topf-Set und Besteck für 4 Personen. Mit Gaskartusche für ein Wochenende. Alles sauber und bereit für dein nächstes Abenteuer.",
-    image: "https://images.unsplash.com/photo-1476041800959-2f6bb412c8ce?w=800&q=80",
-    category: "Outdoor & Sport",
-    rating: 4.6,
-    reviews: 10,
-    featured: false,
-    userId: "demo",
-    ownerName: "Marie P.",
-    status: "aktiv",
-  },
-  {
-    id: "demo-13",
-    title: "Bluetooth Lautsprecher (JBL)",
-    price: "6€ / Tag",
-    location: "Paderborn-Innenstadt",
-    description: "JBL Charge 5 — wasserdicht, mit bis zu 20h Akku und kräftigem Sound. Ideal für Partys, Grillen oder Outdoor-Aktivitäten. Ladekabel inklusive.",
-    image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=800&q=80",
-    category: "Party & Events",
-    rating: 4.7,
-    reviews: 19,
-    featured: false,
-    userId: "demo",
-    ownerName: "Cem Y.",
-    status: "aktiv",
-  },
-  {
-    id: "demo-14",
-    title: "Keyboard (88 Tasten, gewichtet)",
-    price: "8€ / Tag",
-    location: "Uni Paderborn",
-    description: "Yamaha P-45 mit gewichteten Tasten, Sustain-Pedal und Notenständer. Ideal für Studenten die üben wollen, ohne ein eigenes Klavier zu besitzen. Inkl. Netzteil.",
-    image: "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=800&q=80",
-    category: "Musik",
-    rating: 4.9,
-    reviews: 12,
-    featured: false,
-    userId: "demo",
-    ownerName: "Anna K.",
-    status: "aktiv",
-  },
-  {
-    id: "demo-15",
-    title: "Lastenrad / Cargo-Bike",
-    price: "10€ / Tag",
-    location: "Paderborn",
-    description: "Praktisches Lastenrad mit großer Frontbox — perfekt für IKEA-Käufe, Umzüge oder Einkaufstouren. 7 Gänge, Licht, max. 60 kg Zuladung. Schloss inklusive.",
-    image: "https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=800&q=80",
-    category: "Transport",
-    rating: 4.8,
-    reviews: 7,
-    featured: false,
-    userId: "demo",
-    ownerName: "Jonas H.",
-    status: "aktiv",
-  },
+export const allCategoryNames = [
+  'Werkzeug',
+  'Technik',
+  'Outdoor & Sport',
+  'Foto & Technik',
+  'Party & Events',
+  'Musik',
+  'Bücher & Uni',
+  'Transport',
+  'Gaming',
+  'Sonstiges',
 ];
 
-export const allCategoryNames = ["Werkzeug", "Technik", "Outdoor & Sport", "Foto & Technik", "Party & Events", "Musik", "Bücher & Uni", "Transport", "Gaming", "Sonstiges"];
-
 export const categories = [
-  { name: "Outdoor & Sport", img: categoryImages["Outdoor & Sport"] },
-  { name: "Werkzeug", img: categoryImages.Werkzeug },
-  { name: "Foto & Technik", img: categoryImages["Foto & Technik"] },
-  { name: "Party & Events", img: categoryImages["Party & Events"] },
-  { name: "Musik", img: categoryImages.Musik },
-  { name: "Bücher & Uni", img: categoryImages["Bücher & Uni"] },
-  { name: "Transport", img: categoryImages.Transport },
-  { name: "Gaming", img: categoryImages.Gaming },
+  { name: 'Outdoor & Sport', img: categoryImages['Outdoor & Sport'] },
+  { name: 'Werkzeug', img: categoryImages.Werkzeug },
+  { name: 'Foto & Technik', img: categoryImages['Foto & Technik'] },
+  { name: 'Party & Events', img: categoryImages['Party & Events'] },
+  { name: 'Musik', img: categoryImages.Musik },
+  { name: 'Bücher & Uni', img: categoryImages['Bücher & Uni'] },
+  { name: 'Transport', img: categoryImages.Transport },
+  { name: 'Gaming', img: categoryImages.Gaming },
 ];
 
 export const steps = [
-  { num: "01", title: "Suchen oder Inserieren", desc: "Durchstöbere Gegenstände in deiner Nähe oder biete deine eigenen an und verdiene nebenbei." },
-  { num: "02", title: "Kontakt & Einigung", desc: "Schreibe dem Vermieter direkt, einige dich auf Preis und Zeitraum und klärt die Übergabe." },
-  { num: "03", title: "Abholen & Nutzen", desc: "Trefft euch lokal, übergebt den Gegenstand und gebt euch danach Feedback." },
+  {
+    num: '01',
+    title: 'Suchen oder Inserieren',
+    desc: 'Durchstöbere Gegenstände in deiner Nähe oder biete deine eigenen an und verdiene nebenbei.',
+  },
+  {
+    num: '02',
+    title: 'Kontakt & Einigung',
+    desc: 'Schreibe dem Vermieter direkt, einige dich auf Preis und Zeitraum und klärt die Übergabe.',
+  },
+  {
+    num: '03',
+    title: 'Abholen & Nutzen',
+    desc: 'Trefft euch lokal, übergebt den Gegenstand und gebt euch danach Feedback.',
+  },
 ];
+
+/**
+ * @typedef {Object} Listing
+ * @property {string} id
+ * @property {string} title
+ * @property {string} description
+ * @property {number} price
+ * @property {string} category
+ * @property {string} location
+ * @property {string[]} images
+ * @property {string} owner_id
+ * @property {string} [owner_name]
+ * @property {boolean} [is_available]
+ * @property {string} created_at
+ */
+
+/**
+ * @typedef {Object} Message
+ * @property {string} id
+ * @property {string} from_user_id
+ * @property {string} to_user_id
+ * @property {string} text
+ * @property {string} [message_type]
+ * @property {string} listing_id
+ * @property {string} [listing_title]
+ * @property {string} created_at
+ * @property {boolean} [read]
+ */
+
+/**
+ * @typedef {Object} Booking
+ * @property {string} id
+ * @property {string} listing_id
+ * @property {string} renter_id
+ * @property {string} owner_id
+ * @property {string} start_date
+ * @property {string} end_date
+ * @property {string} status
+ * @property {number} [total_price]
+ * @property {string} created_at
+ */
+
+/**
+ * @typedef {Object} UserProfile
+ * @property {string} id
+ * @property {string} name
+ * @property {string} [avatar_url]
+ * @property {string} [bio]
+ * @property {boolean} [is_banned]
+ * @property {string} created_at
+ */
+
+/**
+ * @typedef {Object} Review
+ * @property {string} id
+ * @property {string} listing_id
+ * @property {string} reviewer_id
+ * @property {string} [reviewer_name]
+ * @property {number} rating
+ * @property {string} [text]
+ * @property {string} created_at
+ */
+

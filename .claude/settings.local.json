@@ -5,7 +5,23 @@
       "Bash(node --input-type=module --eval \":*)",
       "Bash(npx --yes acorn --ecma2020 --module src/App.jsx)",
       "Bash(node -e \":*)",
-      "Bash(npx vite:*)"
+      "Bash(npx vite:*)",
+      "Bash(npm install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"fix: Supabase Fallback-Keys damit App nie weiß bleibt wenn Env Vars fehlen:*)",
+      "Bash(git push:*)",
+      "Bash(grep -i \"rate\\\\|limit\\\\|throttle\" /Users/cedricrenner/ria-app/api/*.js)",
+      "Bash(cat:*)",
+      "Bash(npx vercel:*)",
+      "Bash(npm run:*)",
+      "Bash(ls /Users/cedricrenner/ria-app/public/favicon*)",
+      "Bash(ls /Users/cedricrenner/ria-app/public/*.png /Users/cedricrenner/ria-app/*.js)",
+      "Bash(/Users/cedricrenner/ria-app/public/favicon.svg:*)",
+      "Bash(ls /Users/cedricrenner/ria-app/dist/favicon* /Users/cedricrenner/ria-app/dist/icon*)",
+      "Bash(ls /Users/cedricrenner/ria-app/*.js /Users/cedricrenner/ria-app/scripts/)",
+      "Bash(grep -r \"448\\\\|leaf\\\\|font-size\\\\|Georgia\" /Users/cedricrenner/.claude/projects/-Users-cedricrenner-ria-app/ --include=*.jsonl -l)",
+      "Bash(python3 -c \":*)",
+      "Bash(npx prettier:*)"
     ]
   }
 }

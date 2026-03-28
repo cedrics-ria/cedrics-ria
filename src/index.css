@@ -36,3 +36,116 @@ textarea,
 select {
   font: inherit;
 }
+
+/* ── Animations ── */
+@keyframes sway {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Global interactions ── */
+button:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.07); }
+.hover-card { transition: transform 0.22s ease, box-shadow 0.22s ease; }
+.hover-card:hover { transform: translateY(-3px); box-shadow: 0 24px 60px rgba(28,58,46,0.14); }
+.hover-media img { transition: transform 0.3s ease; }
+.hover-media:hover img { transform: scale(1.05); }
+
+/* ── Responsive grid overrides ── */
+@media (max-width: 980px) {
+  .ria-hero-grid, .ria-grid-4, .ria-grid-3, .ria-grid-2, .ria-detail-grid, .ria-create-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .ria-listing-filters { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 860px) {
+  .ria-login-left { display: none !important; }
+}
+
+@media (max-width: 640px) {
+  .ria-bottom-nav { display: block !important; }
+  .ria-topbar-nav-group { display: none !important; }
+  .ria-topbar-user { display: none !important; }
+  .ria-page-pad { padding-bottom: 6.5rem !important; }
+  .ria-detail-grid, .ria-create-grid { grid-template-columns: 1fr !important; }
+  h1 { font-size: clamp(1.6rem, 8vw, 3rem) !important; }
+  img { max-width: 100%; }
+  .ria-msg-thread-header { padding: 1rem !important; }
+  button { min-height: 40px; }
+}
+
+@media (max-width: 600px) {
+  .ria-topbar { padding: 0.65rem 1rem !important; gap: 0.5rem !important; }
+  .ria-topbar-navbtn { padding: 0.55rem 0.75rem !important; font-size: 0.85rem !important; }
+  .ria-topbar-logo { min-width: unset !important; }
+  .ria-hero-cards { display: none !important; }
+  .ria-hero-section { padding: 4rem 1.25rem 3.5rem !important; }
+}
+
+/* ── Bottom nav hidden by default (shown on mobile via media query) ── */
+.ria-bottom-nav { display: none; }
+
+/* ── Scrollbar styling ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(28,58,46,0.18); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(28,58,46,0.35); }
+
+/* ── Input autofill ── */
+input:-webkit-autofill { -webkit-box-shadow: 0 0 0 1000px white inset !important; }
+
+/* ── Avatar upload overlay ── */
+.avatar-overlay { opacity: 0 !important; }
+label:hover .avatar-overlay { opacity: 1 !important; }
+
+/* ── Accessibility ── */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 10000;
+  background: #1C3A2E;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+.skip-link:focus { top: 0.75rem; outline: 2px solid #C8A96B; outline-offset: 3px; }
+
+*:focus { outline: none; }
+*:focus-visible { outline: 2px solid #1C3A2E; outline-offset: 3px; border-radius: 4px; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
