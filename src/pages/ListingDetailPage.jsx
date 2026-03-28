@@ -559,18 +559,18 @@ export default function ListingDetailPage({
             {/* Trust signals */}
             <div
               style={{
-                background: 'white',
+                background: 'linear-gradient(135deg, white 0%, #f0f5f0 100%)',
                 borderRadius: 20,
                 padding: '1.25rem',
-                border: `1px solid ${C.line}`,
+                border: `1.5px solid ${C.line}`,
               }}
             >
               {[
-                ['Direkt anfragen', 'Kläre alles persönlich mit dem Verleiher'],
-                ['Übergabe vor Ort', 'Treffe dich lokal – kein Versand, kein Mittelsmann'],
-                ['Digitaler Mietvertrag', 'Schütze dich mit einem rechtssicheren Vertrag direkt im Chat (§126b BGB)'],
-                ['Gut fürs Klima', 'Mieten statt kaufen spart bis zu 80 % CO₂'],
-              ].map(([t, d]) => (
+                ['💬', 'Direkt anfragen', 'Kläre alles persönlich mit dem Verleiher', false],
+                ['🤝', 'Übergabe vor Ort', 'Treffe dich lokal – kein Versand, kein Mittelsmann', false],
+                ['📄', 'Digitaler Mietvertrag', 'Schütze dich mit einem rechtssicheren Vertrag direkt im Chat (§126b BGB)', true],
+                ['🌱', 'Gut fürs Klima', 'Mieten statt kaufen spart bis zu 80 % CO₂', false],
+              ].map(([icon, t, d, highlight]) => (
                 <div
                   key={t}
                   style={{
@@ -582,30 +582,31 @@ export default function ListingDetailPage({
                 >
                   <div
                     style={{
-                      width: 20,
-                      height: 20,
+                      width: 28,
+                      height: 28,
                       borderRadius: '50%',
                       background: C.sageLight,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       flexShrink: 0,
-                      marginTop: '0.1rem',
+                      marginTop: '0.05rem',
+                      fontSize: '0.9rem',
                     }}
                   >
-                    <svg width="10" height="10" viewBox="0 0 10 10">
-                      <polyline
-                        points="1.5,5.5 4,8 8.5,2"
-                        stroke={C.sage}
-                        strokeWidth="1.8"
-                        fill="none"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    {icon}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, color: C.forest, fontSize: '0.85rem' }}>{t}</div>
+                    <div
+                      style={{
+                        fontWeight: 700,
+                        color: highlight ? C.forest : C.forest,
+                        fontSize: '0.85rem',
+                        ...(highlight ? { color: C.terra } : {}),
+                      }}
+                    >
+                      {t}
+                    </div>
                     <div style={{ color: C.muted, fontSize: '0.78rem', marginTop: '0.1rem' }}>
                       {d}
                     </div>

@@ -4,6 +4,7 @@ import { smartImageUrl } from '../lib/getImageUrl.js';
 import Logo from '../components/Logo';
 import AnimatedCounter from '../components/AnimatedCounter';
 import RatingStars from '../components/RatingStars';
+import ListingCard from '../components/ListingCard';
 
 export default function HomePage({
   goTo,
@@ -332,81 +333,11 @@ export default function HomePage({
             }}
           >
             {featuredListings.map((item) => (
-              <div
+              <ListingCard
                 key={item.id}
-                className="hover-card"
-                onClick={() => onSelectListing?.(item)}
-                style={{
-                  background: 'white',
-                  borderRadius: 24,
-                  overflow: 'hidden',
-                  border: `1px solid ${C.line}`,
-                  boxShadow: C.shadow,
-                  cursor: 'pointer',
-                }}
-              >
-                <div style={{ position: 'relative', height: 220 }}>
-                  <img
-                    src={smartImageUrl(item.image || getFallbackImage(item.category), { width: 600, quality: 80 })}
-                    alt={item.title}
-                    loading="lazy"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  />
-                  {item.isAvailable === false ? (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: 12,
-                        left: 12,
-                        background: C.terra,
-                        color: 'white',
-                        padding: '0.35rem 0.7rem',
-                        borderRadius: 999,
-                        fontSize: '0.75rem',
-                        fontWeight: 800,
-                      }}
-                    >
-                      Vergeben
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: 12,
-                        left: 12,
-                        background: 'rgba(255,255,255,0.95)',
-                        color: C.forest,
-                        padding: '0.35rem 0.7rem',
-                        borderRadius: 999,
-                        fontSize: '0.75rem',
-                        fontWeight: 800,
-                      }}
-                    >
-                      Beliebt
-                    </div>
-                  )}
-                </div>
-                <div style={{ padding: '1.2rem' }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      gap: '0.75rem',
-                      alignItems: 'start',
-                      marginBottom: '0.5rem',
-                    }}
-                  >
-                    <h3 style={{ color: C.forest, margin: 0 }}>{item.title}</h3>
-                    <span style={{ color: C.terra, fontWeight: 800, whiteSpace: 'nowrap' }}>
-                      {item.price}
-                    </span>
-                  </div>
-                  <p style={{ color: C.muted, marginTop: 0, marginBottom: '0.65rem' }}>
-                    {item.location}
-                  </p>
-                  <RatingStars rating={item.rating} reviews={item.reviews} small />
-                </div>
-              </div>
+                listing={item}
+                onSelect={onSelectListing}
+              />
             ))}
           </div>
         </div>

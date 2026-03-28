@@ -218,7 +218,7 @@ export default function MessagesPage({
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: C.cream, padding: '4rem 1.5rem' }}>
+    <div className="ria-messages-wrap" style={{ minHeight: '100vh', background: C.cream, padding: '4rem 1.5rem' }}>
       <div style={{ maxWidth: 860, margin: '0 auto' }}>
         <p
           style={{

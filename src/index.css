@@ -86,6 +86,13 @@ button:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.
   button { min-height: 40px; }
 }
 
+@media (max-width: 640px) {
+  /* Messages page */
+  .ria-messages-wrap { padding: 2rem 1rem !important; }
+  /* Profile page */
+  .ria-profile-wrap { padding: 2rem 1rem !important; }
+}
+
 @media (max-width: 600px) {
   .ria-topbar { padding: 0.65rem 1rem !important; gap: 0.5rem !important; }
   .ria-topbar-navbtn { padding: 0.55rem 0.75rem !important; font-size: 0.85rem !important; }
