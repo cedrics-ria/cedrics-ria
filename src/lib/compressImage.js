@@ -1,14 +1,16 @@
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
 /**
  * Compress and resize an image file using Canvas API.
+ * Returns null if the file type is not allowed.
  * @param {File} file - Original image file
  * @param {number} maxWidth - Max width in pixels (default 1200)
  * @param {number} quality - JPEG quality 0-1 (default 0.82)
- * @returns {Promise<File>} Compressed file
+ * @returns {Promise<File|null>} Compressed file or null if invalid type
  */
 export function compressImage(file, maxWidth = 1200, quality = 0.82) {
   return new Promise((resolve) => {
-    // If already small enough, return as-is
-    if (file.size < 300 * 1024) { resolve(file); return; }
+    if (!ALLOWED_TYPES.includes(file.type)) { resolve(null); return; }
 
     const img = new Image();
     const objectUrl = URL.createObjectURL(file);
@@ -26,7 +28,7 @@ export function compressImage(file, maxWidth = 1200, quality = 0.82) {
       canvas.getContext('2d').drawImage(img, 0, 0, width, height);
       canvas.toBlob(
         (blob) => {
-          if (!blob) { resolve(file); return; }
+          if (!blob) { resolve(null); return; }
           const compressed = new File(
             [blob],
             file.name.replace(/\.[^.]+$/, '.jpg'),
@@ -39,7 +41,7 @@ export function compressImage(file, maxWidth = 1200, quality = 0.82) {
       );
     };
 
-    img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(file); };
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(null); };
     img.src = objectUrl;
   });
 }

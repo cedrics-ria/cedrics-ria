@@ -108,9 +108,6 @@ export default async function handler(req, res) {
   const secret = req.headers['x-webhook-secret'];
   const authHeader = req.headers['authorization'];
   const isWebhook = validSecret && secret === validSecret;
-  const isClient = authHeader && authHeader.startsWith('Bearer ');
-
-  if (!isWebhook && !isClient) return res.status(401).end();
 
   try {
     const { createClient } = await import('@supabase/supabase-js');
@@ -118,6 +115,16 @@ export default async function handler(req, res) {
       process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL,
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
+
+    // Verify JWT token if not a webhook call
+    let isClient = false;
+    if (!isWebhook && authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.slice(7);
+      const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+      isClient = !authError && !!user;
+    }
+
+    if (!isWebhook && !isClient) return res.status(401).end();
 
     const { record } = req.body || {};
 

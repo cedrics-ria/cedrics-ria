@@ -91,20 +91,20 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
     }
     setSubmitting(true);
     const ok = await onAddListing({
-      title: formData.title.trim(),
-      price: formData.price.trim(),
-      location: formData.location.trim(),
+      title: formData.title.trim().slice(0, 100),
+      price: formData.price.trim().slice(0, 50),
+      location: formData.location.trim().slice(0, 100),
       image: formData.image.trim() || getFallbackImage(formData.category.trim()),
       images: extraImages,
       category: formData.category.trim(),
-      description: formData.description.trim(),
+      description: formData.description.trim().slice(0, 1000),
       userId: currentUser.id,
       ownerName: currentUser.name || 'Ria Mitglied',
       rating: 5.0,
       reviews: 0,
       featured: false,
       status: 'aktiv',
-      kaution: formData.kaution.trim(),
+      kaution: formData.kaution.trim().slice(0, 50),
       plz: formData.plz.trim(),
       paymentMethods,
     });
@@ -242,6 +242,7 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
                 onChange={handleChange}
                 placeholder="z. B. Campingzelt, Kamera, E-Roller ..."
                 aria-required="true"
+                maxLength={100}
                 onFocus={applyInputFocus}
                 onBlur={resetInputFocus}
                 style={{ ...inputBaseStyle, fontSize: '1.05rem', fontWeight: 600 }}
@@ -309,6 +310,7 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
                     onChange={handleChange}
                     placeholder="z. B. 8€ / Tag"
                     aria-required="true"
+                    maxLength={50}
                     onFocus={applyInputFocus}
                     onBlur={resetInputFocus}
                     style={{ ...inputBaseStyle, fontWeight: 700 }}
@@ -358,6 +360,7 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
                       onChange={handleChange}
                       placeholder="Stadt / Stadtteil"
                       aria-required="true"
+                      maxLength={100}
                       onFocus={applyInputFocus}
                       onBlur={resetInputFocus}
                       style={inputBaseStyle}
@@ -402,6 +405,7 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
                     name="kaution"
                     value={formData.kaution}
                     onChange={handleChange}
+                    maxLength={50}
                     placeholder="z. B. 50 €"
                     onFocus={applyInputFocus}
                     onBlur={resetInputFocus}
@@ -495,6 +499,7 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
                 placeholder="Kurz den Zustand beschreiben, was dabei ist und ob Abholung oder Übergabe vor Ort möglich ist..."
                 rows={5}
                 aria-required="true"
+                maxLength={1000}
                 onFocus={applyInputFocus}
                 onBlur={resetInputFocus}
                 style={{ ...inputBaseStyle, resize: 'vertical', lineHeight: 1.65 }}
@@ -503,7 +508,7 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
                 style={{
                   textAlign: 'right',
                   fontSize: '0.78rem',
-                  color: formData.description.length > 400 ? C.terra : C.muted,
+                  color: formData.description.length > 800 ? C.terra : C.muted,
                   marginTop: '0.4rem',
                 }}
               >
@@ -548,6 +553,11 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
                       }
                       setUploading(true);
                       const compressed = await compressImage(file);
+                      if (!compressed) {
+                        addToast('Ungültiger Dateityp. Bitte lade ein JPEG, PNG, GIF oder WebP hoch.', 'error');
+                        setUploading(false);
+                        return;
+                      }
                       const path = `public/${Date.now()}.jpg`;
                       const { error } = await supabase.storage
                         .from('listing-images')
@@ -652,6 +662,10 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
                       return;
                     }
                     const compressed = await compressImage(file);
+                    if (!compressed) {
+                      addToast('Ungültiger Dateityp. Bitte lade ein JPEG, PNG, GIF oder WebP hoch.', 'error');
+                      return;
+                    }
                     const path = `public/${Date.now()}_extra.jpg`;
                     const { error } = await supabase.storage
                       .from('listing-images')

@@ -355,7 +355,10 @@ export default function App() {
   }
 
   async function toggleAvailability(id, isAvailable) {
-    const { error } = await supabase.from('listings').update({ is_available: isAvailable }).eq('id', id);
+    if (!currentUser) return;
+    let query = supabase.from('listings').update({ is_available: isAvailable }).eq('id', id);
+    if (!isAdmin) query = query.eq('user_id', currentUser.id);
+    const { error } = await query;
     if (error) { console.error('[toggleAvailability]', error); addToast('Verfügbarkeit konnte nicht geändert werden.', 'error'); return; }
     setListings((prev) => prev.map((l) => (l.id === id ? { ...l, isAvailable } : l)));
     addToast(isAvailable ? 'Inserat wieder verfügbar ✓' : 'Als vergeben markiert.', 'info');

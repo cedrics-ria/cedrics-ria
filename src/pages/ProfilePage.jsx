@@ -216,6 +216,10 @@ export default function ProfilePage({
                     return;
                   }
                   const compressed = await compressImage(file);
+                  if (!compressed) {
+                    addToast?.('Ungültiger Dateityp. Bitte lade ein JPEG, PNG, GIF oder WebP hoch.', 'error');
+                    return;
+                  }
                   const fileName = `${currentUser.id}-${Date.now()}.jpg`;
                   setAvatarUploading(true);
                   const { error } = await supabase.storage
@@ -373,6 +377,7 @@ export default function ProfilePage({
                     value={profileForm.location}
                     onChange={(e) => setProfileForm((p) => ({ ...p, location: e.target.value }))}
                     placeholder="z. B. Paderborn"
+                    maxLength={100}
                     onFocus={applyInputFocus}
                     onBlur={resetInputFocus}
                     style={inputBaseStyle}
@@ -394,6 +399,7 @@ export default function ProfilePage({
                     value={profileForm.bio}
                     onChange={(e) => setProfileForm((p) => ({ ...p, bio: e.target.value }))}
                     placeholder="Ein Satz über dich..."
+                    maxLength={500}
                     onFocus={applyInputFocus}
                     onBlur={resetInputFocus}
                     style={inputBaseStyle}
@@ -427,6 +433,7 @@ export default function ProfilePage({
                   value={profileForm.phone}
                   onChange={(e) => setProfileForm((p) => ({ ...p, phone: e.target.value }))}
                   placeholder="z. B. +49 176 12345678"
+                  maxLength={30}
                   onFocus={applyInputFocus}
                   onBlur={resetInputFocus}
                   style={inputBaseStyle}

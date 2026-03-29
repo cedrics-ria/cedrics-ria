@@ -65,6 +65,7 @@ export default function MessageComposerPage({ listing, currentUser, goTo, onSend
       const header = `Mietanfrage: ${fmt(fromDate)} – ${fmt(toDate)} (${days} Tag${days !== 1 ? 'e' : ''})${totalPrice ? ` · Gesamt ca. ${totalPrice.toFixed(0)} €` : ''}`;
       fullText = header + (fullText ? '\n\n' + fullText : '');
     }
+    fullText = fullText.slice(0, 4000);
     if (!fullText) {
       setError('Bitte schreibe eine Nachricht oder wähle einen Zeitraum.');
       return;
@@ -390,6 +391,7 @@ export default function MessageComposerPage({ listing, currentUser, goTo, onSend
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
+                maxLength={2000}
                 placeholder={`Hallo ${listing.ownerName}, ich interessiere mich für „${listing.title}". Ist es noch verfügbar?`}
                 rows={5}
                 onFocus={applyInputFocus}
