@@ -60,9 +60,9 @@ export default function HandoverProtocolModal({
       lender_name: isLender ? currentUser.name : otherUserName,
       borrower_id: isLender ? otherUserId : currentUser.id,
       borrower_name: isLender ? otherUserName : currentUser.name,
-      condition: condition.trim(),
+      condition: condition.trim().slice(0, 500),
       handover_date: date,
-      notes: notes.trim() || null,
+      notes: notes.trim() ? notes.trim().slice(0, 500) : null,
       created_by: currentUser.id,
     };
 
@@ -75,7 +75,8 @@ export default function HandoverProtocolModal({
     setSaving(false);
 
     if (error) {
-      addToast('Fehler: ' + error.message, 'error');
+      console.error('[HandoverProtocol] create:', error);
+      addToast('Protokoll konnte nicht gespeichert werden. Bitte versuche es erneut.', 'error');
       return;
     }
 
@@ -315,6 +316,7 @@ export default function HandoverProtocolModal({
                   placeholder="z. B. Gut erhalten, alle Teile vorhanden, kleiner Kratzer auf der Unterseite..."
                   rows={3}
                   required
+                  maxLength={500}
                   onFocus={applyInputFocus}
                   onBlur={resetInputFocus}
                   style={{ ...inputBaseStyle, resize: 'none', fontSize: '0.9rem' }}
@@ -362,6 +364,7 @@ export default function HandoverProtocolModal({
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Weitere Anmerkungen zur Übergabe..."
                   rows={2}
+                  maxLength={500}
                   onFocus={applyInputFocus}
                   onBlur={resetInputFocus}
                   style={{ ...inputBaseStyle, resize: 'none', fontSize: '0.9rem' }}

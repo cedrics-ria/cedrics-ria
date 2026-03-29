@@ -761,6 +761,20 @@ export default function MessagesPage({
                                 📄 Vertrag erstellen
                               </button>
                             )
+                          ) : threadContract.status === 'cancelled' ? (
+                            <button
+                              onClick={() => setContractModal({ thread, isOwner })}
+                              style={{ padding:'0.6rem 1rem', borderRadius:12, border:'1px solid rgba(139,32,32,0.3)', background:'rgba(139,32,32,0.06)', color:'#8B2020', fontWeight:700, cursor:'pointer', fontSize:'0.84rem', display:'flex', alignItems:'center', gap:'0.4rem' }}
+                            >
+                              ❌ Vertrag storniert
+                            </button>
+                          ) : threadContract.status.startsWith('cancel_requested') ? (
+                            <button
+                              onClick={() => setContractModal({ thread, isOwner })}
+                              style={{ padding:'0.6rem 1rem', borderRadius:12, border:`1px solid rgba(196,113,74,0.35)`, background:'rgba(196,113,74,0.07)', color:C.terra, fontWeight:700, cursor:'pointer', fontSize:'0.84rem', display:'flex', alignItems:'center', gap:'0.4rem' }}
+                            >
+                              ⚠️ Stornierung ausstehend
+                            </button>
                           ) : threadContract.status === 'completed' ? (
                             <button
                               onClick={() => setContractModal({ thread, isOwner })}
