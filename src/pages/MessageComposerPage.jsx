@@ -43,7 +43,8 @@ export default function MessageComposerPage({ listing, currentUser, goTo, onSend
   const hours = bookingMode === 'hours' && startTime && endTime && endTime > startTime
     ? (() => { const [sh,sm] = startTime.split(':').map(Number); const [eh,em] = endTime.split(':').map(Number); return Math.max(0, (eh*60+em) - (sh*60+sm)) / 60; })()
     : 0;
-  const totalHourPrice = hours && hourlyRate ? hours * hourlyRate : null;
+  const effectiveHourlyRate = hourlyRate || (dailyRate ? dailyRate / 12 : null);
+  const totalHourPrice = hours && effectiveHourlyRate ? Math.ceil(hours * effectiveHourlyRate) : null;
 
   if (!listing) {
     return (
