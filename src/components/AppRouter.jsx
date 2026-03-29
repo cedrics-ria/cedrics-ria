@@ -303,7 +303,9 @@ export default function AppRouter(props) {
   return (
     <PageErrorBoundary key={currentPage}>
       <Suspense fallback={Fallback}>
-        {renderPage()}
+        <div key={currentPage} className="ria-page-enter">
+          {renderPage()}
+        </div>
       </Suspense>
     </PageErrorBoundary>
   );

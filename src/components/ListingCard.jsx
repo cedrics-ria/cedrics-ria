@@ -49,6 +49,8 @@ export default function ListingCard({
             quality: compact ? 75 : 80,
           })}
           alt={item.title}
+          width={compact ? 400 : 600}
+          height={imageHeight}
           loading="lazy"
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />

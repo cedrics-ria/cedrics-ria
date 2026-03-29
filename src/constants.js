@@ -1,4 +1,4 @@
-export const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'cedric.s.renner@gmail.com';
+export const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || '';
 
 // Zentrale localStorage-Keys — nie Magic Strings im Code verteilen
 export const STORAGE_KEYS = {

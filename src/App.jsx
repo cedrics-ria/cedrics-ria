@@ -47,12 +47,13 @@ export default function App() {
 
   useEffect(() => {
     window.history.replaceState({ page: 'home' }, '');
-    function handlePop(e) { setCurrentPage(e.state?.page || 'home'); }
+    function handlePop(e) { window.scrollTo({ top: 0, behavior: 'instant' }); setCurrentPage(e.state?.page || 'home'); }
     window.addEventListener('popstate', handlePop);
     return () => window.removeEventListener('popstate', handlePop);
   }, []);
 
   function navigate(page) {
+    window.scrollTo({ top: 0, behavior: 'instant' });
     window.history.pushState({ page }, '');
     setCurrentPage(page);
   }
@@ -317,7 +318,7 @@ export default function App() {
       payment_methods: newListing.paymentMethods || [], plz: newListing.plz || null,
     };
     const { data, error } = await supabase.from('listings').insert(payload).select().single();
-    if (error) { addToast(`Inserat konnte nicht gespeichert werden: ${error.message}`, 'error'); return false; }
+    if (error) { console.error('[addListing]', error); addToast('Inserat konnte nicht gespeichert werden. Bitte versuche es erneut.', 'error'); return false; }
     const inserted = mapListing(data);
     setListings((prev) => [inserted, ...prev]);
     setSelectedListing(inserted);
@@ -336,7 +337,7 @@ export default function App() {
     let query = supabase.from('listings').update(payload).eq('id', id);
     if (!isAdmin) query = query.eq('user_id', currentUser.id);
     const { error } = await query.select().single();
-    if (error) { addToast('Fehler beim Speichern: ' + error.message, 'error'); return false; }
+    if (error) { console.error('[updateListing]', error); addToast('Änderungen konnten nicht gespeichert werden. Bitte versuche es erneut.', 'error'); return false; }
     setListings((prev) => prev.map((l) => (l.id === id ? { ...l, ...updates } : l)));
     addToast('Inserat gespeichert.', 'info');
     return true;
@@ -348,14 +349,14 @@ export default function App() {
     let query = supabase.from('listings').delete().eq('id', id);
     if (!isAdmin) query = query.eq('user_id', currentUser.id);
     const { error } = await query;
-    if (error) { addToast('Fehler beim Löschen.', 'error'); return; }
+    if (error) { console.error('[deleteListing]', error); addToast('Fehler beim Löschen.', 'error'); return; }
     setListings((prev) => prev.filter((l) => l.id !== id));
     addToast('Inserat gelöscht.', 'info');
   }
 
   async function toggleAvailability(id, isAvailable) {
     const { error } = await supabase.from('listings').update({ is_available: isAvailable }).eq('id', id);
-    if (error) { addToast('Fehler: ' + error.message, 'error'); return; }
+    if (error) { console.error('[toggleAvailability]', error); addToast('Verfügbarkeit konnte nicht geändert werden.', 'error'); return; }
     setListings((prev) => prev.map((l) => (l.id === id ? { ...l, isAvailable } : l)));
     addToast(isAvailable ? 'Inserat wieder verfügbar ✓' : 'Als vergeben markiert.', 'info');
   }
@@ -385,7 +386,7 @@ export default function App() {
     const { error } = await supabase.from('profiles').upsert({
       id: currentUser.id, name: currentUser.name, ...safeUpdates, updated_at: new Date().toISOString(),
     });
-    if (error) { addToast('Fehler: ' + error.message, 'error'); return; }
+    if (error) { console.error('[updateProfile]', error); addToast('Profil konnte nicht gespeichert werden. Bitte versuche es erneut.', 'error'); return; }
     setProfile((prev) => ({ ...prev, ...safeUpdates }));
     addToast('Profil gespeichert.', 'info');
   }
@@ -393,7 +394,7 @@ export default function App() {
   async function banUser(userId, banned) {
     if (!isAdmin) { addToast('Keine Berechtigung.', 'error'); return; }
     const { error } = await supabase.from('profiles').update({ is_banned: banned }).eq('id', userId);
-    if (error) { addToast('Fehler: ' + error.message, 'error'); return; }
+    if (error) { console.error('[banUser]', error); addToast('Aktion konnte nicht durchgeführt werden.', 'error'); return; }
     addToast(banned ? 'Nutzer gesperrt.' : 'Sperre aufgehoben.', 'info');
   }
 
@@ -406,7 +407,7 @@ export default function App() {
       from_user_id: currentUser.id, from_name: currentUser.name, from_email: currentUser.email,
       to_user_id: newMessage.toUserId, text: newMessage.text,
     }).select().single();
-    if (error) { addToast('Fehler beim Senden: ' + error.message, 'error'); return false; }
+    if (error) { console.error('[saveMessage]', error); addToast('Nachricht konnte nicht gesendet werden. Bitte versuche es erneut.', 'error'); return false; }
     setMessages((prev) => [mapMessageFromDb(data), ...prev]);
     // Fire-and-forget email notification
     fetch('/api/send-message-email', {
@@ -434,7 +435,7 @@ export default function App() {
       requester_id: currentUser.id, requester_name: currentUser.name,
       owner_id: ownerId, start_date: startDate, end_date: endDate, status: 'pending',
     });
-    if (error) { addToast('Buchungsanfrage konnte nicht gesendet werden: ' + error.message, 'error'); return; }
+    if (error) { console.error('[bookListing]', error); addToast('Buchungsanfrage konnte nicht gesendet werden. Bitte versuche es erneut.', 'error'); return; }
     const fmt = (d) => d.split('-').reverse().join('.');
     await saveMessage({
       listingId: String(listingId), listingTitle, toUserId: ownerId,
@@ -449,7 +450,7 @@ export default function App() {
     if (!booking || booking.owner_id !== currentUser?.id) { addToast('Keine Berechtigung.', 'error'); return; }
     const { error } = await supabase.from('bookings').update({ status: 'accepted' })
       .eq('id', bookingId).eq('owner_id', currentUser.id);
-    if (error) { addToast('Fehler: ' + error.message, 'error'); return; }
+    if (error) { console.error('[acceptBookingRecord]', error); addToast('Buchung konnte nicht angenommen werden.', 'error'); return; }
     setBookings((prev) => prev.map((b) => (b.id === bookingId ? { ...b, status: 'accepted' } : b)));
     addToast('Buchung angenommen ✓', 'info');
   }
@@ -459,7 +460,7 @@ export default function App() {
     if (!booking || booking.owner_id !== currentUser?.id) { addToast('Keine Berechtigung.', 'error'); return; }
     const { error } = await supabase.from('bookings').update({ status: 'declined' })
       .eq('id', bookingId).eq('owner_id', currentUser.id);
-    if (error) { addToast('Fehler: ' + error.message, 'error'); return; }
+    if (error) { console.error('[declineBookingRecord]', error); addToast('Buchung konnte nicht abgelehnt werden.', 'error'); return; }
     setBookings((prev) => prev.map((b) => (b.id === bookingId ? { ...b, status: 'declined' } : b)));
     addToast('Buchung abgelehnt.', 'info');
   }

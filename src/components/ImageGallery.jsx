@@ -28,6 +28,8 @@ export default function ImageGallery({ mainImage, images, title }) {
         <img
           src={smartImageUrl(all[current], { width: 1200, quality: 85 })}
           alt={title}
+          width={1200}
+          height={460}
           style={{
             width: '100%',
             height: '100%',
@@ -129,6 +131,8 @@ export default function ImageGallery({ mainImage, images, title }) {
               key={i}
               src={smartImageUrl(img, { width: 140, quality: 70 })}
               alt=""
+              width={70}
+              height={56}
               loading="lazy"
               onClick={() => setCurrent(i)}
               style={{
