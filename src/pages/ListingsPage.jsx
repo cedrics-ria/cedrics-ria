@@ -19,18 +19,14 @@ export default function ListingsPage({
   initSearch,
 }) {
   const [search, setSearch] = useState(initSearch || '');
-  const [categoryFilter, setCategoryFilter] = useState(initCategory || 'Alle');
+  const [categoryFilter, setCategoryFilter] = useState(
+    initCategory && initCategory !== 'Alle' ? initCategory : 'Alle'
+  );
   const [locationFilter, setLocationFilter] = useState('Alle');
   const [sort, setSort] = useState('newest');
   const [mode, setMode] = useState('all');
   const [visibleCount, setVisibleCount] = useState(12);
   const [priceFilter, setPriceFilter] = useState('Alle');
-
-  // Sync when navigated from homepage with a pre-set filter
-  useEffect(() => {
-    if (initCategory && initCategory !== 'Alle') setCategoryFilter(initCategory);
-    if (initSearch) setSearch(initSearch);
-  }, [initCategory, initSearch]);
 
   // Server-side search — pass normalized filter values (empty string = no filter)
   const searchQuery = search;
@@ -46,14 +42,15 @@ export default function ListingsPage({
 
   const categoryOptions = [
     'Alle',
-    ...new Set(listings.map((item) => item.category).filter(Boolean)),
+    ...new Set(listings.filter((item) => item.category).map((item) => item.category)),
   ];
   const locationOptions = [
     'Alle',
-    ...new Set(listings.map((item) => item.location).filter(Boolean)),
+    ...new Set(listings.filter((item) => item.location).map((item) => item.location)),
   ].slice(0, 8);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisibleCount(12);
   }, [search, categoryFilter, locationFilter, priceFilter, mode, sort]);
 

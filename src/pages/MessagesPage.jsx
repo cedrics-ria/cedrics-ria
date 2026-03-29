@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { C } from '../constants';
+import { C, STORAGE_KEYS } from '../constants';
 import { inputBaseStyle, primaryButtonStyle, applyInputFocus, resetInputFocus } from '../styles';
 import EmptyState from '../components/EmptyState';
 import ReviewModal from '../components/ReviewModal';
@@ -79,10 +79,10 @@ export default function MessagesPage({
   const [contracts, setContracts] = useState({}); // thread.key -> contract obj or null
   const [contractModal, setContractModal] = useState(null); // { thread, isOwner }
   const [readThreads, setReadThreads] = useState(new Set());
-  const hiddenKey = `ria-hidden-threads-${currentUser?.id || 'guest'}`;
+  const hiddenKey = STORAGE_KEYS.hiddenThreads(currentUser?.id || 'guest');
   // Use lifted state from App.jsx if provided, else fall back to local state
   const [hiddenThreadsLocal, setHiddenThreadsLocal] = useState(() => {
-    try { return new Set(JSON.parse(localStorage.getItem(`ria-hidden-threads-${currentUser?.id || 'guest'}`) || '[]')); }
+    try { return new Set(JSON.parse(localStorage.getItem(STORAGE_KEYS.hiddenThreads(currentUser?.id || 'guest')) || '[]')); }
     catch { return new Set(); }
   });
   const hiddenThreads = hiddenThreadsProp ?? hiddenThreadsLocal;
@@ -96,7 +96,7 @@ export default function MessagesPage({
     if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
       Notification.requestPermission();
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Group messages into threads by listing
   const threads = useMemo(() => {
@@ -236,7 +236,7 @@ export default function MessagesPage({
         if (!cancelled && contractData) {
           setContracts(prev => ({ ...prev, [thread.key]: contractData }));
         }
-      } catch (_) {
+      } catch {
         // silently handle network or table errors
       }
     })();

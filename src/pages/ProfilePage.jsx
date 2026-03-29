@@ -18,9 +18,6 @@ export default function ProfilePage({
   onDeleteListing,
   onEditListing,
   onUpdateProfile,
-  onAcceptBooking,
-  onDeclineBooking,
-  handledBookings,
   addToast,
   bookings,
   onAcceptBookingRecord,
@@ -39,6 +36,7 @@ export default function ProfilePage({
 
   useEffect(() => {
     if (profile)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProfileForm({
         bio: profile.bio || '',
         location: profile.location || '',
@@ -490,7 +488,7 @@ export default function ProfilePage({
                               subject: 'Kontolöschung',
                               message: `Bitte lösche mein Konto und alle meine Daten. User-ID: ${currentUser.id}`,
                             });
-                          } catch (_) {}
+                          } catch { /* ignore */ }
                           await supabase.auth.signOut();
                         }}
                         style={{ flex: 2, padding: '0.7rem', borderRadius: 10, border: 'none', background: C.terra, color: 'white', fontWeight: 700, cursor: deletingAccount ? 'not-allowed' : 'pointer', fontSize: '0.85rem', opacity: deletingAccount ? 0.7 : 1 }}
@@ -574,7 +572,7 @@ export default function ProfilePage({
               </button>
             </div>
             {myListings.length > 0 && (() => {
-              const cats = [...new Set(myListings.map(l => l.category).filter(Boolean))];
+              const cats = [...new Set(myListings.filter(l => l.category).map(l => l.category))];
               if (cats.length < 2) return null;
               return (
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
@@ -1084,202 +1082,6 @@ export default function ProfilePage({
                           year: 'numeric',
                         })}
                       </p>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* legacy anfragen tab removed — consolidated into buchungen + meine-buchungen */}
-        {false && (
-          <div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '1.25rem',
-                flexWrap: 'wrap',
-                gap: '0.75rem',
-              }}
-            >
-              <h2 style={{ color: C.forest, margin: 0, fontSize: '1.4rem' }}>Buchungsanfragen (legacy)</h2>
-            </div>
-            {true ? (
-              <EmptyState
-                title="Dieser Tab wurde ersetzt"
-                text="Buchungsanfragen werden jetzt über den Tab 'Anfragen' verwaltet."
-              />
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                {[].map((msg) => {
-                  const handled = (handledBookings || {})[msg.id];
-                  const listing = listings.find((l) => String(l.id) === String(msg.listingId));
-                  const firstLine = msg.text.split('\n')[0];
-                  const rest = msg.text.split('\n').slice(2).join('\n').trim();
-                  return (
-                    <div
-                      key={msg.id}
-                      style={{
-                        background: 'white',
-                        borderRadius: 20,
-                        border: `1px solid ${handled === 'accepted' ? C.sage : handled === 'declined' ? 'rgba(196,113,74,0.3)' : C.line}`,
-                        boxShadow: C.shadow,
-                        overflow: 'hidden',
-                      }}
-                    >
-                      <div style={{ padding: '1.25rem 1.5rem' }}>
-                        <div
-                          style={{
-                            display: 'flex',
-                            gap: '1rem',
-                            alignItems: 'flex-start',
-                            flexWrap: 'wrap',
-                          }}
-                        >
-                          {listing?.image && (
-                            <img
-                              src={smartImageUrl(listing.image, { width: 400, quality: 75 })}
-                              alt=""
-                              style={{
-                                width: 56,
-                                height: 56,
-                                borderRadius: 10,
-                                objectFit: 'cover',
-                                flexShrink: 0,
-                              }}
-                            />
-                          )}
-                          <div style={{ flex: 1, minWidth: 160 }}>
-                            <div
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                marginBottom: '0.3rem',
-                                flexWrap: 'wrap',
-                              }}
-                            >
-                              <span
-                                style={{ fontWeight: 700, color: C.forest, fontSize: '0.95rem' }}
-                              >
-                                {msg.fromName}
-                              </span>
-                              <span
-                                style={{
-                                  background: C.sageLight,
-                                  color: C.forest,
-                                  padding: '0.15rem 0.55rem',
-                                  borderRadius: 999,
-                                  fontSize: '0.72rem',
-                                  fontWeight: 700,
-                                }}
-                              >
-                                {msg.listingTitle}
-                              </span>
-                              {handled === 'accepted' && (
-                                <span
-                                  style={{
-                                    background: 'rgba(122,158,126,0.2)',
-                                    color: C.forest,
-                                    borderRadius: 999,
-                                    padding: '0.12rem 0.55rem',
-                                    fontSize: '0.7rem',
-                                    fontWeight: 800,
-                                  }}
-                                >
-                                  ✓ Angenommen
-                                </span>
-                              )}
-                              {handled === 'declined' && (
-                                <span
-                                  style={{
-                                    background: 'rgba(196,113,74,0.12)',
-                                    color: C.terra,
-                                    borderRadius: 999,
-                                    padding: '0.12rem 0.55rem',
-                                    fontSize: '0.7rem',
-                                    fontWeight: 800,
-                                  }}
-                                >
-                                  ✗ Abgelehnt
-                                </span>
-                              )}
-                            </div>
-                            <p
-                              style={{
-                                margin: '0 0 0.3rem',
-                                fontWeight: 700,
-                                color: C.forest,
-                                fontSize: '0.88rem',
-                              }}
-                            >
-                              {firstLine}
-                            </p>
-                            {rest && (
-                              <p
-                                style={{
-                                  margin: 0,
-                                  color: C.muted,
-                                  fontSize: '0.84rem',
-                                  lineHeight: 1.6,
-                                }}
-                              >
-                                {rest}
-                              </p>
-                            )}
-                            <p
-                              style={{ margin: '0.4rem 0 0', fontSize: '0.75rem', color: C.muted }}
-                            >
-                              {new Date(msg.createdAt).toLocaleDateString('de-DE', {
-                                day: '2-digit',
-                                month: 'long',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </p>
-                          </div>
-                        </div>
-                        {!handled && (
-                          <div style={{ display: 'flex', gap: '0.65rem', marginTop: '1rem' }}>
-                            <button
-                              onClick={() => onAcceptBooking && onAcceptBooking(msg)}
-                              style={{
-                                flex: 1,
-                                padding: '0.75rem',
-                                borderRadius: 12,
-                                border: 'none',
-                                background: 'linear-gradient(135deg, #163126, #1C3A2E)',
-                                color: 'white',
-                                fontWeight: 700,
-                                cursor: 'pointer',
-                                fontSize: '0.88rem',
-                              }}
-                            >
-                              ✓ Anfrage annehmen
-                            </button>
-                            <button
-                              onClick={() => onDeclineBooking && onDeclineBooking(msg)}
-                              style={{
-                                flex: 1,
-                                padding: '0.75rem',
-                                borderRadius: 12,
-                                border: `1px solid rgba(196,113,74,0.3)`,
-                                background: 'rgba(196,113,74,0.07)',
-                                color: C.terra,
-                                fontWeight: 700,
-                                cursor: 'pointer',
-                                fontSize: '0.88rem',
-                              }}
-                            >
-                              ✗ Ablehnen
-                            </button>
-                          </div>
-                        )}
-                      </div>
                     </div>
                   );
                 })}

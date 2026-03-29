@@ -33,12 +33,12 @@ export default function ListingDetailPage({
     const url = `${window.location.origin}?inserat=${listing.id}`;
     const shareText = `${listing.title} – ${listing.price} auf ria`;
     if (navigator.share) {
-      try { await navigator.share({ title: listing.title, text: shareText, url }); } catch (_) {}
+      try { await navigator.share({ title: listing.title, text: shareText, url }); } catch { /* ignore */ }
     } else {
       try {
         await navigator.clipboard.writeText(url);
         addToast('Link kopiert! 📋');
-      } catch (_) {
+      } catch {
         addToast('Link: ' + url);
       }
     }

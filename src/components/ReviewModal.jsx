@@ -23,7 +23,7 @@ export default function ReviewModal({
     e.preventDefault();
     if (!rating) return;
     setSaving(true);
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('reviews')
       .insert({
         listing_id: String(listingId),

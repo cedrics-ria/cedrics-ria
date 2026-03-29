@@ -26,7 +26,13 @@
       "Bash(git commit:*)",
       "Bash(ls /Users/cedricrenner/ria-app/src/constants*)",
       "Bash(rm -f /Users/cedricrenner/ria-app/.git/index.lock)",
-      "Bash(git -C /Users/cedricrenner/ria-app status)"
+      "Bash(git -C /Users/cedricrenner/ria-app status)",
+      "Bash(grep -r \"\\\\/\\\\/\\\\|\\\\/\\\\*.*\\\\*\\\\/\" /Users/cedricrenner/ria-app/src/pages --include=*.jsx)",
+      "Bash(grep -rn \"any\\\\|@ts-ignore\" /Users/cedricrenner/ria-app/src --include=*.tsx --include=*.ts --include=*.jsx)",
+      "Bash(grep -rn \"export.*const\\\\|export.*function\" /Users/cedricrenner/ria-app/src --include=*.jsx)",
+      "Bash(grep -rn \"String\\(.*\\\\.id\\)\\\\|String\\(listingId\\)\\\\|String\\(id\\)\" /Users/cedricrenner/ria-app/src --include=*.jsx --include=*.js)",
+      "Bash(grep -rn \"onError\\\\|catch.*console\\\\|error.*=>\" /Users/cedricrenner/ria-app/src --include=*.jsx --include=*.js)",
+      "Bash(find /Users/cedricrenner/ria-app/src -type f \\\\\\(-name *.jsx -o -name *.js -o -name *.ts -o -name *.tsx \\\\\\) -exec wc -l {} +)"
     ]
   }
 }

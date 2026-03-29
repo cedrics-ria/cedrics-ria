@@ -1,4 +1,12 @@
-export const ADMIN_EMAIL = 'cedric.s.renner@gmail.com';
+export const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'cedric.s.renner@gmail.com';
+
+// Zentrale localStorage-Keys — nie Magic Strings im Code verteilen
+export const STORAGE_KEYS = {
+  HANDLED_BOOKINGS: 'ria-handled-bookings',
+  LAST_MSG_CHECK: 'ria-last-msg-check',
+  CURRENT_USER: 'ria-current-user',
+  hiddenThreads: (userId) => `ria-hidden-threads-${userId}`,
+};
 
 export const C = {
   forest: '#1C3A2E',

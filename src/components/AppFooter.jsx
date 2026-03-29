@@ -1,7 +1,7 @@
 import Logo from './Logo';
 import { C } from '../constants';
 
-export default function AppFooter({ navigate, currentUser, profile, isAdmin }) {
+export default function AppFooter({ navigate, isAdmin }) {
   const linkStyle = {
     background: 'none',
     border: 'none',

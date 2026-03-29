@@ -5,7 +5,6 @@ import EmptyState from '../components/EmptyState';
 import VerifiedBadge from '../components/VerifiedBadge';
 import ReportModal from '../components/ReportModal';
 import { supabase } from '../supabase';
-import { smartImageUrl } from '../lib/getImageUrl';
 
 export default function OwnerProfilePage({
   owner,
@@ -286,7 +285,7 @@ export default function OwnerProfilePage({
                 <div style={{ height: 180, background: C.sageLight, position: 'relative' }}>
                   {item.image && (
                     <img
-                      src={smartImageUrl(item.image, { width: 400, quality: 75 })}
+                      src={item.image}
                       alt={item.title}
                       style={{
                         width: '100%',

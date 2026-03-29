@@ -1,5 +1,4 @@
 import { C, categories, steps } from '../constants';
-import { getFallbackImage } from '../styles';
 import { smartImageUrl } from '../lib/getImageUrl.js';
 import Logo from '../components/Logo';
 import AnimatedCounter from '../components/AnimatedCounter';
@@ -9,7 +8,6 @@ import ListingCard from '../components/ListingCard';
 export default function HomePage({
   goTo,
   listings,
-  currentUser,
   onCategoryClick,
   onSearch,
   onSelectListing,

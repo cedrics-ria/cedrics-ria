@@ -4,7 +4,7 @@ import { inputBaseStyle, applyInputFocus, resetInputFocus, getFallbackImage } fr
 import { supabase } from '../supabase';
 import { compressImage } from '../lib/compressImage';
 
-export default function EditListingPage({ listing, onUpdateListing, goTo, currentUser, addToast }) {
+export default function EditListingPage({ listing, onUpdateListing, goTo, addToast }) {
   const [formData, setFormData] = useState({
     title: listing?.title || '',
     price: listing?.price || '',

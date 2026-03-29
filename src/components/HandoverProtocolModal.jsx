@@ -31,7 +31,7 @@ export default function HandoverProtocolModal({
           .limit(1)
           .maybeSingle();
         if (data) setExisting(data);
-      } catch (_) {
+      } catch {
         // table may not exist yet — silently ignore
       } finally {
         setLoadingExisting(false);

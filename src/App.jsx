@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { C, ADMIN_EMAIL } from './constants';
+import { C, ADMIN_EMAIL, STORAGE_KEYS } from './constants';
 import { supabase } from './supabase';
 import { useMessages } from './hooks/useMessages.js';
 import { useBookings } from './hooks/useBookings.js';
@@ -71,11 +71,11 @@ export default function App() {
   const [listingsInitCategory, setListingsInitCategory] = useState('');
   const [listingsInitSearch, setListingsInitSearch] = useState('');
   const [handledBookings, setHandledBookings] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('ria-handled-bookings') || '{}'); }
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.HANDLED_BOOKINGS) || '{}'); }
     catch { return {}; }
   });
-  const [lastMessagesCheck, setLastMessagesCheck] = useState(() => {
-    try { return new Date(localStorage.getItem('ria-last-msg-check') || 0); }
+  const [, setLastMessagesCheck] = useState(() => {
+    try { return new Date(localStorage.getItem(STORAGE_KEYS.LAST_MSG_CHECK) || 0); }
     catch { return new Date(0); }
   });
   const [hiddenThreads, setHiddenThreads] = useState(new Set());
@@ -83,7 +83,7 @@ export default function App() {
   const pendingListingIdRef = useRef(null);
 
   // ── Hooks ─────────────────────────────────────────────────────────────────
-  const { messages, setMessages, loadMessages, saveMessage: saveMsg } = useMessages();
+  const { messages, setMessages, loadMessages } = useMessages();
   const { bookings, setBookings, loadBookings } = useBookings();
   const { favorites, setFavorites, loadFavorites, toggleFavorite: toggleFavHook } = useFavorites();
   const { supportRequests, setSupportRequests, loadSupportRequests, markSupportRequestRead } =
@@ -133,12 +133,12 @@ export default function App() {
   function markMessagesRead() {
     const now = new Date();
     setLastMessagesCheck(now);
-    localStorage.setItem('ria-last-msg-check', now.toISOString());
+    localStorage.setItem(STORAGE_KEYS.LAST_MSG_CHECK, now.toISOString());
   }
 
   // ── Auth + initial load ──────────────────────────────────────────────────
   useEffect(() => {
-    const savedUser = localStorage.getItem('ria-current-user');
+    const savedUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
     if (savedUser) setCurrentUser(JSON.parse(savedUser));
 
     async function init() {
@@ -150,7 +150,7 @@ export default function App() {
       if (session?.user) {
         const u = buildSessionUser(session.user);
         setCurrentUser(u);
-        localStorage.setItem('ria-current-user', JSON.stringify(u));
+        localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(u));
         loadMessages(u.id);
         loadProfile(u.id);
         loadFavorites(u.id);
@@ -163,21 +163,20 @@ export default function App() {
 
     void init();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (_event === 'PASSWORD_RECOVERY') { setCurrentPage('reset-password'); return; }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((authEvent, session) => {
+      if (authEvent === 'PASSWORD_RECOVERY') { setCurrentPage('reset-password'); return; }
       if (session?.user) {
         const u = buildSessionUser(session.user);
         setCurrentUser(u);
-        localStorage.setItem('ria-current-user', JSON.stringify(u));
+        localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(u));
         loadMessages(u.id);
         loadProfile(u.id);
         loadFavorites(u.id);
         loadBookings(u.id);
         if (u.email === ADMIN_EMAIL) loadSupportRequests();
         try {
-          const key = `ria-hidden-threads-${u.id}`;
-          setHiddenThreads(new Set(JSON.parse(localStorage.getItem(key) || '[]')));
-        } catch (_) { setHiddenThreads(new Set()); }
+          setHiddenThreads(new Set(JSON.parse(localStorage.getItem(STORAGE_KEYS.hiddenThreads(u.id)) || '[]')));
+        } catch { setHiddenThreads(new Set()); }
       } else {
         setCurrentUser(null);
         setMessages([]);
@@ -186,7 +185,7 @@ export default function App() {
         setBookings([]);
         setSupportRequests([]);
         setHiddenThreads(new Set());
-        localStorage.removeItem('ria-current-user');
+        localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
       }
     });
 
@@ -217,6 +216,7 @@ export default function App() {
       }
     }
     setupPush();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.id]);
 
   // ── Realtime: support requests (admin only) ──────────────────────────────
@@ -247,7 +247,7 @@ export default function App() {
         addToast('Neue Nachricht', 'info');
         if (Notification?.permission === 'granted') {
           try { new Notification('ria – Neue Nachricht', { body: msg.text.slice(0, 80), icon: '/favicon.ico' }); }
-          catch (_) {}
+          catch { /* ignore notification errors */ }
         }
       })
       .subscribe();
@@ -469,7 +469,7 @@ export default function App() {
     await saveMessage({ listingId: msg.listingId, listingTitle: msg.listingTitle, toUserId: msg.fromUserId, text: '✓ Buchungsanfrage angenommen! Melde dich gerne für Details zur Übergabe.' });
     const updated = { ...handledBookings, [msg.id]: 'accepted' };
     setHandledBookings(updated);
-    localStorage.setItem('ria-handled-bookings', JSON.stringify(updated));
+    localStorage.setItem(STORAGE_KEYS.HANDLED_BOOKINGS, JSON.stringify(updated));
     addToast('Buchung angenommen ✓', 'info');
   }
 
@@ -478,7 +478,7 @@ export default function App() {
     await saveMessage({ listingId: msg.listingId, listingTitle: msg.listingTitle, toUserId: msg.fromUserId, text: 'Leider kann ich die Buchungsanfrage gerade nicht annehmen. Schau gerne nach anderen Inseraten auf ria!' });
     const updated = { ...handledBookings, [msg.id]: 'declined' };
     setHandledBookings(updated);
-    localStorage.setItem('ria-handled-bookings', JSON.stringify(updated));
+    localStorage.setItem(STORAGE_KEYS.HANDLED_BOOKINGS, JSON.stringify(updated));
     addToast('Buchung abgelehnt.', 'info');
   }
 
@@ -496,7 +496,7 @@ export default function App() {
 
   function handleLogin(user, isNew = false) {
     setCurrentUser(user);
-    localStorage.setItem('ria-current-user', JSON.stringify(user));
+    localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
     loadMessages(user.id); loadProfile(user.id); loadFavorites(user.id); loadBookings(user.id);
     if (user.email === ADMIN_EMAIL) loadSupportRequests();
     if (isNew) setShowOnboarding(true);
@@ -506,7 +506,7 @@ export default function App() {
   async function handleLogout() {
     await supabase.auth.signOut();
     setCurrentUser(null); setProfile(null); setFavorites([]); setMessages([]);
-    localStorage.removeItem('ria-current-user');
+    localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
     setCurrentPage('home');
   }
 

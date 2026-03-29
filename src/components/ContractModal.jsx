@@ -6,7 +6,7 @@ import { inputBaseStyle, applyInputFocus, resetInputFocus } from '../styles';
 export default function ContractModal({
   contract, listingId, listingTitle,
   ownerId, ownerName, renterId, renterName,
-  currentUser, isOwner, addToast, onClose, onContractUpdated,
+  isOwner, addToast, onClose, onContractUpdated,
 }) {
   const [form, setForm] = useState({
     start_date: contract?.start_date || '',

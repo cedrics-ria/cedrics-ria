@@ -72,14 +72,6 @@ export default function AdminPage({
   const [deletingId, setDeletingId] = useState(null);
   const [banningId, setBanningId] = useState(null);
 
-  useEffect(() => {
-    if (!isAdmin) return;
-    loadStats();
-    loadSupportRequests();
-    loadReports();
-    loadUsers();
-  }, [isAdmin]);
-
   async function loadStats() {
     const [listingsRes, usersRes, messagesRes, supportRes] = await Promise.all([
       supabase.from('listings').select('id', { count: 'exact', head: true }),
@@ -115,16 +107,6 @@ export default function AdminPage({
     setLoadingReports(false);
   }
 
-  async function markReportHandled(id, status) {
-    const { error } = await supabase.from('reports').update({ status }).eq('id', id);
-    if (error) {
-      addToast('Fehler: ' + error.message, 'error');
-      return;
-    }
-    setReports((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
-    addToast(status === 'resolved' ? 'Als erledigt markiert ✓' : 'Status aktualisiert.', 'info');
-  }
-
   async function loadUsers() {
     setLoadingUsers(true);
     const { data } = await supabase
@@ -133,6 +115,25 @@ export default function AdminPage({
       .order('updated_at', { ascending: false });
     setUsers(data || []);
     setLoadingUsers(false);
+  }
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadStats();
+    loadSupportRequests();
+    loadReports();
+    loadUsers();
+  }, [isAdmin]);
+
+  async function markReportHandled(id, status) {
+    const { error } = await supabase.from('reports').update({ status }).eq('id', id);
+    if (error) {
+      addToast('Fehler: ' + error.message, 'error');
+      return;
+    }
+    setReports((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+    addToast(status === 'resolved' ? 'Als erledigt markiert ✓' : 'Status aktualisiert.', 'info');
   }
 
   async function markSupportRead(id) {
