@@ -107,22 +107,23 @@ export default function AdminPage({
     }
     const cutoff = new Date(months[0].year, months[0].month, 1).toISOString();
     const [profilesRes, listingsRes, bookingsRes] = await Promise.all([
-      supabase.from('profiles').select('created_at').gte('created_at', cutoff),
+      supabase.from('profiles').select('created_at, updated_at'),
       supabase.from('listings').select('created_at').gte('created_at', cutoff),
       supabase.from('bookings').select('completed_at').eq('status', 'completed').gte('completed_at', cutoff),
     ]);
-    function bucket(rows, field) {
+    function bucket(rows, field, fallbackField) {
       return months.map(m => ({
         label: m.label,
         value: (rows || []).filter(r => {
-          if (!r[field]) return false;
-          const d = new Date(r[field]);
+          const val = r[field] || (fallbackField ? r[fallbackField] : null);
+          if (!val) return false;
+          const d = new Date(val);
           return d.getFullYear() === m.year && d.getMonth() === m.month;
         }).length,
       }));
     }
     setAnalyticsData({
-      members: bucket(profilesRes.data, 'created_at'),
+      members: bucket(profilesRes.data, 'created_at', 'updated_at'),
       listings: bucket(listingsRes.data, 'created_at'),
       transactions: bucket(bookingsRes.data, 'completed_at'),
     });
