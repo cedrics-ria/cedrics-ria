@@ -33,6 +33,7 @@ export default function LoginPage({ onLogin, currentUser, goTo }) {
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSent, setForgotSent] = useState(false);
   const [agbAccepted, setAgbAccepted] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [registeredEmail, setRegisteredEmail] = useState('');
 
   async function handleSubmit(event) {
@@ -47,6 +48,11 @@ export default function LoginPage({ onLogin, currentUser, goTo }) {
     }
     if (mode === 'register' && !name.trim()) {
       setError('Bitte auch deinen Namen angeben.');
+      setLoading(false);
+      return;
+    }
+    if (mode === 'register' && password !== confirmPassword) {
+      setError('Passwörter stimmen nicht überein.');
       setLoading(false);
       return;
     }
@@ -395,6 +401,7 @@ export default function LoginPage({ onLogin, currentUser, goTo }) {
                   setMode(m);
                   setError('');
                   setAgbAccepted(false);
+                  setConfirmPassword('');
                 }}
                 style={{
                   flex: 1,
@@ -570,6 +577,47 @@ export default function LoginPage({ onLogin, currentUser, goTo }) {
               />
             </div>
             {mode === 'register' && (
+              <div>
+                <label
+                  htmlFor="login-confirm-password"
+                  style={{
+                    display: 'block',
+                    marginBottom: '0.4rem',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    color: C.forest,
+                  }}
+                >
+                  Passwort bestätigen{' '}
+                  <span aria-hidden="true" style={{ color: C.terra }}>
+                    *
+                  </span>
+                </label>
+                <input
+                  id="login-confirm-password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  type="password"
+                  placeholder="Passwort wiederholen"
+                  autoComplete="new-password"
+                  aria-required="true"
+                  onFocus={applyInputFocus}
+                  onBlur={resetInputFocus}
+                  style={{
+                    ...inputBaseStyle,
+                    ...(confirmPassword && password !== confirmPassword
+                      ? { border: `1px solid ${C.terra}`, boxShadow: `0 0 0 3px rgba(196,113,74,0.15)` }
+                      : {}),
+                  }}
+                />
+                {confirmPassword && password !== confirmPassword && (
+                  <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: C.terra, fontWeight: 600 }}>
+                    Passwörter stimmen nicht überein.
+                  </p>
+                )}
+              </div>
+            )}
+            {mode === 'register' && (
               <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: C.muted }}>
                 Mindestens 6 Zeichen. Am besten Buchstaben, Zahlen und ein Sonderzeichen.
               </p>
@@ -593,7 +641,7 @@ export default function LoginPage({ onLogin, currentUser, goTo }) {
             )}
             <button
               type="submit"
-              disabled={loading || (mode === 'register' && !agbAccepted)}
+              disabled={loading || (mode === 'register' && !agbAccepted) || (mode === 'register' && password !== confirmPassword)}
               style={{
                 background: loading ? C.muted : 'linear-gradient(135deg, #163126, #1C3A2E)',
                 color: 'white',
@@ -602,11 +650,11 @@ export default function LoginPage({ onLogin, currentUser, goTo }) {
                 border: 'none',
                 fontSize: '1rem',
                 fontWeight: 700,
-                cursor: (loading || (mode === 'register' && !agbAccepted)) ? 'not-allowed' : 'pointer',
+                cursor: (loading || (mode === 'register' && !agbAccepted) || (mode === 'register' && password !== confirmPassword)) ? 'not-allowed' : 'pointer',
                 boxShadow: '0 14px 34px rgba(28,58,46,0.25)',
                 marginTop: '0.25rem',
                 letterSpacing: '-0.01em',
-                opacity: (mode === 'register' && !agbAccepted) ? 0.5 : 1,
+                opacity: (mode === 'register' && (!agbAccepted || password !== confirmPassword)) ? 0.5 : 1,
               }}
             >
               {loading ? 'Bitte warten…' : mode !== 'login' ? 'Konto erstellen' : 'Einloggen'}
@@ -714,6 +762,7 @@ export default function LoginPage({ onLogin, currentUser, goTo }) {
                 setMode(mode === 'login' ? 'register' : 'login');
                 setError('');
                 setAgbAccepted(false);
+                setConfirmPassword('');
               }}
               style={{
                 background: 'none',

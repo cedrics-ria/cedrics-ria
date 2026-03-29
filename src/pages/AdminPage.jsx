@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { C } from '../constants';
 import { supabase } from '../supabase';
+import AnalyticsChart from '../components/AnalyticsChart';
 
 function StatCard({ label, value, color }) {
   return (
@@ -58,6 +59,7 @@ export default function AdminPage({
     users: null,
     messages: null,
     support: null,
+    transactions: null,
   });
   const [supportRequests, setSupportRequests] = useState([]);
   const [reports, setReports] = useState([]);
@@ -71,20 +73,60 @@ export default function AdminPage({
   const [activeSection, setActiveSection] = useState('stats');
   const [deletingId, setDeletingId] = useState(null);
   const [banningId, setBanningId] = useState(null);
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
   async function loadStats() {
-    const [listingsRes, usersRes, messagesRes, supportRes] = await Promise.all([
+    const [listingsRes, usersRes, messagesRes, supportRes, transactionsRes] = await Promise.all([
       supabase.from('listings').select('id', { count: 'exact', head: true }),
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
       supabase.from('messages').select('id', { count: 'exact', head: true }),
       supabase.from('support_requests').select('id', { count: 'exact', head: true }),
+      supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
     ]);
     setStats({
       listings: listingsRes.count ?? 0,
       users: usersRes.count ?? 0,
       messages: messagesRes.count ?? 0,
       support: supportRes.count ?? 0,
+      transactions: transactionsRes.count ?? 0,
     });
+  }
+
+  async function loadAnalytics() {
+    setLoadingAnalytics(true);
+    const now = new Date();
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({
+        label: d.toLocaleString('de-DE', { month: 'short' }),
+        year: d.getFullYear(),
+        month: d.getMonth(),
+      });
+    }
+    const cutoff = new Date(months[0].year, months[0].month, 1).toISOString();
+    const [profilesRes, listingsRes, bookingsRes] = await Promise.all([
+      supabase.from('profiles').select('created_at').gte('created_at', cutoff),
+      supabase.from('listings').select('created_at').gte('created_at', cutoff),
+      supabase.from('bookings').select('completed_at').eq('status', 'completed').gte('completed_at', cutoff),
+    ]);
+    function bucket(rows, field) {
+      return months.map(m => ({
+        label: m.label,
+        value: (rows || []).filter(r => {
+          if (!r[field]) return false;
+          const d = new Date(r[field]);
+          return d.getFullYear() === m.year && d.getMonth() === m.month;
+        }).length,
+      }));
+    }
+    setAnalyticsData({
+      members: bucket(profilesRes.data, 'created_at'),
+      listings: bucket(listingsRes.data, 'created_at'),
+      transactions: bucket(bookingsRes.data, 'completed_at'),
+    });
+    setLoadingAnalytics(false);
   }
 
   async function loadSupportRequests() {
@@ -371,8 +413,9 @@ export default function AdminPage({
               ['reports', `Meldungen (${reports.filter((r) => r.status === 'open').length} offen)`],
               ['listings', `Inserate (${listings.length})`],
               ['users', `Nutzer (${users.length})`],
+              ['analyse', 'Analyse'],
             ].map(([key, label]) => (
-              <button key={key} onClick={() => setActiveSection(key)} style={navBtnStyle(key)}>
+              <button key={key} onClick={() => { setActiveSection(key); if (key === 'analyse' && !analyticsData) loadAnalytics(); }} style={navBtnStyle(key)}>
                 {label}
               </button>
             ))}
@@ -407,6 +450,7 @@ export default function AdminPage({
               <StatCard label="Nutzer" value={stats.users} color="#7A9E7E" />
               <StatCard label="Nachrichten" value={stats.messages} color={C.terra} />
               <StatCard label="Support-Anfragen" value={stats.support} color="#C8A96B" />
+              <StatCard label="Transaktionen" value={stats.transactions} color={C.terra} />
             </div>
             <p style={{ color: C.muted, fontSize: '0.85rem' }}>
               Wähle oben einen Bereich aus, um Details zu sehen.
@@ -1067,6 +1111,27 @@ export default function AdminPage({
                   );
                 })}
               </div>
+            )}
+          </div>
+        )}
+
+        {/* Analytics */}
+        {activeSection === 'analyse' && (
+          <div>
+            <h2 style={{ color: C.forest, margin: '0 0 1.5rem', fontSize: '1.5rem', letterSpacing: '-0.02em' }}>
+              Wachstums-Analyse
+            </h2>
+            <p style={{ color: C.muted, fontSize: '0.85rem', marginBottom: '1.5rem' }}>Letzte 6 Monate</p>
+            {loadingAnalytics ? (
+              <div style={{ color: C.muted, padding: '2rem 0', textAlign: 'center' }}>Wird geladen…</div>
+            ) : analyticsData ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.25rem' }}>
+                <AnalyticsChart data={analyticsData.members} title="Neue Mitglieder" color={C.forest} />
+                <AnalyticsChart data={analyticsData.listings} title="Neue Inserate" color={C.sage} />
+                <AnalyticsChart data={analyticsData.transactions} title="Abgeschlossene Transaktionen" color={C.terra} />
+              </div>
+            ) : (
+              <div style={{ color: C.muted, padding: '2rem 0', textAlign: 'center' }}>Klicke auf "Analyse" um die Daten zu laden.</div>
             )}
           </div>
         )}

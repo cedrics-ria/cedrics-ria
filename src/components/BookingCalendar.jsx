@@ -61,6 +61,11 @@ export default function BookingCalendar({ listingId, currentUser, onBook }) {
   const [hoveredDate, setHoveredDate] = useState(null);
   const [booking, setBooking] = useState(false);
 
+  const [mode, setMode] = useState('days');
+  const [hourDate, setHourDate] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+
   useEffect(() => {
     if (!listingId) return;
     setLoadingDates(true);
@@ -157,14 +162,27 @@ export default function BookingCalendar({ listingId, currentUser, onBook }) {
   }
 
   async function handleBook() {
-    if (!startDate || !endDate || !onBook) return;
-    setBooking(true);
-    try {
-      await onBook({ startDate, endDate });
-      setStartDate(null);
-      setEndDate(null);
-    } finally {
-      setBooking(false);
+    if (mode === 'hours') {
+      if (!hourDate || !startTime || !endTime || !onBook) return;
+      setBooking(true);
+      try {
+        await onBook({ startDate: hourDate, endDate: hourDate, startTime, endTime, mode: 'hours' });
+        setHourDate('');
+        setStartTime('');
+        setEndTime('');
+      } finally {
+        setBooking(false);
+      }
+    } else {
+      if (!startDate || !endDate || !onBook) return;
+      setBooking(true);
+      try {
+        await onBook({ startDate, endDate, mode: 'days' });
+        setStartDate(null);
+        setEndDate(null);
+      } finally {
+        setBooking(false);
+      }
     }
   }
 
@@ -175,7 +193,9 @@ export default function BookingCalendar({ listingId, currentUser, onBook }) {
   }
 
   const calendarDays = buildCalendarDays();
-  const canBook = !!(startDate && endDate && currentUser);
+  const canBook = mode === 'hours'
+    ? !!(hourDate && startTime && endTime && endTime > startTime && currentUser)
+    : !!(startDate && endDate && currentUser);
 
   const dayStyle = (dateStr, isPast, isBlocked) => {
     const state = dateStr ? getDayState(dateStr) : 'blank';
@@ -296,7 +316,50 @@ export default function BookingCalendar({ listingId, currentUser, onBook }) {
         </div>
       </div>
 
-      {loadingDates ? (
+      {/* Mode toggle */}
+      <div style={{ display: 'flex', background: 'rgba(28,58,46,0.06)', borderRadius: 10, padding: '0.25rem', marginBottom: '1rem', gap: '0.25rem' }}>
+        {['days', 'hours'].map(m => (
+          <button key={m} onClick={() => setMode(m)} style={{ flex: 1, padding: '0.55rem', borderRadius: 8, border: 'none', background: mode === m ? C.forest : 'transparent', color: mode === m ? 'white' : C.muted, fontWeight: mode === m ? 700 : 500, cursor: 'pointer', fontSize: '0.85rem', transition: 'all 0.15s ease' }}>
+            {m === 'days' ? 'Tage' : 'Stunden'}
+          </button>
+        ))}
+      </div>
+
+      {mode === 'hours' ? (
+        <div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div>
+              <label style={{ fontSize: '0.82rem', fontWeight: 700, color: C.forest, display: 'block', marginBottom: '0.4rem' }}>Datum</label>
+              <input type="date" value={hourDate} min={isoDate(today)} onChange={e => setHourDate(e.target.value)} style={{ width: '100%', padding: '0.85rem 1rem', borderRadius: 12, border: `1px solid ${C.line}`, fontSize: '0.9rem', background: 'white', outline: 'none' }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div>
+                <label style={{ fontSize: '0.82rem', fontWeight: 700, color: C.forest, display: 'block', marginBottom: '0.4rem' }}>Von</label>
+                <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} style={{ width: '100%', padding: '0.85rem 1rem', borderRadius: 12, border: `1px solid ${C.line}`, fontSize: '0.9rem', background: 'white', outline: 'none' }} />
+              </div>
+              <div>
+                <label style={{ fontSize: '0.82rem', fontWeight: 700, color: C.forest, display: 'block', marginBottom: '0.4rem' }}>Bis</label>
+                <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} style={{ width: '100%', padding: '0.85rem 1rem', borderRadius: 12, border: `1px solid ${C.line}`, fontSize: '0.9rem', background: 'white', outline: 'none' }} />
+              </div>
+            </div>
+          </div>
+          {hourDate && startTime && endTime && endTime > startTime && (
+            <div style={{ marginTop: '1rem', background: C.sageLight, borderRadius: 12, padding: '0.9rem 1rem', fontSize: '0.88rem', color: C.forest }}>
+              <strong>{new Date(hourDate).toLocaleDateString('de-DE')}</strong>, {startTime} – {endTime} ({(() => { const [sh,sm] = startTime.split(':').map(Number); const [eh,em] = endTime.split(':').map(Number); return Math.max(0, (eh*60+em) - (sh*60+sm)) / 60; })().toFixed(1)} Std.)
+            </div>
+          )}
+          {/* CTA */}
+          <div style={{ marginTop: '1rem' }}>
+            {!currentUser ? (
+              <div style={{ textAlign: 'center', padding: '0.85rem', background: C.sageLight, borderRadius: 12, color: C.forest, fontSize: '0.88rem', fontWeight: 600 }}>Einloggen um zu buchen</div>
+            ) : (
+              <button onClick={handleBook} disabled={!canBook || booking} style={{ width: '100%', padding: '1rem', borderRadius: 12, border: 'none', background: canBook ? `linear-gradient(135deg, ${C.forest}, #163126)` : 'rgba(28,58,46,0.12)', color: canBook ? 'white' : C.muted, fontWeight: 700, fontSize: '0.97rem', cursor: canBook ? 'pointer' : 'not-allowed', transition: 'all 0.15s ease', opacity: booking ? 0.7 : 1 }}>
+                {booking ? 'Anfrage wird gesendet…' : canBook ? 'Anfragen' : 'Datum & Uhrzeit wählen'}
+              </button>
+            )}
+          </div>
+        </div>
+      ) : loadingDates ? (
         <div
           style={{ textAlign: 'center', color: C.muted, padding: '2rem 0', fontSize: '0.88rem' }}
         >

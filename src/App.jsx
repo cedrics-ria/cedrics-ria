@@ -431,18 +431,26 @@ export default function App() {
     return true;
   }
 
-  async function bookListing(listingId, listingTitle, ownerId, startDate, endDate) {
+  async function bookListing(listingId, listingTitle, ownerId, startDate, endDate, startTime, endTime, bookingMode) {
     if (!currentUser) return;
     const { error } = await supabase.from('bookings').insert({
       listing_id: String(listingId), listing_title: listingTitle,
       requester_id: currentUser.id, requester_name: currentUser.name,
       owner_id: ownerId, start_date: startDate, end_date: endDate, status: 'pending',
+      start_time: startTime || null, end_time: endTime || null, booking_mode: bookingMode || 'days',
     });
     if (error) { console.error('[bookListing]', error); addToast('Buchungsanfrage konnte nicht gesendet werden. Bitte versuche es erneut.', 'error'); return; }
-    const fmt = (d) => d.split('-').reverse().join('.');
+    let bookingText;
+    if (bookingMode === 'hours' && startTime && endTime) {
+      const fmtD = (d) => d.split('-').reverse().join('.');
+      bookingText = `Buchungsanfrage: ${listingTitle}\n\nZeitraum: ${fmtD(startDate)}, ${startTime} – ${endTime}\n\nHallo, ich würde gerne "${listingTitle}" für diesen Zeitraum buchen. Bitte gib mir Bescheid, ob das passt!`;
+    } else {
+      const fmt = (d) => d.split('-').reverse().join('.');
+      bookingText = `Buchungsanfrage: ${listingTitle}\n\nZeitraum: ${fmt(startDate)} – ${fmt(endDate)}\n\nHallo, ich würde gerne "${listingTitle}" für diesen Zeitraum buchen. Bitte gib mir Bescheid, ob das passt!`;
+    }
     await saveMessage({
       listingId: String(listingId), listingTitle, toUserId: ownerId,
-      text: `Buchungsanfrage: ${listingTitle}\n\nZeitraum: ${fmt(startDate)} – ${fmt(endDate)}\n\nHallo, ich würde gerne "${listingTitle}" für diesen Zeitraum buchen. Bitte gib mir Bescheid, ob das passt!`,
+      text: bookingText,
     });
     loadBookings(currentUser.id);
     addToast('Buchungsanfrage gesendet ✓', 'info');
@@ -466,6 +474,23 @@ export default function App() {
     if (error) { console.error('[declineBookingRecord]', error); addToast('Buchung konnte nicht abgelehnt werden.', 'error'); return; }
     setBookings((prev) => prev.map((b) => (b.id === bookingId ? { ...b, status: 'declined' } : b)));
     addToast('Buchung abgelehnt.', 'info');
+  }
+
+  async function confirmReturn(bookingId, role) {
+    const booking = bookings.find(b => b.id === bookingId);
+    if (!booking || !currentUser) return;
+    const isOwnerRole = role === 'owner';
+    const field = isOwnerRole ? 'owner_confirmed_return' : 'renter_confirmed_return';
+    const otherConfirmed = isOwnerRole ? booking.renter_confirmed_return : booking.owner_confirmed_return;
+    const updatePayload = { [field]: true };
+    if (otherConfirmed) {
+      updatePayload.status = 'completed';
+      updatePayload.completed_at = new Date().toISOString();
+    }
+    const { error } = await supabase.from('bookings').update(updatePayload).eq('id', bookingId);
+    if (error) { console.error('[confirmReturn]', error); addToast('Rückgabe konnte nicht bestätigt werden.', 'error'); return; }
+    setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, ...updatePayload } : b));
+    addToast(otherConfirmed ? 'Transaktion abgeschlossen ✓' : 'Rückgabe bestätigt ✓', 'info');
   }
 
   async function acceptBooking(msg) {
@@ -567,6 +592,7 @@ export default function App() {
           onDeclineBooking={declineBooking}
           onAcceptBookingRecord={acceptBookingRecord}
           onDeclineBookingRecord={declineBookingRecord}
+          onConfirmReturn={confirmReturn}
           onUpdateProfile={updateProfile}
           onEditListing={(item) => { setEditListing(item); navigate('edit-listing'); }}
           onViewOwner={(owner) => { setSelectedOwner(owner); navigate('owner-profile'); }}

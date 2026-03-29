@@ -41,7 +41,13 @@ export interface Booking {
   owner_id: string;
   start_date: string;
   end_date: string;
-  status: 'pending' | 'accepted' | 'declined';
+  start_time?: string | null;
+  end_time?: string | null;
+  booking_mode?: 'days' | 'hours';
+  owner_confirmed_return?: boolean;
+  renter_confirmed_return?: boolean;
+  completed_at?: string | null;
+  status: 'pending' | 'accepted' | 'declined' | 'completed';
   created_at: string;
 }
 

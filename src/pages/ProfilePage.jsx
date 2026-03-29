@@ -3,6 +3,7 @@ import { C } from '../constants';
 import { inputBaseStyle, primaryButtonStyle, applyInputFocus, resetInputFocus } from '../styles';
 import EmptyState from '../components/EmptyState';
 import VerifiedBadge from '../components/VerifiedBadge';
+import ReviewModal from '../components/ReviewModal';
 import { supabase } from '../supabase';
 import { smartImageUrl } from '../lib/getImageUrl';
 import { compressImage } from '../lib/compressImage';
@@ -22,6 +23,7 @@ export default function ProfilePage({
   bookings,
   onAcceptBookingRecord,
   onDeclineBookingRecord,
+  onConfirmReturn,
 }) {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [editingProfile, setEditingProfile] = useState(false);
@@ -32,6 +34,7 @@ export default function ProfilePage({
   const [listingFilter, setListingFilter] = useState('');
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [accountDeleteConfirm, setAccountDeleteConfirm] = useState(false);
+  const [reviewBooking, setReviewBooking] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -971,6 +974,47 @@ export default function ProfilePage({
                             </button>
                           </div>
                         )}
+                        {/* Return confirmation for accepted bookings */}
+                        {booking.status === 'accepted' && onConfirmReturn && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                            {booking.owner_confirmed_return && (
+                              <span style={{ fontSize: '0.75rem', color: C.sage, fontWeight: 600 }}>✓ Vermieter bestätigt</span>
+                            )}
+                            {booking.renter_confirmed_return && (
+                              <span style={{ fontSize: '0.75rem', color: C.sage, fontWeight: 600 }}>✓ Mieter bestätigt</span>
+                            )}
+                            {currentUser.id === booking.owner_id && !booking.owner_confirmed_return && (
+                              <button
+                                onClick={() => onConfirmReturn(booking.id, 'owner')}
+                                style={{ padding: '0.5rem 0.9rem', borderRadius: 10, border: 'none', background: `linear-gradient(135deg, ${C.forest}, #163126)`, color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}
+                              >
+                                Rückgabe bestätigen
+                              </button>
+                            )}
+                            {currentUser.id === booking.requester_id && !booking.renter_confirmed_return && (
+                              <button
+                                onClick={() => onConfirmReturn(booking.id, 'renter')}
+                                style={{ padding: '0.5rem 0.9rem', borderRadius: 10, border: 'none', background: `linear-gradient(135deg, ${C.forest}, #163126)`, color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}
+                              >
+                                Rückgabe bestätigen
+                              </button>
+                            )}
+                          </div>
+                        )}
+                        {/* Completed badge + review button */}
+                        {booking.status === 'completed' && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                            <span style={{ background: 'rgba(122,158,126,0.15)', color: C.forest, padding: '0.3rem 0.75rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 700 }}>✅ Abgeschlossen</span>
+                            {currentUser.id === booking.requester_id && (
+                              <button
+                                onClick={() => setReviewBooking(booking)}
+                                style={{ padding: '0.5rem 0.9rem', borderRadius: 10, border: `1px solid ${C.gold}`, background: 'rgba(200,169,107,0.08)', color: C.gold, fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}
+                              >
+                                Erfahrung bewerten
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -1089,6 +1133,47 @@ export default function ProfilePage({
                           year: 'numeric',
                         })}
                       </p>
+                      {/* Return confirmation for accepted bookings */}
+                      {booking.status === 'accepted' && onConfirmReturn && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                          {booking.owner_confirmed_return && (
+                            <span style={{ fontSize: '0.75rem', color: C.sage, fontWeight: 600 }}>✓ Vermieter bestätigt</span>
+                          )}
+                          {booking.renter_confirmed_return && (
+                            <span style={{ fontSize: '0.75rem', color: C.sage, fontWeight: 600 }}>✓ Mieter bestätigt</span>
+                          )}
+                          {currentUser.id === booking.owner_id && !booking.owner_confirmed_return && (
+                            <button
+                              onClick={() => onConfirmReturn(booking.id, 'owner')}
+                              style={{ padding: '0.5rem 0.9rem', borderRadius: 10, border: 'none', background: `linear-gradient(135deg, ${C.forest}, #163126)`, color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}
+                            >
+                              Rückgabe bestätigen
+                            </button>
+                          )}
+                          {currentUser.id === booking.requester_id && !booking.renter_confirmed_return && (
+                            <button
+                              onClick={() => onConfirmReturn(booking.id, 'renter')}
+                              style={{ padding: '0.5rem 0.9rem', borderRadius: 10, border: 'none', background: `linear-gradient(135deg, ${C.forest}, #163126)`, color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}
+                            >
+                              Rückgabe bestätigen
+                            </button>
+                          )}
+                        </div>
+                      )}
+                      {/* Completed badge + review button */}
+                      {booking.status === 'completed' && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                          <span style={{ background: 'rgba(122,158,126,0.15)', color: C.forest, padding: '0.3rem 0.75rem', borderRadius: 999, fontSize: '0.75rem', fontWeight: 700 }}>✅ Abgeschlossen</span>
+                          {currentUser.id === booking.requester_id && (
+                            <button
+                              onClick={() => setReviewBooking(booking)}
+                              style={{ padding: '0.5rem 0.9rem', borderRadius: 10, border: `1px solid ${C.gold}`, background: 'rgba(200,169,107,0.08)', color: C.gold, fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}
+                            >
+                              Erfahrung bewerten
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -1316,6 +1401,18 @@ export default function ProfilePage({
           </div>
         )}
       </div>
+      {reviewBooking && (
+        <ReviewModal
+          listingId={reviewBooking.listing_id}
+          listingTitle={reviewBooking.listing_title}
+          revieweeId={reviewBooking.owner_id}
+          revieweeName={reviewBooking.listing_title}
+          currentUser={currentUser}
+          onClose={() => setReviewBooking(null)}
+          onReviewAdded={() => { setReviewBooking(null); }}
+          addToast={addToast}
+        />
+      )}
     </div>
   );
 }

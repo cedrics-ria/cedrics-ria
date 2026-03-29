@@ -10,6 +10,11 @@ export default function MessageComposerPage({ listing, currentUser, goTo, onSend
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
 
+  const [bookingMode, setBookingMode] = useState('days');
+  const [hourDate, setHourDate] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+
   const today = new Date().toISOString().split('T')[0];
 
   // Parse daily rate from price string like "5€ / Tag", "8 € pro Nacht"
@@ -26,6 +31,19 @@ export default function MessageComposerPage({ listing, currentUser, goTo, onSend
       ? Math.max(1, Math.round((new Date(toDate) - new Date(fromDate)) / 86400000) + 1)
       : 0;
   const totalPrice = days && dailyRate ? days * dailyRate : null;
+
+  const hourlyRate = (() => {
+    if (!listing?.price) return null;
+    const lower = listing.price.toLowerCase();
+    if (!lower.includes('stunde') && !lower.includes('std') && !lower.includes('hour')) return null;
+    const m = listing.price.match(/(\d+[.,]?\d*)/);
+    return m ? parseFloat(m[1].replace(',', '.')) : null;
+  })();
+
+  const hours = bookingMode === 'hours' && startTime && endTime && endTime > startTime
+    ? (() => { const [sh,sm] = startTime.split(':').map(Number); const [eh,em] = endTime.split(':').map(Number); return Math.max(0, (eh*60+em) - (sh*60+sm)) / 60; })()
+    : 0;
+  const totalHourPrice = hours && hourlyRate ? hours * hourlyRate : null;
 
   if (!listing) {
     return (
@@ -59,7 +77,12 @@ export default function MessageComposerPage({ listing, currentUser, goTo, onSend
     }
     let fullText = message.trim();
     // Prepend booking header when dates selected
-    if (fromDate && toDate) {
+    if (bookingMode === 'hours' && hourDate && startTime && endTime) {
+      const fmtD = (d) => new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+      const h = hours.toFixed(1);
+      const header = `Mietanfrage: ${fmtD(hourDate)}, ${startTime} – ${endTime} (${h} Stunden)${totalHourPrice ? ` · Gesamt ca. ${totalHourPrice.toFixed(0)} €` : ''}`;
+      fullText = header + (fullText ? '\n\n' + fullText : '');
+    } else if (fromDate && toDate) {
       const fmt = (d) =>
         new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
       const header = `Mietanfrage: ${fmt(fromDate)} – ${fmt(toDate)} (${days} Tag${days !== 1 ? 'e' : ''})${totalPrice ? ` · Gesamt ca. ${totalPrice.toFixed(0)} €` : ''}`;
@@ -272,7 +295,17 @@ export default function MessageComposerPage({ listing, currentUser, goTo, onSend
             onSubmit={handleSend}
             style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
           >
+            {/* Booking mode toggle */}
+            <div style={{ display: 'flex', background: 'rgba(28,58,46,0.06)', borderRadius: 10, padding: '0.25rem', gap: '0.25rem' }}>
+              {['days', 'hours'].map(m => (
+                <button key={m} type="button" onClick={() => setBookingMode(m)} style={{ flex: 1, padding: '0.55rem', borderRadius: 8, border: 'none', background: bookingMode === m ? C.forest : 'transparent', color: bookingMode === m ? 'white' : C.muted, fontWeight: bookingMode === m ? 700 : 500, cursor: 'pointer', fontSize: '0.85rem', transition: 'all 0.15s ease' }}>
+                  {m === 'days' ? 'Tage' : 'Stunden'}
+                </button>
+              ))}
+            </div>
+
             {/* Date range */}
+            {bookingMode === 'days' && (
             <div>
               <div
                 style={{
@@ -333,9 +366,31 @@ export default function MessageComposerPage({ listing, currentUser, goTo, onSend
                 </div>
               </div>
             </div>
+            )}
+
+            {bookingMode === 'hours' && (
+              <div>
+                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: C.forest, marginBottom: '0.65rem', letterSpacing: '0.02em' }}>
+                  Datum & Uhrzeit <span style={{ color: C.muted, fontWeight: 500 }}>(optional)</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  <input type="date" value={hourDate} min={today} onChange={e => setHourDate(e.target.value)} onFocus={applyInputFocus} onBlur={resetInputFocus} style={{ ...inputBaseStyle, fontSize: '0.95rem' }} />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div>
+                      <div style={{ fontSize: '0.75rem', color: C.muted, marginBottom: '0.3rem', fontWeight: 600 }}>Von</div>
+                      <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} onFocus={applyInputFocus} onBlur={resetInputFocus} style={{ ...inputBaseStyle, fontSize: '0.95rem' }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.75rem', color: C.muted, marginBottom: '0.3rem', fontWeight: 600 }}>Bis</div>
+                      <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} onFocus={applyInputFocus} onBlur={resetInputFocus} style={{ ...inputBaseStyle, fontSize: '0.95rem' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Price summary */}
-            {days > 0 && (
+            {bookingMode === 'days' && days > 0 && (
               <div
                 style={{
                   background: C.sageLight,
@@ -365,6 +420,23 @@ export default function MessageComposerPage({ listing, currentUser, goTo, onSend
                     <div style={{ fontWeight: 800, color: C.terra, fontSize: '1.05rem' }}>
                       ≈ {totalPrice.toFixed(0)} €
                     </div>
+                  </>
+                ) : (
+                  <span style={{ color: C.muted, fontSize: '0.85rem' }}>Zeitraum ausgewählt</span>
+                )}
+              </div>
+            )}
+
+            {bookingMode === 'hours' && hours > 0 && (
+              <div style={{ background: C.sageLight, borderRadius: 14, padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: C.forest }}>
+                  <span style={{ fontSize: '1.1rem' }}>⏱️</span>
+                  <span style={{ fontWeight: 700 }}>{hours.toFixed(1)} Std.</span>
+                </div>
+                {totalHourPrice ? (
+                  <>
+                    <span style={{ color: C.muted }}>·</span>
+                    <div style={{ fontWeight: 800, color: C.terra, fontSize: '1.05rem' }}>≈ {totalHourPrice.toFixed(0)} €</div>
                   </>
                 ) : (
                   <span style={{ color: C.muted, fontSize: '0.85rem' }}>Zeitraum ausgewählt</span>
@@ -402,10 +474,10 @@ export default function MessageComposerPage({ listing, currentUser, goTo, onSend
 
             <button
               type="submit"
-              disabled={sending || (!message.trim() && !fromDate)}
+              disabled={sending || (!message.trim() && !fromDate && !(bookingMode === 'hours' && hourDate && startTime && endTime))}
               style={{
                 ...primaryButtonStyle,
-                opacity: sending || (!message.trim() && !fromDate) ? 0.6 : 1,
+                opacity: sending || (!message.trim() && !fromDate && !(bookingMode === 'hours' && hourDate && startTime && endTime)) ? 0.6 : 1,
               }}
             >
               {sending ? 'Wird gesendet…' : currentUser ? 'Anfrage senden' : 'Zum Login'}

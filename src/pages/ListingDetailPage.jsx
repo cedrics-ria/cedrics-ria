@@ -661,8 +661,8 @@ export default function ListingDetailPage({
               <BookingCalendar
                 listingId={String(listing.id)}
                 currentUser={currentUser}
-                onBook={({ startDate, endDate }) =>
-                  onBook(listing.id, listing.title, listing.userId, startDate, endDate)
+                onBook={({ startDate, endDate, startTime, endTime, mode: bookingMode }) =>
+                  onBook(listing.id, listing.title, listing.userId, startDate, endDate, startTime, endTime, bookingMode)
                 }
               />
             )}

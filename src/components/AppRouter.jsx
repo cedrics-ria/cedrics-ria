@@ -115,6 +115,7 @@ export default function AppRouter(props) {
     onDeclineBooking,
     onAcceptBookingRecord,
     onDeclineBookingRecord,
+    onConfirmReturn,
     onUpdateProfile,
     onEditListing,
     onViewOwner,
@@ -245,6 +246,7 @@ export default function AppRouter(props) {
           bookings={bookings}
           onAcceptBookingRecord={onAcceptBookingRecord}
           onDeclineBookingRecord={onDeclineBookingRecord}
+          onConfirmReturn={onConfirmReturn}
         />
       );
     }
