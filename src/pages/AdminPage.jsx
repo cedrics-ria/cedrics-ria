@@ -122,8 +122,15 @@ export default function AdminPage({
         }).length,
       }));
     }
+    // For members: if no dates exist at all, show total count in current month
+    const memberData = bucket(profilesRes.data, 'created_at', 'updated_at');
+    const memberTotal = memberData.reduce((s, d) => s + d.value, 0);
+    const profileCount = (profilesRes.data || []).length;
+    if (profileCount > 0 && memberTotal === 0) {
+      memberData[memberData.length - 1].value = profileCount;
+    }
     setAnalyticsData({
-      members: bucket(profilesRes.data, 'created_at', 'updated_at'),
+      members: memberData,
       listings: bucket(listingsRes.data, 'created_at'),
       transactions: bucket(bookingsRes.data, 'completed_at'),
     });
