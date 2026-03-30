@@ -384,6 +384,7 @@ export default function App() {
       ...(updates.name      !== undefined && { name:       String(updates.name).trim().slice(0, 100) }),
       ...(updates.phone     !== undefined && { phone:      String(updates.phone).trim().slice(0, 30) }),
       ...(updates.bio       !== undefined && { bio:        String(updates.bio).trim().slice(0, 500) }),
+      ...(updates.location  !== undefined && { location:   String(updates.location).trim().slice(0, 100) }),
       ...(updates.avatar_url !== undefined && { avatar_url: String(updates.avatar_url).slice(0, 500) }),
     };
     const { error } = await supabase.from('profiles').upsert({
