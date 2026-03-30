@@ -1,16 +1,10 @@
-module.exports = {
-  allowedTypes: ['image/jpeg', 'image/png', 'image/gif'],
-  allowedExtensions: ['.jpg', '.jpeg', '.png', '.gif'],
-  acceptAttributes: 'image/jpeg,image/png,image/gif',
-  maxFileSize: 5 * 1024 * 1024, // 5 MB in bytes
-  compression: {
-    quality: 0.8, // Quality for JPEG compression
-    // Other compression settings can be defined here
-  },
-  errorMessages: {
-    invalidType: 'Ungültiger Dateityp. Bitte verwenden Sie JPG, PNG oder GIF.',
-    fileTooLarge: 'Die Datei überschreitet die maximal erlaubte Größe von 5 MB.',
-    compressionError: 'Fehler bei der Kompression der Datei.',
-    default: 'Ein unbekannter Fehler ist aufgetreten.',
-  }
+export const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
+export const ACCEPT_ATTRIBUTES = 'image/*';
+export const MAX_FILE_SIZE = 5242880; // 5MB in bytes
+export const COMPRESSION_QUALITY = 0.8;
+export const MAX_WIDTH = 1920;
+export const ERROR_MESSAGES = {
+    INVALID_TYPE: 'Invalid file type!',
+    FILE_TOO_LARGE: 'File is too large!',
+    LOAD_ERROR: 'Error loading file!'
 };
