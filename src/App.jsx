@@ -157,6 +157,9 @@ export default function App() {
         loadFavorites(u.id);
         loadBookings(u.id);
         if (u.email === ADMIN_EMAIL) loadSupportRequests();
+        try {
+          setHiddenThreads(new Set(JSON.parse(localStorage.getItem(STORAGE_KEYS.hiddenThreads(u.id)) || '[]')));
+        } catch { setHiddenThreads(new Set()); }
       }
       await loadListings();
       loadAllReviews();
