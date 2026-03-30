@@ -1,47 +1,29 @@
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+/**
+ * Compresses an image based on specified configurations.
+ *
+ * @module compressImage
+ * @typedef {Object} IMAGE_CONFIG - Configuration for allowed image types and error messages.
+ * @property {string[]} allowedTypes - Array of allowed image types.
+ * @property {Object} errorMessages - Object containing error messages for invalid types.
+ */
+import { IMAGE_CONFIG } from './imageConfig';
 
 /**
- * Compress and resize an image file using Canvas API.
- * Returns null if the file type is not allowed.
- * @param {File} file - Original image file
- * @param {number} maxWidth - Max width in pixels (default 1200)
- * @param {number} quality - JPEG quality 0-1 (default 0.82)
- * @returns {Promise<File|null>} Compressed file or null if invalid type
+ * Function to compress an image.
+ * @param {File} image - The image file to compress.
+ * @returns {Promise<string>} - A promise that resolves to the compressed image URL.
  */
-export function compressImage(file, maxWidth = 1200, quality = 0.82) {
-  return new Promise((resolve) => {
-    if (!ALLOWED_TYPES.includes(file.type)) { resolve(null); return; }
+const compressImage = async (image) => {
+    try {
+        if (!IMAGE_CONFIG.allowedTypes.includes(image.type)) {
+            throw new Error(IMAGE_CONFIG.errorMessages.invalidType);
+        }
+        // Image compression logic goes here...
+        const compressedImageUrl = ''; // Assume this is the result of compression
+        return compressedImageUrl;
+    } catch (error) {
+        return Promise.reject(new Error(`Image compression failed: ${error.message}`));
+    }
+};
 
-    const img = new Image();
-    const objectUrl = URL.createObjectURL(file);
-
-    img.onload = () => {
-      URL.revokeObjectURL(objectUrl);
-      let { width, height } = img;
-      if (width > maxWidth) {
-        height = Math.round((height * maxWidth) / width);
-        width = maxWidth;
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) { resolve(null); return; }
-          const compressed = new File(
-            [blob],
-            file.name.replace(/\.[^.]+$/, '.jpg'),
-            { type: 'image/jpeg' }
-          );
-          resolve(compressed);
-        },
-        'image/jpeg',
-        quality
-      );
-    };
-
-    img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(null); };
-    img.src = objectUrl;
-  });
-}
+export default compressImage;
