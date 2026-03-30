@@ -24,7 +24,8 @@ function mapAuthError(msg) {
 
 export default function LoginPage({ onLogin, currentUser, goTo }) {
   const [mode, setMode] = useState('login');
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -46,8 +47,8 @@ export default function LoginPage({ onLogin, currentUser, goTo }) {
       setLoading(false);
       return;
     }
-    if (mode === 'register' && !name.trim()) {
-      setError('Bitte auch deinen Namen angeben.');
+    if (mode === 'register' && (!firstName.trim() || !lastName.trim())) {
+      setError('Bitte Vorname und Nachname angeben.');
       setLoading(false);
       return;
     }
@@ -57,11 +58,13 @@ export default function LoginPage({ onLogin, currentUser, goTo }) {
       return;
     }
 
+    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+
     if (mode === 'register') {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password: password.trim(),
-        options: { data: { name: name.trim() } },
+        options: { data: { name: fullName } },
       });
       setLoading(false);
       if (error) {
@@ -484,7 +487,7 @@ export default function LoginPage({ onLogin, currentUser, goTo }) {
             {mode === 'register' && (
               <div>
                 <label
-                  htmlFor="login-name"
+                  htmlFor="login-first-name"
                   style={{
                     display: 'block',
                     marginBottom: '0.4rem',
@@ -493,20 +496,53 @@ export default function LoginPage({ onLogin, currentUser, goTo }) {
                     color: C.forest,
                   }}
                 >
-                  Name{' '}
+                  Vorname{' '}
                   <span aria-hidden="true" style={{ color: C.terra }}>
                     *
                   </span>
                 </label>
                 <input
-                  id="login-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  id="login-first-name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                   type="text"
                   placeholder="Dein Vorname"
-                  autoComplete="name"
+                  autoComplete="given-name"
                   aria-required="true"
-                  aria-invalid={!!error && !name}
+                  aria-invalid={!!error && !firstName}
+                  aria-describedby={error ? 'login-error' : undefined}
+                  onFocus={applyInputFocus}
+                  onBlur={resetInputFocus}
+                  style={inputBaseStyle}
+                />
+              </div>
+            )}
+            {mode === 'register' && (
+              <div>
+                <label
+                  htmlFor="login-last-name"
+                  style={{
+                    display: 'block',
+                    marginBottom: '0.4rem',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    color: C.forest,
+                  }}
+                >
+                  Nachname{' '}
+                  <span aria-hidden="true" style={{ color: C.terra }}>
+                    *
+                  </span>
+                </label>
+                <input
+                  id="login-last-name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  type="text"
+                  placeholder="Dein Nachname"
+                  autoComplete="family-name"
+                  aria-required="true"
+                  aria-invalid={!!error && !lastName}
                   aria-describedby={error ? 'login-error' : undefined}
                   onFocus={applyInputFocus}
                   onBlur={resetInputFocus}
