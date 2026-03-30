@@ -561,7 +561,6 @@ export default function App() {
         <AppRouter
           currentPage={currentPage}
           navigate={navigate}
-          setCurrentPage={setCurrentPage}
           currentUser={currentUser}
           profile={profile}
           enrichedListings={enrichedListings}

@@ -7,6 +7,10 @@ import HandoverProtocolModal from '../components/HandoverProtocolModal';
 import ContractModal from '../components/ContractModal';
 import { supabase } from '../supabase';
 
+function getThreadKey(listingId, counterpartId) {
+  return `${String(listingId)}::${String(counterpartId || 'unknown')}`;
+}
+
 function OwnerRatingForm({ currentUser, ownerReviewModal, onDone, onClose }) {
   const [rating, setRating] = useState(5);
   const [text, setText] = useState('');
@@ -98,16 +102,18 @@ export default function MessagesPage({
     }
   }, []);
 
-  // Group messages into threads by listing
+  // Group messages into threads by listing + counterpart
   const threads = useMemo(() => {
     const map = {};
     messages.forEach((msg) => {
-      const key = String(msg.listingId);
+      const counterpartId = msg.fromUserId === currentUser?.id ? msg.toUserId : msg.fromUserId;
+      const key = getThreadKey(msg.listingId, counterpartId);
       if (!map[key]) {
         map[key] = {
           key,
           listingId: msg.listingId,
           listingTitle: msg.listingTitle,
+          counterpartId,
           otherName: null,
           otherUserId: null,
           msgs: [],
@@ -125,7 +131,7 @@ export default function MessagesPage({
         let otherName = t.otherName;
         let otherUserId = t.otherUserId;
         if (!otherName) {
-          const relListing = listings.find((l) => String(l.id) === t.key);
+          const relListing = listings.find((l) => String(l.id) === String(t.listingId));
           if (relListing) {
             otherName = relListing.ownerName || 'Verleiher';
             if (!otherUserId) otherUserId = relListing.userId;
@@ -225,11 +231,14 @@ export default function MessagesPage({
         }
 
         // Load contract for this thread (always)
+        const contractUserFilter = thread.otherUserId
+          ? `and(owner_id.eq.${currentUser.id},renter_id.eq.${thread.otherUserId}),and(owner_id.eq.${thread.otherUserId},renter_id.eq.${currentUser.id})`
+          : `owner_id.eq.${currentUser.id},renter_id.eq.${currentUser.id}`;
         const { data: contractData } = await supabase
           .from('contracts')
           .select('*')
           .eq('listing_id', String(thread.listingId))
-          .or(`owner_id.eq.${currentUser.id},renter_id.eq.${currentUser.id}`)
+          .or(contractUserFilter)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -270,6 +279,7 @@ export default function MessagesPage({
 
   function openReviewModal(thread) {
     setReviewModal({
+      threadKey: thread.key,
       listingId: thread.listingId,
       listingTitle: thread.listingTitle,
       revieweeId: thread.otherUserId,
@@ -352,7 +362,7 @@ export default function MessagesPage({
               );
               const alreadyReviewed = reviewedThreads[thread.key];
               const hasProtocol = handoverProtocols[thread.key];
-              const relListing = listings.find(l => String(l.id) === thread.key);
+              const relListing = listings.find(l => String(l.id) === String(thread.listingId));
               const isOwner = relListing ? relListing.userId === currentUser?.id : false;
               const threadContract = contracts[thread.key];
 
@@ -382,11 +392,16 @@ export default function MessagesPage({
                             .update({ read: true })
                             .eq('to_user_id', currentUser.id)
                             .eq('listing_id', thread.listingId)
+                            .eq('from_user_id', thread.otherUserId)
                             .eq('read', false)
                             .then(() => {
                               if (setMessages) {
                                 setMessages(prev => prev.map(m =>
-                                  m.toUserId === currentUser.id && String(m.listingId) === thread.key
+                                  m.toUserId === currentUser.id &&
+                                  getThreadKey(
+                                    m.listingId,
+                                    m.fromUserId === currentUser.id ? m.toUserId : m.fromUserId
+                                  ) === thread.key
                                     ? { ...m, read: true } : m
                                 ));
                               }
@@ -854,7 +869,9 @@ export default function MessagesPage({
           currentUser={currentUser}
           addToast={addToast || (() => {})}
           onReviewAdded={(listingId, rating) => {
-            setReviewedThreads((prev) => ({ ...prev, [String(listingId)]: true }));
+            if (reviewModal.threadKey) {
+              setReviewedThreads((prev) => ({ ...prev, [reviewModal.threadKey]: true }));
+            }
             if (onReviewAdded) onReviewAdded(listingId, rating);
           }}
           onClose={() => setReviewModal(null)}
@@ -883,7 +900,7 @@ export default function MessagesPage({
       {/* Contract Modal */}
       {contractModal && (() => {
         const { thread, isOwner: modalIsOwner } = contractModal;
-        const relListing = listings.find(l => String(l.id) === thread.key);
+        const relListing = listings.find(l => String(l.id) === String(thread.listingId));
         const ownerId = relListing?.userId || '';
         const ownerName = relListing?.ownerName || thread.otherName || '';
         const renterId = modalIsOwner ? thread.otherUserId : currentUser?.id;

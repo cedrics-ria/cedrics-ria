@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useMemo } from 'react';
 import { C } from '../constants';
 import PageErrorBoundary from './PageErrorBoundary';
 
@@ -18,6 +18,7 @@ const AGBPage = lazy(() => import('../pages/AGBPage'));
 const DatenschutzPage = lazy(() => import('../pages/DatenschutzPage'));
 const SupportPage = lazy(() => import('../pages/SupportPage'));
 const AdminPage = lazy(() => import('../pages/AdminPage'));
+const PROTECTED_PAGES = new Set(['create-listing', 'messages', 'profile']);
 
 const Fallback = (
   <div
@@ -74,7 +75,6 @@ const Fallback = (
  *   onBanUser: Function,
  *   onCategoryClick: Function,
  *   onSearch: Function,
- *   setCurrentPage: Function,
  * }} props
  */
 export default function AppRouter(props) {
@@ -123,15 +123,18 @@ export default function AppRouter(props) {
     onBanUser,
     onCategoryClick,
     onSearch,
-    setCurrentPage,
   } = props;
 
-  function renderPage() {
-    if (currentPage === 'login')
-      return <LoginPage onLogin={onLogin} currentUser={currentUser} goTo={navigate} />;
+  useEffect(() => {
+    if (!currentUser && PROTECTED_PAGES.has(currentPage)) {
+      navigate('login');
+    }
+  }, [currentPage, currentUser, navigate]);
 
-    if (currentPage === 'listings')
-      return (
+  const routeMap = useMemo(
+    () => ({
+      login: () => <LoginPage onLogin={onLogin} currentUser={currentUser} goTo={navigate} />,
+      listings: () => (
         <ListingsPage
           listings={enrichedListings}
           loading={loading}
@@ -143,10 +146,8 @@ export default function AppRouter(props) {
           initCategory={listingsInitCategory}
           initSearch={listingsInitSearch}
         />
-      );
-
-    if (currentPage === 'listing-detail')
-      return (
+      ),
+      'listing-detail': () => (
         <ListingDetailPage
           listing={enrichedListings.find((l) => l.id === selectedListing?.id) || selectedListing}
           goTo={navigate}
@@ -167,10 +168,8 @@ export default function AppRouter(props) {
           onViewOwner={onViewOwner}
           onBook={onBook}
         />
-      );
-
-    if (currentPage === 'owner-profile')
-      return (
+      ),
+      'owner-profile': () => (
         <OwnerProfilePage
           owner={selectedOwner}
           listings={enrichedListings}
@@ -179,36 +178,24 @@ export default function AppRouter(props) {
           currentUser={currentUser}
           addToast={addToast}
         />
-      );
-
-    if (currentPage === 'message-composer')
-      return (
+      ),
+      'message-composer': () => (
         <MessageComposerPage
           listing={selectedListing}
           currentUser={currentUser}
           goTo={navigate}
           onSendMessage={onSendMessage}
         />
-      );
-
-    if (currentPage === 'create-listing') {
-      if (!currentUser) {
-        setCurrentPage('login');
-        return null;
-      }
-      return (
+      ),
+      'create-listing': () => (
         <CreateListingPage
           onAddListing={onAddListing}
           goTo={navigate}
           currentUser={currentUser}
           addToast={addToast}
         />
-      );
-    }
-
-    if (currentPage === 'messages') {
-      if (!currentUser) { setCurrentPage('login'); return null; }
-      return (
+      ),
+      messages: () => (
         <MessagesPage
           messages={messages}
           setMessages={setMessages}
@@ -222,12 +209,8 @@ export default function AppRouter(props) {
           onReviewAdded={onReviewAdded}
           addToast={addToast}
         />
-      );
-    }
-
-    if (currentPage === 'profile') {
-      if (!currentUser) { setCurrentPage('login'); return null; }
-      return (
+      ),
+      profile: () => (
         <ProfilePage
           currentUser={currentUser}
           profile={profile}
@@ -248,11 +231,8 @@ export default function AppRouter(props) {
           onDeclineBookingRecord={onDeclineBookingRecord}
           onConfirmReturn={onConfirmReturn}
         />
-      );
-    }
-
-    if (currentPage === 'admin')
-      return (
+      ),
+      admin: () => (
         <AdminPage
           currentUser={currentUser}
           profile={profile}
@@ -265,10 +245,8 @@ export default function AppRouter(props) {
           onBanUser={onBanUser}
           onViewOwner={onViewOwner}
         />
-      );
-
-    if (currentPage === 'edit-listing')
-      return (
+      ),
+      'edit-listing': () => (
         <EditListingPage
           listing={editListing}
           onUpdateListing={onUpdateListing}
@@ -276,30 +254,74 @@ export default function AppRouter(props) {
           currentUser={currentUser}
           addToast={addToast}
         />
-      );
+      ),
+      'reset-password': () => <ResetPasswordPage onDone={() => navigate('home')} />,
+      support: () => <SupportPage goTo={navigate} currentUser={currentUser} />,
+      impressum: () => <ImpressumPage goTo={navigate} />,
+      agb: () => <AGBPage goTo={navigate} />,
+      datenschutz: () => <DatenschutzPage goTo={navigate} />,
+      home: () => (
+        <HomePage
+          goTo={navigate}
+          listings={enrichedListings}
+          loading={loading}
+          currentUser={currentUser}
+          onCategoryClick={onCategoryClick}
+          onSearch={onSearch}
+          onSelectListing={onSelectListing}
+        />
+      ),
+    }),
+    [
+      addToast,
+      bookings,
+      currentUser,
+      editListing,
+      enrichedListings,
+      favorites,
+      handledBookings,
+      hiddenThreads,
+      listingsInitCategory,
+      listingsInitSearch,
+      loading,
+      messages,
+      navigate,
+      onAcceptBooking,
+      onAcceptBookingRecord,
+      onAddListing,
+      onBanUser,
+      onBook,
+      onDeclineBooking,
+      onDeclineBookingRecord,
+      onDeleteListing,
+      onEditListing,
+      onLogin,
+      onMarkMessagesRead,
+      onMarkSupportRead,
+      onReviewAdded,
+      onSearch,
+      onSelectListing,
+      onSendMessage,
+      onStartMessage,
+      onToggleAvailability,
+      onUpdateListing,
+      onUpdateProfile,
+      onViewOwner,
+      onConfirmReturn,
+      profile,
+      selectedListing,
+      selectedOwner,
+      setHiddenThreads,
+      setMessages,
+      supportRequests,
+      toggleFavorite,
+      onCategoryClick,
+    ]
+  );
 
-    if (currentPage === 'reset-password')
-      return <ResetPasswordPage onDone={() => setCurrentPage('home')} />;
-
-    if (currentPage === 'support')
-      return <SupportPage goTo={navigate} currentUser={currentUser} />;
-
-    if (currentPage === 'impressum') return <ImpressumPage goTo={navigate} />;
-    if (currentPage === 'agb') return <AGBPage goTo={navigate} />;
-    if (currentPage === 'datenschutz') return <DatenschutzPage goTo={navigate} />;
-
-    // Default: home
-    return (
-      <HomePage
-        goTo={navigate}
-        listings={enrichedListings}
-        loading={loading}
-        currentUser={currentUser}
-        onCategoryClick={onCategoryClick}
-        onSearch={onSearch}
-        onSelectListing={onSelectListing}
-      />
-    );
+  function renderPage() {
+    if (!currentUser && PROTECTED_PAGES.has(currentPage)) return null;
+    return (routeMap[currentPage] || routeMap.home)();
   }
 
   return (
