@@ -1,4 +1,4 @@
-export const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
+export const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif'];
 export const ACCEPT_ATTRIBUTES = 'image/*';
 export const MAX_FILE_SIZE = 5242880; // 5MB in bytes
 export const COMPRESSION_QUALITY = 0.8;

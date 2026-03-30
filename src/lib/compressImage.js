@@ -10,7 +10,7 @@ import { ALLOWED_TYPES, COMPRESSION_QUALITY, MAX_WIDTH } from './imageConfig.js'
  */
 export function compressImage(file, maxWidth = MAX_WIDTH, quality = COMPRESSION_QUALITY) {
   return new Promise((resolve) => {
-    if (!ALLOWED_TYPES.includes(file.type)) { resolve(null); return; }
+    if (!ALLOWED_TYPES.includes(file.type) && !file.type.startsWith('image/')) { resolve(null); return; }
 
     const img = new Image();
     const objectUrl = URL.createObjectURL(file);
@@ -41,7 +41,7 @@ export function compressImage(file, maxWidth = MAX_WIDTH, quality = COMPRESSION_
       );
     };
 
-    img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(null); };
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(file); };
     img.src = objectUrl;
   });
 }
