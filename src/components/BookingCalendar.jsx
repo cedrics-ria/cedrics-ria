@@ -74,17 +74,19 @@ export default function BookingCalendar({ listingId, currentUser, onBook }) {
       .select('start_date, end_date, status')
       .eq('listing_id', listingId)
       .in('status', ['accepted', 'pending'])
-      .then(({ data }) => {
-        const blocked = new Set();
-        const pending = new Set();
-        (data || []).forEach(({ start_date, end_date, status }) => {
-          dateRange(start_date, end_date).forEach((d) => {
-            if (status === 'accepted') blocked.add(d);
-            else pending.add(d);
+      .then(({ data, error }) => {
+        if (!error) {
+          const blocked = new Set();
+          const pending = new Set();
+          (data || []).forEach(({ start_date, end_date, status }) => {
+            dateRange(start_date, end_date).forEach((d) => {
+              if (status === 'accepted') blocked.add(d);
+              else pending.add(d);
+            });
           });
-        });
-        setBlockedDates(blocked);
-        setPendingDates(pending);
+          setBlockedDates(blocked);
+          setPendingDates(pending);
+        }
         setLoadingDates(false);
       });
   }, [listingId]);

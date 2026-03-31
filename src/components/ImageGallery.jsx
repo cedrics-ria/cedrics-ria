@@ -61,7 +61,7 @@ export default function ImageGallery({ mainImage, images, title }) {
                 boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
                 zIndex: 1,
               }}
-              aria-hidden={undefined}
+
             >
               ‹
             </button>

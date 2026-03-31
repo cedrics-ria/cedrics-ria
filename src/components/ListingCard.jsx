@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { C } from '../constants';
 import { getFallbackImage } from '../styles';
 import { smartImageUrl } from '../lib/getImageUrl.js';
@@ -18,6 +19,10 @@ export default function ListingCard({
   const item = listing;
   const imageHeight = compact ? 150 : 220;
   const isFav = favorites ? favorites.includes(String(item.id)) : false;
+  const imageSrc = useMemo(
+    () => smartImageUrl(item.image || getFallbackImage(item.category), { width: compact ? 400 : 600, quality: compact ? 75 : 80 }),
+    [item.image, item.category, compact]
+  );
 
   return (
     <div
@@ -44,10 +49,7 @@ export default function ListingCard({
         }}
       >
         <img
-          src={smartImageUrl(item.image || getFallbackImage(item.category), {
-            width: compact ? 400 : 600,
-            quality: compact ? 75 : 80,
-          })}
+          src={imageSrc}
           alt={item.title}
           width={compact ? 400 : 600}
           height={imageHeight}

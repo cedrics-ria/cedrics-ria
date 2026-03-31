@@ -1,18 +1,25 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { supabase } from '../supabase';
 import { mapMessageFromDb } from '../lib/mappers';
 import type { Message } from '../types';
 
+const PAGE_SIZE = 50;
+
 interface UseMessagesReturn {
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+  hasMoreMessages: boolean;
   loadMessages: (userId: string) => Promise<void>;
+  loadMoreMessages: (userId: string) => Promise<void>;
   saveMessage: (userId: string, toUserId: string, text: string, listingId: string | null, listingTitle: string | null, messageType?: Message['messageType']) => Promise<Message | false>;
   markMessagesRead: (fromUserId: string, toUserId: string) => Promise<void>;
 }
 
 export function useMessages(): UseMessagesReturn {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  // Tracks the oldest loaded createdAt for cursor-based pagination
+  const oldestCursorRef = useRef<string | null>(null);
 
   const loadMessages = useCallback(async (userId: string) => {
     if (!userId) return;
@@ -21,11 +28,35 @@ export function useMessages(): UseMessagesReturn {
         .from('messages')
         .select('*')
         .or(`from_user_id.eq.${userId},to_user_id.eq.${userId}`)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: false })
+        .limit(PAGE_SIZE);
       if (error) throw error;
-      setMessages((data ?? []).map(mapMessageFromDb));
+      const mapped = (data ?? []).map(mapMessageFromDb);
+      setMessages(mapped);
+      setHasMoreMessages((data ?? []).length === PAGE_SIZE);
+      oldestCursorRef.current = data?.length ? data[data.length - 1].created_at : null;
     } catch (err) {
       if (import.meta.env.DEV) console.warn('[useMessages] loadMessages:', err);
+    }
+  }, []);
+
+  const loadMoreMessages = useCallback(async (userId: string) => {
+    if (!userId || !oldestCursorRef.current) return;
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`from_user_id.eq.${userId},to_user_id.eq.${userId}`)
+        .lt('created_at', oldestCursorRef.current)
+        .order('created_at', { ascending: false })
+        .limit(PAGE_SIZE);
+      if (error) throw error;
+      const mapped = (data ?? []).map(mapMessageFromDb);
+      setMessages((prev) => [...prev, ...mapped]);
+      setHasMoreMessages((data ?? []).length === PAGE_SIZE);
+      if (data?.length) oldestCursorRef.current = data[data.length - 1].created_at;
+    } catch (err) {
+      if (import.meta.env.DEV) console.warn('[useMessages] loadMoreMessages:', err);
     }
   }, []);
 
@@ -46,7 +77,7 @@ export function useMessages(): UseMessagesReturn {
         .single();
       if (error) throw error;
       const mapped = mapMessageFromDb(data);
-      setMessages((prev) => [...prev, mapped]);
+      setMessages((prev) => [mapped, ...prev]);
       return mapped;
     } catch (err) {
       if (import.meta.env.DEV) console.warn('[useMessages] saveMessage:', err);
@@ -70,5 +101,5 @@ export function useMessages(): UseMessagesReturn {
     }
   }, []);
 
-  return { messages, setMessages, loadMessages, saveMessage, markMessagesRead };
+  return { messages, setMessages, hasMoreMessages, loadMessages, loadMoreMessages, saveMessage, markMessagesRead };
 }

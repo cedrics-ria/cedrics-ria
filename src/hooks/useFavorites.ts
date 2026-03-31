@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { supabase } from '../supabase';
 
 interface UseFavoritesReturn {
@@ -10,6 +10,7 @@ interface UseFavoritesReturn {
 
 export function useFavorites(): UseFavoritesReturn {
   const [favorites, setFavorites] = useState<string[]>([]);
+  const pendingRef = useRef<Set<string>>(new Set());
 
   const loadFavorites = useCallback(async (userId: string) => {
     if (!userId) return;
@@ -24,6 +25,9 @@ export function useFavorites(): UseFavoritesReturn {
 
   const toggleFavorite = useCallback(async (userId: string, listingId: string) => {
     if (!userId) return;
+    // Prevent double-click race condition: ignore if this listingId is already in-flight
+    if (pendingRef.current.has(listingId)) return;
+    pendingRef.current.add(listingId);
     const isFav = favorites.includes(listingId);
     try {
       if (isFav) {
@@ -35,6 +39,8 @@ export function useFavorites(): UseFavoritesReturn {
       }
     } catch (err) {
       if (import.meta.env.DEV) console.warn('[useFavorites] toggleFavorite:', err);
+    } finally {
+      pendingRef.current.delete(listingId);
     }
   }, [favorites]);
 

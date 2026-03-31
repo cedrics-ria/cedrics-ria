@@ -40,18 +40,18 @@ export default function ListingsPage({
     { allListings: listings }
   );
 
-  const categoryOptions = [
-    'Alle',
-    ...new Set(listings.filter((item) => item.category).map((item) => item.category)),
-  ];
-  const locationOptions = [
-    'Alle',
-    ...new Set(listings.filter((item) => item.location).map((item) => item.location)),
-  ].slice(0, 8);
+  const categoryOptions = useMemo(
+    () => ['Alle', ...new Set(listings.filter((item) => item.category).map((item) => item.category))],
+    [listings]
+  );
+  const locationOptions = useMemo(
+    () => ['Alle', ...new Set(listings.filter((item) => item.location).map((item) => item.location))].slice(0, 8),
+    [listings]
+  );
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisibleCount(12);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [search, categoryFilter, locationFilter, priceFilter, mode, sort]);
 
   const filteredListings = useMemo(

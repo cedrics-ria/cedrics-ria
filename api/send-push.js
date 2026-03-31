@@ -18,10 +18,18 @@ const sanitize = (str) =>
     .replace(/[<>"'&]/g, '')
     .slice(0, 200);
 
-// Simple in-memory rate limiting (resets on cold start)
+// In-memory rate limiting — resets on serverless cold start by design.
+// This is a best-effort defense layer; the primary security is the WEBHOOK_SECRET.
+// Periodically purge expired entries to prevent unbounded memory growth.
 const rateLimitMap = new Map();
 function isRateLimited(ip) {
   const now = Date.now();
+  // Purge stale entries every ~100 calls to avoid memory leaks
+  if (rateLimitMap.size > 100) {
+    for (const [key, val] of rateLimitMap) {
+      if (now > val.reset) rateLimitMap.delete(key);
+    }
+  }
   const entry = rateLimitMap.get(ip) || { count: 0, reset: now + 60_000 };
   if (now > entry.reset) {
     entry.count = 0;
@@ -46,6 +54,10 @@ export default async function handler(req, res) {
 
   const { record } = req.body;
   if (!record?.to_user_id) return res.status(400).end();
+
+  // Validate UUID format to prevent malformed queries
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_RE.test(record.to_user_id)) return res.status(400).json({ error: 'Invalid to_user_id format' });
 
   // Alle Push-Subscriptions des Empfängers laden
   const { data: subs } = await supabase

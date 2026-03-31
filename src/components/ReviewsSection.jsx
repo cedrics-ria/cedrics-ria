@@ -30,7 +30,7 @@ export default function ReviewsSection({ listingId, currentUser, addToast, onRev
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!rating) return;
+    if (!rating || saving) return;
     setSaving(true);
     const { data, error } = await supabase
       .from('reviews')

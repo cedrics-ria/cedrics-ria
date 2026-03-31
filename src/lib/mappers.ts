@@ -43,5 +43,6 @@ export function mapListingFromDb(row: Record<string, unknown>): Listing {
     paymentMethods: Array.isArray(row.payment_methods) ? (row.payment_methods as string[]) : [],
     plz: (row.plz as string) ?? '',
     createdAt: row.created_at as string,
+    views: (row.views as number) ?? 0,
   };
 }

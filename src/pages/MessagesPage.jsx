@@ -69,6 +69,8 @@ export default function MessagesPage({
   onOpen,
   onReviewAdded,
   addToast,
+  hasMoreMessages = false,
+  onLoadMoreMessages,
 }) {
   const [openThread, setOpenThread] = useState(null);
   const [search, setSearch] = useState('');
@@ -534,6 +536,10 @@ export default function MessagesPage({
                             if (!window.confirm('Chat ausblenden?')) return;
                             const next = new Set([...hiddenThreads, thread.key]);
                             setHiddenThreads(next);
+                            // Persist to Supabase (primary) + localStorage (fallback)
+                            if (currentUser?.id) {
+                              void supabase.from('profiles').update({ hidden_thread_keys: [...next] }).eq('id', currentUser.id);
+                            }
                             localStorage.setItem(hiddenKey, JSON.stringify([...next]));
                             if (openThread === thread.key) setOpenThread(null);
                           }}
@@ -855,6 +861,26 @@ export default function MessagesPage({
                 </div>
               );
             })}
+            {hasMoreMessages && (
+              <button
+                type="button"
+                onClick={onLoadMoreMessages}
+                style={{
+                  width: '100%',
+                  padding: '0.85rem',
+                  marginTop: '0.25rem',
+                  background: 'white',
+                  border: `1px solid rgba(28,58,46,0.15)`,
+                  borderRadius: 14,
+                  color: C.forest,
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                }}
+              >
+                Ältere Nachrichten laden
+              </button>
+            )}
           </div>
         )}
       </div>

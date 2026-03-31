@@ -5,6 +5,7 @@ export const STORAGE_KEYS = {
   HANDLED_BOOKINGS: 'ria-handled-bookings',
   LAST_MSG_CHECK: 'ria-last-msg-check',
   CURRENT_USER: 'ria-current-user',
+  FAVORITES: 'ria-favorites',
   hiddenThreads: (userId) => `ria-hidden-threads-${userId}`,
 };
 

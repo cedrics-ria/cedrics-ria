@@ -123,6 +123,9 @@ export default function AppRouter(props) {
     onBanUser,
     onCategoryClick,
     onSearch,
+    hasMoreMessages,
+    onLoadMoreMessages,
+    onLogout,
   } = props;
 
   useEffect(() => {
@@ -208,6 +211,8 @@ export default function AppRouter(props) {
           onOpen={onMarkMessagesRead}
           onReviewAdded={onReviewAdded}
           addToast={addToast}
+          hasMoreMessages={hasMoreMessages}
+          onLoadMoreMessages={onLoadMoreMessages}
         />
       ),
       profile: () => (
@@ -230,6 +235,7 @@ export default function AppRouter(props) {
           onAcceptBookingRecord={onAcceptBookingRecord}
           onDeclineBookingRecord={onDeclineBookingRecord}
           onConfirmReturn={onConfirmReturn}
+          onLogout={onLogout}
         />
       ),
       admin: () => (

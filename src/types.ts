@@ -1,3 +1,10 @@
+export interface AppUser {
+  id: string;
+  name: string;
+  email: string;
+  emailConfirmed: boolean;
+}
+
 export interface Listing {
   id: string;
   title: string;

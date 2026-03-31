@@ -644,13 +644,13 @@ export default function HomePage({
                 {
                   to: 80,
                   suffix: '%',
-                  label: 'Aller Haushaltsgeräte werden weniger als einmal pro Monat benutzt.',
+                  label: 'Ca. 80 % aller Haushaltsgeräte werden weniger als einmal pro Monat benutzt.',
                 },
                 {
-                  to: 50,
+                  to: 25,
                   prefix: '−',
                   suffix: ' kg',
-                  label: 'CO₂ sparst du, wenn du mietest statt neu zu kaufen.',
+                  label: 'CO₂ sparst du im Schnitt, wenn du ein Gerät mietest statt es neu zu kaufen.',
                 },
               ].map((s) => (
                 <div key={s.suffix}>
@@ -707,7 +707,7 @@ export default function HomePage({
               </div>
               {[
                 ['€89–150', 'Kaufpreis für eine Bohrmaschine'],
-                ['25 kg CO₂', 'Durch Produktion & Transport'],
+                ['10–25 kg CO₂', 'Durch Produktion & Transport (je nach Gerät)'],
                 ['15 Min / Jahr', 'Tatsächliche Nutzungsdauer'],
                 ['Jahre im Keller', 'Danach verstaubt sie'],
               ].map(([val, label]) => (

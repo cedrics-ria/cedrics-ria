@@ -3,6 +3,7 @@ import { C, allCategoryNames } from '../constants';
 import { inputBaseStyle, applyInputFocus, resetInputFocus, getFallbackImage } from '../styles';
 import { supabase } from '../supabase';
 import { compressImage } from '../lib/compressImage';
+import { MAX_FILE_SIZE } from '../lib/imageConfig';
 
 export default function CreateListingPage({ onAddListing, goTo, currentUser, addToast }) {
   const [formData, setFormData] = useState({
@@ -547,32 +548,33 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      if (file.size > 8 * 1024 * 1024) {
-                        addToast('Bild zu groß – max. 8 MB erlaubt.', 'error');
+                      if (file.size > MAX_FILE_SIZE) {
+                        addToast(`Bild zu groß – max. ${Math.round(MAX_FILE_SIZE / 1024 / 1024)} MB erlaubt.`, 'error');
                         return;
                       }
                       setUploading(true);
-                      const compressed = await compressImage(file);
-                      if (!compressed) {
-                        addToast('Ungültiger Dateityp. Bitte lade ein JPEG, PNG, GIF oder WebP hoch.', 'error');
+                      try {
+                        const compressed = await compressImage(file);
+                        if (!compressed) {
+                          addToast('Ungültiger Dateityp. Bitte lade ein JPEG, PNG, GIF oder WebP hoch.', 'error');
+                          return;
+                        }
+                        const path = `public/${Date.now()}.jpg`;
+                        const { error } = await supabase.storage
+                          .from('listing-images')
+                          .upload(path, compressed, { upsert: true });
+                        if (error) {
+                          addToast('Upload fehlgeschlagen: ' + error.message, 'error');
+                          return;
+                        }
+                        const { data: urlData } = supabase.storage
+                          .from('listing-images')
+                          .getPublicUrl(path);
+                        setFormData((prev) => ({ ...prev, image: urlData.publicUrl }));
+                        setImgError(false);
+                      } finally {
                         setUploading(false);
-                        return;
                       }
-                      const path = `public/${Date.now()}.jpg`;
-                      const { error } = await supabase.storage
-                        .from('listing-images')
-                        .upload(path, compressed, { upsert: true });
-                      if (error) {
-                        addToast('Upload fehlgeschlagen: ' + error.message, 'error');
-                        setUploading(false);
-                        return;
-                      }
-                      const { data: urlData } = supabase.storage
-                        .from('listing-images')
-                        .getPublicUrl(path);
-                      setFormData((prev) => ({ ...prev, image: urlData.publicUrl }));
-                      setImgError(false);
-                      setUploading(false);
                     }}
                   />
                 </label>
@@ -657,8 +659,8 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    if (file.size > 8 * 1024 * 1024) {
-                      addToast('Bild zu groß – max. 8 MB erlaubt.', 'error');
+                    if (file.size > MAX_FILE_SIZE) {
+                      addToast(`Bild zu groß – max. ${Math.round(MAX_FILE_SIZE / 1024 / 1024)} MB erlaubt.`, 'error');
                       return;
                     }
                     const compressed = await compressImage(file);

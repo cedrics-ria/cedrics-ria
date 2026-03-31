@@ -13,10 +13,18 @@ const escapeHtml = (str) =>
 
 const sanitize = (str) => escapeHtml(str).slice(0, 500);
 
-// Simple in-memory rate limiting (resets on cold start)
+// In-memory rate limiting — resets on serverless cold start by design.
+// This is a best-effort defense layer; the primary security is the WEBHOOK_SECRET / JWT.
+// Periodically purge expired entries to prevent unbounded memory growth.
 const rateLimitMap = new Map();
 function isRateLimited(ip) {
   const now = Date.now();
+  // Purge stale entries every ~100 calls to avoid memory leaks
+  if (rateLimitMap.size > 100) {
+    for (const [key, val] of rateLimitMap) {
+      if (now > val.reset) rateLimitMap.delete(key);
+    }
+  }
   const entry = rateLimitMap.get(ip) || { count: 0, reset: now + 60_000 };
   if (now > entry.reset) {
     entry.count = 0;

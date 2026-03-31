@@ -24,6 +24,7 @@ export default function ProfilePage({
   onAcceptBookingRecord,
   onDeclineBookingRecord,
   onConfirmReturn,
+  onLogout,
 }) {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [editingProfile, setEditingProfile] = useState(false);
@@ -454,7 +455,27 @@ export default function ProfilePage({
               >
                 {saving ? 'Wird gespeichert...' : 'Speichern'}
               </button>
-              <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: `1px solid rgba(196,113,74,0.2)` }}>
+              <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: `1px solid ${C.line}` }}>
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1.25rem',
+                    borderRadius: 12,
+                    border: `1px solid ${C.line}`,
+                    background: 'white',
+                    color: C.ink,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontSize: '0.95rem',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  Abmelden
+                </button>
+              </div>
+              <div style={{ paddingTop: '0.5rem', borderTop: `1px solid rgba(196,113,74,0.2)` }}>
                 <p style={{ margin: '0 0 0.75rem', fontSize: '0.82rem', color: C.muted, fontWeight: 600 }}>Gefahrenzone</p>
                 {!accountDeleteConfirm ? (
                   <button
