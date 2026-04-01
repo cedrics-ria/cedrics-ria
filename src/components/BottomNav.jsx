@@ -95,7 +95,7 @@ export default function BottomNav({ currentPage, goTo, currentUser, unreadCount,
             <button
               key={tab.id}
               onClick={() => (isMsgs ? onOpenMessages() : goTo(tab.id))}
-              aria-current={isActive && !isMsgs ? 'page' : undefined}
+              aria-current={isActive ? 'page' : undefined}
               aria-label={
                 isMsgs && unreadCount > 0 ? `${tab.label} (${unreadCount} ungelesen)` : tab.label
               }

@@ -140,11 +140,15 @@ export default function ImageGallery({ mainImage, images, title }) {
             <img
               key={i}
               src={smartImageUrl(img, { width: 140, quality: 70 })}
-              alt=""
+              alt={`Bild ${i + 1} von ${all.length} anzeigen`}
+              role="button"
+              tabIndex={0}
+              aria-pressed={i === current}
               width={70}
               height={56}
               loading="lazy"
               onClick={() => setCurrent(i)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCurrent(i); } }}
               style={{
                 width: 70,
                 height: 56,

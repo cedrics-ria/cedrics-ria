@@ -27,6 +27,9 @@ export default function ListingCard({
   return (
     <div
       className="hover-card"
+      role="button"
+      tabIndex={0}
+      aria-label={`${item.title}, ${item.price}${item.isAvailable === false ? ', momentan vergeben' : ''}`}
       style={{
         background: 'white',
         borderRadius: 20,
@@ -38,6 +41,7 @@ export default function ListingCard({
         opacity: item.isAvailable === false ? 0.72 : 1,
       }}
       onClick={() => onSelect && onSelect(item)}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect && onSelect(item); } }}
     >
       {/* Image area */}
       <div
@@ -118,6 +122,8 @@ export default function ListingCard({
         {/* Favorite heart button */}
         {favorites && toggleFavorite && (
           <button
+            aria-label={isFav ? `${item.title} aus Favoriten entfernen` : `${item.title} zu Favoriten hinzufügen`}
+            aria-pressed={isFav}
             onClick={(e) => {
               e.stopPropagation();
               toggleFavorite(item.id);
