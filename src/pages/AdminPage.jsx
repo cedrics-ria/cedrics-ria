@@ -99,36 +99,48 @@ export default function AdminPage({
     const months = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push({
-        label: d.toLocaleString('de-DE', { month: 'short' }),
-        year: d.getFullYear(),
-        month: d.getMonth(),
-      });
+      months.push({ label: d.toLocaleString('de-DE', { month: 'short', year: '2-digit' }), year: d.getFullYear(), month: d.getMonth() });
     }
     const cutoff = new Date(months[0].year, months[0].month, 1).toISOString();
-    const [profilesRes, listingsRes, bookingsRes] = await Promise.all([
-      supabase.from('profiles').select('created_at, updated_at'),
+
+    const [allProfilesRes, listingsRes, bookingsRes] = await Promise.all([
+      supabase.from('profiles').select('created_at'),          // ALL — for cumulative
       supabase.from('listings').select('created_at').gte('created_at', cutoff),
       supabase.from('bookings').select('completed_at').eq('status', 'completed').gte('completed_at', cutoff),
     ]);
-    function bucket(rows, field, fallbackField) {
-      return months.map(m => ({
-        label: m.label,
-        value: (rows || []).filter(r => {
-          const val = r[field] || (fallbackField ? r[fallbackField] : null);
+
+    const allProfiles = allProfilesRes.data || [];
+
+    // Cumulative user count per month (all users up to & incl. that month)
+    const memberData = months.map((m) => {
+      const endOfMonth = new Date(m.year, m.month + 1, 0, 23, 59, 59, 999);
+      const total = allProfiles.filter(p => p.created_at && new Date(p.created_at) <= endOfMonth).length;
+      const newCount = allProfiles.filter(p => {
+        if (!p.created_at) return false;
+        const d = new Date(p.created_at);
+        return d.getFullYear() === m.year && d.getMonth() === m.month;
+      }).length;
+      return { label: m.label, value: total, new: newCount };
+    });
+
+    // If no profiles have created_at, fall back to total in current month
+    if (memberData.every(d => d.value === 0) && allProfiles.length > 0) {
+      memberData[memberData.length - 1].value = allProfiles.length;
+      memberData[memberData.length - 1].new = allProfiles.length;
+    }
+
+    function bucket(rows, field) {
+      return months.map(m => {
+        const count = (rows || []).filter(r => {
+          const val = r[field];
           if (!val) return false;
           const d = new Date(val);
           return d.getFullYear() === m.year && d.getMonth() === m.month;
-        }).length,
-      }));
+        }).length;
+        return { label: m.label, value: count, new: count };
+      });
     }
-    // For members: if no dates exist at all, show total count in current month
-    const memberData = bucket(profilesRes.data, 'created_at', 'updated_at');
-    const memberTotal = memberData.reduce((s, d) => s + d.value, 0);
-    const profileCount = (profilesRes.data || []).length;
-    if (profileCount > 0 && memberTotal === 0) {
-      memberData[memberData.length - 1].value = profileCount;
-    }
+
     setAnalyticsData({
       members: memberData,
       listings: bucket(listingsRes.data, 'created_at'),
