@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { ADMIN_EMAIL, STORAGE_KEYS } from './constants';
 import { supabase } from './supabase';
 import { useMessages } from './hooks/useMessages.js';
@@ -17,8 +18,18 @@ import Toaster from './components/Toaster';
 import OnboardingModal from './components/OnboardingModal';
 import AppRouter from './components/AppRouter';
 import AppFooter from './components/AppFooter';
+import CookieConsent from './components/CookieConsent';
 
 export default function App() {
+  // ── Cookie consent ────────────────────────────────────────────────────────
+  const [cookieConsent, setCookieConsent] = useState(() =>
+    localStorage.getItem(STORAGE_KEYS.COOKIE_CONSENT) || null
+  );
+  function handleConsent(choice) {
+    localStorage.setItem(STORAGE_KEYS.COOKIE_CONSENT, choice);
+    setCookieConsent(choice);
+  }
+
   // ── Routing ──────────────────────────────────────────────────────────────
   const [currentPage, setCurrentPage] = useState('home');
 
@@ -285,6 +296,8 @@ export default function App() {
         <OnboardingModal user={currentUser} onClose={() => setShowOnboarding(false)} goTo={setCurrentPage} />
       )}
       <AppFooter navigate={navigate} currentUser={currentUser} profile={profile} isAdmin={isAdmin} />
+      {!cookieConsent && <CookieConsent onConsent={handleConsent} goTo={navigate} />}
+      {cookieConsent === 'all' && <Analytics />}
     </div>
   );
 }

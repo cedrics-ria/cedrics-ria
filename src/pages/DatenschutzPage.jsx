@@ -42,7 +42,7 @@ ria wird als privates, nicht-gewerbliches Projekt betrieben.`,
 • Bereitstellung und Betrieb der Plattform
 • Verwaltung deines Nutzerkontos
 • Kommunikation zwischen Nutzern (Nachrichten, Buchungsanfragen)
-• Versand von Benachrichtigungs-E-Mails bei neuen Nachrichten
+• Versand von Benachrichtigungs-E-Mails bei neuen Nachrichten und Buchungsstatusänderungen (Annahme/Ablehnung)
 • Push-Benachrichtigungen (nur mit ausdrücklicher Browser-Erlaubnis)
 • Erstellung und Speicherung digitaler Mietverträge zwischen Nutzern (nur auf Wunsch beider Parteien)
 • Verbesserung der Plattform
@@ -96,18 +96,21 @@ Landesbeauftragte für Datenschutz und Informationsfreiheit NRW
 ldi.nrw.de`,
   ],
   [
-    '7. Cookies & lokale Speicherung',
-    `ria setzt keine Tracking- oder Werbe-Cookies ein. Wir nutzen den lokalen Browser-Speicher (localStorage) ausschließlich für technische Zwecke:
+    '7. Cookies, lokale Speicherung & Einwilligung',
+    `Beim ersten Besuch von ria wird dir ein Hinweis-Banner angezeigt, in dem du deine Einwilligung zur Nutzung von Analysetools erteilen oder ablehnen kannst. Deine Wahl wird in deinem Browser gespeichert (localStorage-Schlüssel: ria-cookie-consent) und kann durch Löschen des Browser-Speichers jederzeit zurückgesetzt werden.
 
-• Authentifizierungs-Session (Supabase Auth-Token — technisch notwendig für den Login)
+Technisch notwendige Speicherung (immer aktiv, keine Einwilligung erforderlich):
+• Authentifizierungs-Session (Supabase Auth-Token — notwendig für den Login)
 • Favoriten-Liste (für nicht eingeloggte Nutzer)
 • Ausgeblendete Chat-Threads (nutzerspezifisch)
 • Zuletzt angesehene Inserate (temporärer Verlauf, nur lokal, max. 8 Einträge)
 • Buchungsbestätigungen (lokal gecacht)
+• Deine Cookie-Einwilligung (ria-cookie-consent)
 
-Supabase Auth speichert Sitzungs-Tokens im lokalen Browserspeicher (localStorage), um den Login-Status zu erhalten. Diese Tokens sind ausschließlich technisch notwendig und enthalten keine Tracking-Informationen.
+Nur bei Einwilligung „Alle akzeptieren":
+• Vercel Analytics — anonymisierte Nutzungsstatistiken (Seitenaufrufe, Gerätetyp, Land). Es werden keine Cookies gesetzt und keine persönlichen Daten erhoben. Weitere Infos: vercel.com/docs/analytics/privacy-policy
 
-Da kein Tracking stattfindet und nur technisch notwendige Speicherung erfolgt, ist ein Cookie-Banner nicht erforderlich.`,
+Rechtsgrundlage technisch notwendiger Speicherung: § 25 Abs. 2 TTDSG (keine Einwilligung erforderlich). Rechtsgrundlage für Vercel Analytics: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung).`,
   ],
   [
     '8. Push-Benachrichtigungen',

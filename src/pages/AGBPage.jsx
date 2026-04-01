@@ -95,12 +95,14 @@ export default function AGBPage({ goTo }) {
               ],
             ],
             [
-              '§ 6 Haftungsausschluss',
+              '§ 6 Haftung & Schadensmeldung',
               [
                 'ria ist ausschließlich eine Vermittlungsplattform und wird nicht Vertragspartei der zwischen Nutzern geschlossenen Mietverträge. Sämtliche Vereinbarungen über Mietbedingungen, Übergabe, Rückgabe und etwaige Schäden werden ausschließlich zwischen Verleiher und Mieter getroffen.',
                 'Für Schäden an Gegenständen, Personen oder Dritten, die im Rahmen eines Mietverhältnisses zwischen Nutzern entstehen, übernimmt ria keinerlei Haftung. Dies gilt insbesondere für:',
                 '• Beschädigungen, Verlust oder Diebstahl gemieteter Gegenstände\n• Personen- oder Sachschäden, die durch die Nutzung gemieteter Gegenstände entstehen\n• Schäden durch falsche, unvollständige oder irreführende Angaben in Inseraten\n• Ausfall oder Nichterfüllung vereinbarter Leistungen',
-                'Jeder Nutzer handelt bei der Nutzung der Plattform sowie bei allen darüber zustande kommenden Mietverhältnissen auf eigenes Risiko und in eigener Verantwortung. Verleiher und Mieter sind selbst dafür verantwortlich, den Zustand eines Gegenstands vor der Übergabe zu prüfen, etwaige Schäden zu dokumentieren und bei Bedarf geeignete Absicherungen (z. B. durch Kaution oder Versicherung) zu treffen.',
+                'Jeder Nutzer handelt bei der Nutzung der Plattform sowie bei allen darüber zustande kommenden Mietverhältnissen auf eigenes Risiko und in eigener Verantwortung. Verleiher und Mieter sind selbst dafür verantwortlich, den Zustand eines Gegenstands vor der Übergabe zu prüfen, etwaige Schäden zu dokumentieren und bei Bedarf geeignete Absicherungen (z. B. durch Kaution oder private Versicherung) zu treffen.',
+                'Empfehlungen zur Schadensvorbeugung:\n• Zustand des Gegenstands vor Übergabe gemeinsam prüfen und ggf. per Foto festhalten\n• Kaution im Inserat festlegen und vorab schriftlich (z. B. per Chat) vereinbaren\n• Digitalen Mietvertrag (§ 5) nutzen, um Konditionen verbindlich festzuhalten',
+                'Vorgehen bei Schäden:\nStellt ein Nutzer nach der Rückgabe einen Schaden fest, gilt folgendes Verfahren:\n1. Schaden unverzüglich – spätestens 24 Stunden nach Rückgabe – der anderen Partei per Nachricht auf ria melden.\n2. Schaden mit Fotos und Beschreibung dokumentieren und der anderen Partei übermitteln.\n3. Einigung über Kostenübernahme direkt zwischen den Parteien anstreben (z. B. über vereinbarte Kaution).\n4. Bei Nichteinigung empfiehlt ria, einen Schlichtungsversuch oder – bei erheblichen Schäden – rechtliche Beratung in Anspruch zu nehmen.\nria unterstützt die Kommunikation über die Plattform, übernimmt jedoch keine Rolle als Schlichter und trägt keine Verantwortung für die Schadensregulierung.',
                 'Die Haftung von ria ist zudem auf Vorsatz und grobe Fahrlässigkeit beschränkt. Eine Haftung für leichte Fahrlässigkeit ist – soweit gesetzlich zulässig – ausgeschlossen.',
               ],
             ],

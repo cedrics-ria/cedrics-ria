@@ -84,6 +84,26 @@ export function useMessageBookingActions({
     addToast('Buchungsanfrage gesendet ✓', 'info');
   }
 
+  function sendBookingEmail(toUserId: string, status: 'accepted' | 'declined', listingTitle: string) {
+    supabase.auth.getSession().then(({ data: sessionData }) => {
+      fetch('/api/send-booking-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionData.session?.access_token || ''}`,
+        },
+        body: JSON.stringify({
+          to_user_id: toUserId,
+          status,
+          listing_title: listingTitle,
+          owner_name: currentUser?.name || 'Der Verleiher',
+        }),
+      }).catch((err) => {
+        if (import.meta.env.DEV) console.warn('[sendBookingEmail] fehlgeschlagen:', err);
+      });
+    });
+  }
+
   async function acceptBookingRecord(bookingId: string) {
     const booking = bookings.find((b) => b.id === bookingId);
     if (!booking || booking.owner_id !== currentUser?.id) { addToast('Keine Berechtigung.', 'error'); return; }
@@ -91,6 +111,7 @@ export function useMessageBookingActions({
       .eq('id', bookingId).eq('owner_id', currentUser.id);
     if (error) { console.error('[acceptBookingRecord]', error); addToast('Buchung konnte nicht angenommen werden.', 'error'); return; }
     setBookings((prev) => prev.map((b) => (b.id === bookingId ? { ...b, status: 'accepted' as const } : b)));
+    sendBookingEmail(booking.requester_id, 'accepted', booking.listing_title || booking.listing_id);
     addToast('Buchung angenommen ✓', 'info');
   }
 
@@ -101,6 +122,7 @@ export function useMessageBookingActions({
       .eq('id', bookingId).eq('owner_id', currentUser.id);
     if (error) { console.error('[declineBookingRecord]', error); addToast('Buchung konnte nicht abgelehnt werden.', 'error'); return; }
     setBookings((prev) => prev.map((b) => (b.id === bookingId ? { ...b, status: 'declined' as const } : b)));
+    sendBookingEmail(booking.requester_id, 'declined', booking.listing_title || booking.listing_id);
     addToast('Buchung abgelehnt.', 'info');
   }
 

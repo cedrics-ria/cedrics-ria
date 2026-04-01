@@ -8,6 +8,7 @@ export const STORAGE_KEYS = {
   FAVORITES: 'ria-favorites',
   hiddenThreads: (userId) => `ria-hidden-threads-${userId}`,
   RECENTLY_VIEWED: 'ria-recently-viewed',
+  COOKIE_CONSENT: 'ria-cookie-consent',
 };
 
 export const C = {
