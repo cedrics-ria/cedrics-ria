@@ -42,6 +42,7 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
   });
   const [imgError, setImgError] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingExtra, setUploadingExtra] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [extraImages, setExtraImages] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
@@ -399,23 +400,29 @@ export default function CreateListingPage({ onAddListing, goTo, currentUser, add
                   <label style={labelStyle}>
                     Weitere Bilder <span style={{ color: C.muted, fontWeight: 400 }}>(optional)</span>
                   </label>
-                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1rem', borderRadius: 12, background: C.sageLight, color: C.forest, fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem', border: `1px solid ${C.line}`, marginBottom: extraImages.length ? '0.75rem' : 0 }}>
-                    + Weiteres Bild
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1rem', borderRadius: 12, background: C.sageLight, color: uploadingExtra ? C.muted : C.forest, fontWeight: 700, cursor: uploadingExtra ? 'default' : 'pointer', fontSize: '0.85rem', border: `1px solid ${C.line}`, marginBottom: extraImages.length ? '0.75rem' : 0, opacity: uploadingExtra ? 0.7 : 1 }}>
+                    {uploadingExtra ? 'Wird hochgeladen…' : '+ Weiteres Bild'}
                     <input
                       type="file"
                       accept="image/*"
+                      disabled={uploadingExtra}
                       style={{ display: 'none' }}
                       onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
                         if (file.size > MAX_FILE_SIZE) { addToast(`Bild zu groß – max. ${Math.round(MAX_FILE_SIZE / 1024 / 1024)} MB erlaubt.`, 'error'); return; }
-                        const compressed = await compressImage(file);
-                        if (!compressed) { addToast('Ungültiger Dateityp.', 'error'); return; }
-                        const path = `public/${Date.now()}_extra.jpg`;
-                        const { error } = await supabase.storage.from('listing-images').upload(path, compressed, { upsert: true });
-                        if (error) { addToast('Upload fehlgeschlagen: ' + error.message, 'error'); return; }
-                        const { data: urlData } = supabase.storage.from('listing-images').getPublicUrl(path);
-                        setExtraImages((prev) => [...prev, urlData.publicUrl]);
+                        setUploadingExtra(true);
+                        try {
+                          const compressed = await compressImage(file);
+                          if (!compressed) { addToast('Ungültiger Dateityp.', 'error'); return; }
+                          const path = `public/${Date.now()}_extra.jpg`;
+                          const { error } = await supabase.storage.from('listing-images').upload(path, compressed, { upsert: true });
+                          if (error) { addToast('Upload fehlgeschlagen: ' + error.message, 'error'); return; }
+                          const { data: urlData } = supabase.storage.from('listing-images').getPublicUrl(path);
+                          setExtraImages((prev) => [...prev, urlData.publicUrl]);
+                        } finally {
+                          setUploadingExtra(false);
+                        }
                       }}
                     />
                   </label>

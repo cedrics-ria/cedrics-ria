@@ -324,6 +324,9 @@ export default function AppRouter(props) {
       supportRequests,
       toggleFavorite,
       onCategoryClick,
+      hasMoreMessages,
+      onLoadMoreMessages,
+      onLogout,
     ]
   );
 
