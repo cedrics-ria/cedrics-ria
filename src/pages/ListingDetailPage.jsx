@@ -61,14 +61,20 @@ export default function ListingDetailPage({
   useEffect(() => {
     if (!listing?.id || listing.userId === 'demo') return;
     if (currentUser?.id === listing.userId) return;
-    supabase.rpc('increment_listing_views', { p_listing_id: listing.id }).then(() => {});
+    supabase.rpc('increment_listing_views', { p_listing_id: listing.id }).catch(err => { if (import.meta.env.DEV) console.warn('[Views]', err); });
   }, [listing?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Track recently viewed
   useEffect(() => {
     if (!listing?.id) return;
     try {
-      const prev = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENTLY_VIEWED) || '[]');
+      let prev;
+      try {
+        prev = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENTLY_VIEWED) || '[]');
+      } catch {
+        localStorage.removeItem(STORAGE_KEYS.RECENTLY_VIEWED);
+        prev = [];
+      }
       const next = [String(listing.id), ...prev.filter((id) => id !== String(listing.id))].slice(0, 8);
       localStorage.setItem(STORAGE_KEYS.RECENTLY_VIEWED, JSON.stringify(next));
     } catch {}
@@ -82,10 +88,11 @@ export default function ListingDetailPage({
     const setMeta = (sel, attr, val) => document.querySelector(sel)?.setAttribute(attr, val);
     setMeta('meta[property="og:title"]', 'content', `${listing.title} | ria`);
     setMeta('meta[property="og:description"]', 'content', (listing.description || '').slice(0, 160));
-    setMeta('meta[property="og:image"]', 'content', listing.image || 'https://ria-rentitall.de/og-image.png');
+    const safeImage = /^https?:\/\//.test(listing.image || '') ? listing.image : 'https://ria-rentitall.de/og-image.png';
+    setMeta('meta[property="og:image"]', 'content', safeImage);
     setMeta('meta[name="twitter:title"]', 'content', `${listing.title} | ria`);
     setMeta('meta[name="twitter:description"]', 'content', (listing.description || '').slice(0, 160));
-    setMeta('meta[name="twitter:image"]', 'content', listing.image || 'https://ria-rentitall.de/og-image.png');
+    setMeta('meta[name="twitter:image"]', 'content', safeImage);
     const script = document.createElement('script');
     script.type = 'application/ld+json';
     script.id = 'ria-listing-jsonld';
@@ -129,12 +136,18 @@ export default function ListingDetailPage({
 
   async function toggleWatchlist() {
     if (!currentUser?.id || !listing?.id) return;
-    if (onWatchlist) {
-      await supabase.from('watchlist').delete().eq('user_id', currentUser.id).eq('listing_id', String(listing.id));
-      setOnWatchlist(false);
-    } else {
-      await supabase.from('watchlist').upsert({ user_id: currentUser.id, listing_id: String(listing.id) });
-      setOnWatchlist(true);
+    try {
+      if (onWatchlist) {
+        const { error } = await supabase.from('watchlist').delete().eq('user_id', currentUser.id).eq('listing_id', String(listing.id));
+        if (error) throw error;
+        setOnWatchlist(false);
+      } else {
+        const { error } = await supabase.from('watchlist').upsert({ user_id: currentUser.id, listing_id: String(listing.id) });
+        if (error) throw error;
+        setOnWatchlist(true);
+      }
+    } catch {
+      addToast('Fehler beim Aktualisieren.', 'error');
     }
   }
 
@@ -688,8 +701,13 @@ export default function ListingDetailPage({
                       if (!window.confirm(`${listing.ownerName} blockieren? Du siehst dann keine Nachrichten oder Inserate mehr von dieser Person.`)) return;
                       const blocked = Array.isArray(currentUser.blockedIds) ? currentUser.blockedIds : [];
                       if (blocked.includes(listing.userId)) return;
-                      await supabase.from('profiles').update({ blocked_user_ids: [...blocked, listing.userId] }).eq('id', currentUser.id);
-                      addToast(`${listing.ownerName} wurde blockiert.`, 'info');
+                      try {
+                        const { error } = await supabase.from('profiles').update({ blocked_user_ids: [...blocked, listing.userId] }).eq('id', currentUser.id);
+                        if (error) throw error;
+                        addToast(`${listing.ownerName} wurde blockiert.`, 'info');
+                      } catch {
+                        addToast('Fehler beim Blockieren.', 'error');
+                      }
                     }}
                     style={{ background: 'none', border: 'none', color: C.muted, fontSize: '0.78rem', cursor: 'pointer', padding: '0.25rem 0.5rem', textDecoration: 'underline', textUnderlineOffset: 3 }}
                   >

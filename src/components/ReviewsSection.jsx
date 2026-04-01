@@ -287,7 +287,7 @@ export default function ReviewsSection({ listingId, listingUserId, currentUser, 
                   flexShrink: 0,
                 }}
               >
-                {r.reviewer_name.charAt(0).toUpperCase()}
+                {(r.reviewer_name || '?').charAt(0).toUpperCase()}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, color: C.forest, fontSize: '0.9rem' }}>
