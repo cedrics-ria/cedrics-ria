@@ -18,13 +18,21 @@ ria wird als privates, nicht-gewerbliches Projekt betrieben.`,
     `Bei Registrierung und Nutzung von ria erheben wir folgende Daten:
 
 • E-Mail-Adresse (Konto, Kommunikation)
-• Name (öffentliches Profil)
+• Vor- und Nachname (öffentliches Profil)
 • Profilbild (optional, von dir hochgeladen)
+• Telefonnummer (optional, nur im Profil hinterlegt)
+• Bio / Kurzbeschreibung (optional, öffentliches Profil)
+• Standort / Ort (optional, im Profil angegeben)
 • Inserate (Titel, Beschreibung, Ort, Preis, Fotos)
 • Nachrichten zwischen Nutzern
 • Buchungsanfragen (Zeitraum, Inseratreferenz)
+• Bewertungen und Rezensionen (inkl. Bewertungstext und Sternezahl)
+• Merkliste (Inserate, die du als Favorit gespeichert hast)
+• Verfügbarkeits-Watchlist (Inserate, über deren Verfügbarkeit du benachrichtigt werden möchtest)
+• Blockierungsliste (IDs von Nutzern, die du blockiert hast — nicht öffentlich sichtbar)
 • Push-Benachrichtigungs-Token (optional, nur bei Zustimmung im Browser)
 • Digitale Mietverträge (optional): Mietgegenstand, Zeitraum, Preis, Kaution, Zustandsbeschreibung, Anmerkungen sowie Zeitstempel der Unterzeichnung beider Parteien
+• Authentifizierungs-Session-Token (technisch notwendig, im lokalen Browserspeicher gespeichert)
 • Technische Daten: IP-Adresse, Browser-Typ, Zugriffszeiten (via Supabase)`,
   ],
   [
@@ -91,12 +99,15 @@ ldi.nrw.de`,
     '7. Cookies & lokale Speicherung',
     `ria setzt keine Tracking- oder Werbe-Cookies ein. Wir nutzen den lokalen Browser-Speicher (localStorage) ausschließlich für technische Zwecke:
 
-• Login-Status (Sitzungsverwaltung)
-• Favoriten-Liste
+• Authentifizierungs-Session (Supabase Auth-Token — technisch notwendig für den Login)
+• Favoriten-Liste (für nicht eingeloggte Nutzer)
 • Ausgeblendete Chat-Threads (nutzerspezifisch)
+• Zuletzt angesehene Inserate (temporärer Verlauf, nur lokal, max. 8 Einträge)
 • Buchungsbestätigungen (lokal gecacht)
 
-Da kein Tracking stattfindet, ist ein Cookie-Banner nicht erforderlich.`,
+Supabase Auth speichert Sitzungs-Tokens im lokalen Browserspeicher (localStorage), um den Login-Status zu erhalten. Diese Tokens sind ausschließlich technisch notwendig und enthalten keine Tracking-Informationen.
+
+Da kein Tracking stattfindet und nur technisch notwendige Speicherung erfolgt, ist ein Cookie-Banner nicht erforderlich.`,
   ],
   [
     '8. Push-Benachrichtigungen',

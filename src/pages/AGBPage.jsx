@@ -111,26 +111,40 @@ export default function AGBPage({ goTo }) {
               ],
             ],
             [
-              '§ 8 Kündigung & Kontolöschung',
+              '§ 8 Bewertungen',
+              [
+                'Nutzer können nach abgeschlossenen Buchungen Bewertungen hinterlassen. Bewertungen müssen wahrheitsgemäß, sachlich und nicht beleidigend sein. ria behält sich vor, Bewertungen zu entfernen, die gegen diese Grundsätze oder gegen geltendes Recht verstoßen.',
+                'Nach Löschung eines Nutzerkontos können bereits abgegebene Bewertungen in anonymisierter Form (ohne Namensnennung) erhalten bleiben, sofern sie für andere Nutzer relevant sind und keine personenbezogenen Daten des gelöschten Kontos enthalten.',
+              ],
+            ],
+            [
+              '§ 9 Kündigung & Kontolöschung',
               [
                 'Nutzer können ihr Konto jederzeit durch Kontaktaufnahme unter ria.rentitall@web.de löschen lassen. Mit der Kontolöschung werden alle personenbezogenen Daten innerhalb von 30 Tagen gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.',
                 'ria behält sich vor, Nutzerkonten bei Verstößen gegen diese AGB fristlos zu sperren oder zu löschen.',
               ],
             ],
             [
-              '§ 9 Änderungen der AGB',
+              '§ 10 Änderungen der AGB',
               [
                 'ria behält sich vor, diese AGB zu ändern. Über wesentliche Änderungen werden Nutzer mindestens 30 Tage vor Inkrafttreten per E-Mail informiert. Wird der Nutzung nach Ablauf der Frist nicht widersprochen, gelten die neuen AGB als akzeptiert. Das Widerspruchsrecht bleibt unberührt.',
               ],
             ],
             [
-              '§ 10 Anwendbares Recht & Gerichtsstand',
+              '§ 11 Anwendbares Recht & Gerichtsstand',
               [
                 'Es gilt das Recht der Bundesrepublik Deutschland. Gerichtsstand für Streitigkeiten mit Unternehmern ist Paderborn. Für Verbraucher gelten die gesetzlichen Zuständigkeitsregelungen.',
               ],
             ],
             [
-              '§ 11 Salvatorische Klausel',
+              '§ 12 Online-Streitbeilegung',
+              [
+                'Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: https://ec.europa.eu/consumers/odr/',
+                'Unsere E-Mail-Adresse lautet: ria.rentitall@web.de. Wir sind nicht verpflichtet und nicht bereit, an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.',
+              ],
+            ],
+            [
+              '§ 13 Salvatorische Klausel',
               [
                 'Sollten einzelne Bestimmungen dieser AGB ganz oder teilweise unwirksam sein oder werden, berührt dies die Wirksamkeit der übrigen Bestimmungen nicht. Anstelle der unwirksamen Bestimmung gilt eine wirksame Regelung, die dem wirtschaftlichen Zweck der unwirksamen Klausel am nächsten kommt.',
               ],
