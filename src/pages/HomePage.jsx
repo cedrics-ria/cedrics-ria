@@ -708,7 +708,7 @@ export default function HomePage({
               {[
                 ['€89–150', 'Kaufpreis für eine Bohrmaschine'],
                 ['10–25 kg CO₂', 'Durch Produktion & Transport (je nach Gerät)'],
-                ['15 Min / Jahr', 'Tatsächliche Nutzungsdauer'],
+                ['15 Min im Leben', 'Tatsächliche Nutzungsdauer'],
                 ['Jahre im Keller', 'Danach verstaubt sie'],
               ].map(([val, label]) => (
                 <div

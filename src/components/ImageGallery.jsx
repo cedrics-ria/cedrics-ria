@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { C } from '../constants';
 import { smartImageUrl } from '../lib/getImageUrl';
 
 export default function ImageGallery({ mainImage, images, title }) {
   const all = [mainImage, ...(images || [])].filter(Boolean);
   const [current, setCurrent] = useState(0);
+  const touchStartX = useRef(0);
+
   if (all.length === 0)
     return (
       <div
@@ -20,10 +22,19 @@ export default function ImageGallery({ mainImage, images, title }) {
         Kein Bild
       </div>
     );
+
+  function prev() { setCurrent((c) => (c - 1 + all.length) % all.length); }
+  function next() { setCurrent((c) => (c + 1) % all.length); }
+
   return (
     <div style={{ position: 'relative' }}>
       <div
         style={{ height: 460, background: C.sageLight, overflow: 'hidden', position: 'relative' }}
+        onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+        onTouchEnd={(e) => {
+          const diff = touchStartX.current - e.changedTouches[0].clientX;
+          if (Math.abs(diff) > 50) diff > 0 ? next() : prev();
+        }}
       >
         <img
           src={smartImageUrl(all[current], { width: 1200, quality: 85 })}
@@ -42,7 +53,7 @@ export default function ImageGallery({ mainImage, images, title }) {
           <>
             <button
               aria-label="Vorheriges Bild"
-              onClick={() => setCurrent((c) => (c - 1 + all.length) % all.length)}
+              onClick={prev}
               style={{
                 position: 'absolute',
                 left: 12,
@@ -61,13 +72,12 @@ export default function ImageGallery({ mainImage, images, title }) {
                 boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
                 zIndex: 1,
               }}
-
             >
               ‹
             </button>
             <button
               aria-label="Nächstes Bild"
-              onClick={() => setCurrent((c) => (c + 1) % all.length)}
+              onClick={next}
               style={{
                 position: 'absolute',
                 right: 12,

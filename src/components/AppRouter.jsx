@@ -18,6 +18,7 @@ const AGBPage = lazy(() => import('../pages/AGBPage'));
 const DatenschutzPage = lazy(() => import('../pages/DatenschutzPage'));
 const SupportPage = lazy(() => import('../pages/SupportPage'));
 const AdminPage = lazy(() => import('../pages/AdminPage'));
+const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
 const PROTECTED_PAGES = new Set(['create-listing', 'messages', 'profile']);
 
 const Fallback = (
@@ -266,6 +267,7 @@ export default function AppRouter(props) {
       impressum: () => <ImpressumPage goTo={navigate} />,
       agb: () => <AGBPage goTo={navigate} />,
       datenschutz: () => <DatenschutzPage goTo={navigate} />,
+      '404': () => <NotFoundPage goTo={navigate} />,
       home: () => (
         <HomePage
           goTo={navigate}
@@ -327,7 +329,9 @@ export default function AppRouter(props) {
 
   function renderPage() {
     if (!currentUser && PROTECTED_PAGES.has(currentPage)) return null;
-    return (routeMap[currentPage] || routeMap.home)();
+    const renderer = routeMap[currentPage];
+    if (!renderer) return routeMap['404']();
+    return renderer();
   }
 
   return (

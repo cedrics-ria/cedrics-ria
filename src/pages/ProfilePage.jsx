@@ -475,6 +475,30 @@ export default function ProfilePage({
                   Abmelden
                 </button>
               </div>
+              {/* Blockierte Nutzer */}
+              {Array.isArray(profile?.blocked_user_ids) && profile.blocked_user_ids.length > 0 && (
+                <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: `1px solid ${C.line}` }}>
+                  <p style={{ margin: '0 0 0.75rem', fontSize: '0.82rem', color: C.muted, fontWeight: 600 }}>Blockierte Nutzer</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    {profile.blocked_user_ids.map((uid) => (
+                      <div key={uid} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(196,113,74,0.08)', borderRadius: 999, padding: '0.3rem 0.75rem', fontSize: '0.8rem', color: C.terra }}>
+                        <span>{uid.slice(0, 8)}…</span>
+                        <button
+                          onClick={async () => {
+                            const next = profile.blocked_user_ids.filter((id) => id !== uid);
+                            await supabase.from('profiles').update({ blocked_user_ids: next }).eq('id', currentUser.id);
+                            addToast('Nutzer entsperrt.', 'info');
+                          }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.terra, fontWeight: 800, fontSize: '0.85rem', padding: 0, lineHeight: 1 }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div style={{ paddingTop: '0.5rem', borderTop: `1px solid rgba(196,113,74,0.2)` }}>
                 <p style={{ margin: '0 0 0.75rem', fontSize: '0.82rem', color: C.muted, fontWeight: 600 }}>Gefahrenzone</p>
                 {!accountDeleteConfirm ? (
@@ -534,6 +558,50 @@ export default function ProfilePage({
           )}
         </div>
 
+        {/* Profil-Vollständigkeit */}
+        {(() => {
+          const steps = [
+            { label: 'E-Mail bestätigt', done: currentUser.emailConfirmed },
+            { label: 'Profilfoto', done: !!profile?.avatar_url },
+            { label: 'Über mich', done: !!(profile?.bio?.trim()) },
+            { label: 'Telefon', done: !!(profile?.phone?.trim()) },
+            { label: 'Standort', done: !!(profile?.location?.trim()) },
+          ];
+          const done = steps.filter((s) => s.done).length;
+          const pct = Math.round((done / steps.length) * 100);
+          if (pct === 100) return null;
+          return (
+            <div
+              style={{
+                background: 'white',
+                borderRadius: 16,
+                padding: '1rem 1.25rem',
+                border: `1px solid ${C.line}`,
+                marginBottom: '1.25rem',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: C.forest }}>Profil vervollständigen</span>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: C.sage }}>{pct} %</span>
+              </div>
+              <div style={{ height: 6, background: C.sageLight, borderRadius: 999, overflow: 'hidden', marginBottom: '0.65rem' }}>
+                <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg, ${C.forest}, ${C.sage})`, borderRadius: 999, transition: 'width 0.4s ease' }} />
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                {steps.filter((s) => !s.done).map((s) => (
+                  <span
+                    key={s.label}
+                    onClick={() => setEditingProfile(true)}
+                    style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: 999, background: 'rgba(196,113,74,0.09)', color: C.terra, fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    + {s.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Tabs */}
         <div
           style={{
@@ -551,6 +619,7 @@ export default function ProfilePage({
             ['buchungen', `Anfragen${ownerBookingsBadge}`],
             ['meine-buchungen', `Meine Buchungen${renterBookingsBadge}`],
             ['favorites', `Favoriten (${favListings.length})`],
+            ['recent', 'Zuletzt angesehen'],
             ['messages', `Nachrichten (${myMessages.length})`],
           ].map(([t, label]) => (
             <button
@@ -1311,6 +1380,56 @@ export default function ProfilePage({
             )}
           </div>
         )}
+
+        {/* Tab: Zuletzt angesehen */}
+        {activeTab === 'recent' && (() => {
+          let recentIds = [];
+          try { recentIds = JSON.parse(localStorage.getItem('ria-recently-viewed') || '[]'); } catch {}
+          const recentListings = recentIds
+            .map((id) => listings.find((l) => String(l.id) === String(id)))
+            .filter(Boolean);
+          return (
+            <div>
+              <h2 style={{ color: C.forest, margin: '0 0 1.25rem', fontSize: '1.4rem' }}>Zuletzt angesehen</h2>
+              {recentListings.length === 0 ? (
+                <EmptyState
+                  title="Noch nichts angesehen"
+                  text="Inserate, die du dir angeschaut hast, erscheinen hier."
+                  buttonLabel="Inserate entdecken"
+                  onClick={() => goTo('listings')}
+                />
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
+                  {recentListings.map((item) => (
+                    <div
+                      key={item.id}
+                      className="hover-card"
+                      onClick={() => onSelectListing(item)}
+                      style={{ background: 'white', borderRadius: 20, overflow: 'hidden', border: `1px solid ${C.line}`, boxShadow: C.shadow, cursor: 'pointer' }}
+                    >
+                      <div style={{ height: 140, background: C.sageLight }}>
+                        {item.image && (
+                          <img
+                            src={smartImageUrl(item.image, { width: 400, quality: 75 })}
+                            alt={item.title}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                          />
+                        )}
+                      </div>
+                      <div style={{ padding: '0.9rem 1rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.2rem' }}>
+                          <h3 style={{ color: C.forest, margin: 0, fontSize: '0.95rem' }}>{item.title}</h3>
+                          <span style={{ color: C.terra, fontWeight: 800, fontSize: '0.88rem', whiteSpace: 'nowrap' }}>{item.price}</span>
+                        </div>
+                        <p style={{ color: C.muted, margin: 0, fontSize: '0.8rem' }}>{item.location}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Tab: Nachrichten */}
         {activeTab === 'messages' && (

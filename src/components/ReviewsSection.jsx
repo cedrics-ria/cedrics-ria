@@ -4,7 +4,7 @@ import { inputBaseStyle, primaryButtonStyle, applyInputFocus, resetInputFocus } 
 import StarRow from './StarRow';
 import { supabase } from '../supabase';
 
-export default function ReviewsSection({ listingId, currentUser, addToast, onReviewAdded }) {
+export default function ReviewsSection({ listingId, listingUserId, currentUser, addToast, onReviewAdded }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -12,6 +12,10 @@ export default function ReviewsSection({ listingId, currentUser, addToast, onRev
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
   const [saving, setSaving] = useState(false);
+  const [hasCompletedBooking, setHasCompletedBooking] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null); // review id being replied to
+  const [replyText, setReplyText] = useState('');
+  const [savingReply, setSavingReply] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -25,8 +29,22 @@ export default function ReviewsSection({ listingId, currentUser, addToast, onRev
     })();
   }, [listingId]);
 
+  // Check if current user has a completed booking for this listing
+  useEffect(() => {
+    if (!currentUser?.id || !listingId) return;
+    supabase
+      .from('bookings')
+      .select('id')
+      .eq('listing_id', String(listingId))
+      .eq('requester_id', currentUser.id)
+      .in('status', ['returned', 'confirmed'])
+      .limit(1)
+      .then(({ data }) => setHasCompletedBooking((data?.length ?? 0) > 0));
+  }, [currentUser?.id, listingId]);
+
   const hasReviewed = reviews.some((r) => r.reviewer_id === currentUser?.id);
   const avgRating = reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
+  const isOwner = currentUser?.id === listingUserId;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -57,6 +75,21 @@ export default function ReviewsSection({ listingId, currentUser, addToast, onRev
     addToast('Bewertung gespeichert ✓', 'info');
   }
 
+  async function handleSaveReply(reviewId) {
+    if (!replyText.trim() || savingReply) return;
+    setSavingReply(true);
+    const { error } = await supabase
+      .from('reviews')
+      .update({ owner_reply: replyText.trim(), owner_reply_at: new Date().toISOString() })
+      .eq('id', reviewId);
+    setSavingReply(false);
+    if (error) { addToast('Fehler beim Speichern', 'error'); return; }
+    setReviews((prev) => prev.map((r) => r.id === reviewId ? { ...r, owner_reply: replyText.trim(), owner_reply_at: new Date().toISOString() } : r));
+    setReplyingTo(null);
+    setReplyText('');
+    addToast('Antwort gespeichert ✓', 'info');
+  }
+
   return (
     <div style={{ marginTop: '3rem' }}>
       <div
@@ -82,23 +115,29 @@ export default function ReviewsSection({ listingId, currentUser, addToast, onRev
             </span>
           </div>
         )}
-        {currentUser && !hasReviewed && !showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            style={{
-              marginLeft: 'auto',
-              padding: '0.55rem 1rem',
-              borderRadius: 12,
-              border: `1px solid ${C.line}`,
-              background: 'white',
-              color: C.forest,
-              fontWeight: 700,
-              cursor: 'pointer',
-              fontSize: '0.85rem',
-            }}
-          >
-            + Bewertung
-          </button>
+        {currentUser && !hasReviewed && !showForm && !isOwner && (
+          hasCompletedBooking ? (
+            <button
+              onClick={() => setShowForm(true)}
+              style={{
+                marginLeft: 'auto',
+                padding: '0.55rem 1rem',
+                borderRadius: 12,
+                border: `1px solid ${C.line}`,
+                background: 'white',
+                color: C.forest,
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+              }}
+            >
+              + Bewertung
+            </button>
+          ) : (
+            <span style={{ marginLeft: 'auto', fontSize: '0.8rem', color: C.muted }}>
+              Nur nach abgeschlossener Buchung
+            </span>
+          )
         )}
       </div>
 
@@ -276,6 +315,66 @@ export default function ReviewsSection({ listingId, currentUser, addToast, onRev
               >
                 {r.comment}
               </p>
+            )}
+
+            {/* Owner reply */}
+            {r.owner_reply && (
+              <div
+                style={{
+                  marginTop: '0.85rem',
+                  marginLeft: '3.1rem',
+                  background: C.sageLight,
+                  borderRadius: 12,
+                  padding: '0.75rem 1rem',
+                  borderLeft: `3px solid ${C.forest}`,
+                }}
+              >
+                <div style={{ fontSize: '0.75rem', color: C.forest, fontWeight: 700, marginBottom: '0.3rem' }}>
+                  Antwort des Anbieters
+                </div>
+                <p style={{ margin: 0, fontSize: '0.88rem', color: C.ink, lineHeight: 1.6 }}>
+                  {r.owner_reply}
+                </p>
+              </div>
+            )}
+
+            {/* Owner can reply if no reply yet */}
+            {isOwner && !r.owner_reply && (
+              replyingTo === r.id ? (
+                <div style={{ marginTop: '0.75rem', marginLeft: '3.1rem' }}>
+                  <textarea
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder="Deine Antwort..."
+                    rows={2}
+                    onFocus={applyInputFocus}
+                    onBlur={resetInputFocus}
+                    style={{ ...inputBaseStyle, resize: 'none', fontSize: '0.85rem', marginBottom: '0.5rem' }}
+                  />
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      onClick={() => { setReplyingTo(null); setReplyText(''); }}
+                      style={{ flex: 1, padding: '0.5rem', borderRadius: 10, border: `1px solid ${C.line}`, background: 'white', color: C.muted, fontSize: '0.82rem', cursor: 'pointer', fontWeight: 600 }}
+                    >
+                      Abbrechen
+                    </button>
+                    <button
+                      onClick={() => handleSaveReply(r.id)}
+                      disabled={!replyText.trim() || savingReply}
+                      style={{ flex: 2, padding: '0.5rem', borderRadius: 10, border: 'none', background: C.forest, color: 'white', fontSize: '0.82rem', cursor: 'pointer', fontWeight: 700, opacity: !replyText.trim() || savingReply ? 0.6 : 1 }}
+                    >
+                      {savingReply ? 'Speichern...' : 'Antworten'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setReplyingTo(r.id); setReplyText(''); }}
+                  style={{ marginTop: '0.5rem', marginLeft: '3.1rem', background: 'none', border: 'none', color: C.muted, fontSize: '0.78rem', cursor: 'pointer', padding: 0, textDecoration: 'underline', textUnderlineOffset: 2 }}
+                >
+                  Antworten
+                </button>
+              )
             )}
           </div>
         ))}

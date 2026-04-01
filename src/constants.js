@@ -7,6 +7,7 @@ export const STORAGE_KEYS = {
   CURRENT_USER: 'ria-current-user',
   FAVORITES: 'ria-favorites',
   hiddenThreads: (userId) => `ria-hidden-threads-${userId}`,
+  RECENTLY_VIEWED: 'ria-recently-viewed',
 };
 
 export const C = {

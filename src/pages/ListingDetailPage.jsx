@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { C } from '../constants';
+import { C, STORAGE_KEYS } from '../constants';
 import { primaryButtonStyle } from '../styles';
 import ImageGallery from '../components/ImageGallery';
 import ListingMap from '../components/ListingMap';
@@ -28,6 +28,7 @@ export default function ListingDetailPage({
 }) {
   const [ownerProfile, setOwnerProfile] = useState(null);
   const [showReport, setShowReport] = useState(false);
+  const [onWatchlist, setOnWatchlist] = useState(false);
 
   async function handleShare() {
     const url = `${window.location.origin}?inserat=${listing.id}`;
@@ -59,9 +60,83 @@ export default function ListingDetailPage({
   // Increment view counter — only for non-owners
   useEffect(() => {
     if (!listing?.id || listing.userId === 'demo') return;
-    if (currentUser?.id === listing.userId) return; // don't count own views
+    if (currentUser?.id === listing.userId) return;
     supabase.rpc('increment_listing_views', { p_listing_id: listing.id }).then(() => {});
   }, [listing?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Track recently viewed
+  useEffect(() => {
+    if (!listing?.id) return;
+    try {
+      const prev = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENTLY_VIEWED) || '[]');
+      const next = [String(listing.id), ...prev.filter((id) => id !== String(listing.id))].slice(0, 8);
+      localStorage.setItem(STORAGE_KEYS.RECENTLY_VIEWED, JSON.stringify(next));
+    } catch {}
+  }, [listing?.id]);
+
+  // Dynamic SEO meta tags + JSON-LD
+  useEffect(() => {
+    if (!listing) return;
+    const prevTitle = document.title;
+    document.title = `${listing.title} – ${listing.price} | ria`;
+    const setMeta = (sel, attr, val) => document.querySelector(sel)?.setAttribute(attr, val);
+    setMeta('meta[property="og:title"]', 'content', `${listing.title} | ria`);
+    setMeta('meta[property="og:description"]', 'content', (listing.description || '').slice(0, 160));
+    setMeta('meta[property="og:image"]', 'content', listing.image || 'https://ria-rentitall.de/og-image.png');
+    setMeta('meta[name="twitter:title"]', 'content', `${listing.title} | ria`);
+    setMeta('meta[name="twitter:description"]', 'content', (listing.description || '').slice(0, 160));
+    setMeta('meta[name="twitter:image"]', 'content', listing.image || 'https://ria-rentitall.de/og-image.png');
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'ria-listing-jsonld';
+    script.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: listing.title,
+      description: listing.description,
+      image: listing.image,
+      offers: {
+        '@type': 'Offer',
+        priceCurrency: 'EUR',
+        availability: listing.isAvailable !== false ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        seller: { '@type': 'Person', name: listing.ownerName },
+      },
+    });
+    document.head.appendChild(script);
+    return () => {
+      document.title = prevTitle;
+      setMeta('meta[property="og:title"]', 'content', 'ria — rent it all');
+      setMeta('meta[property="og:description"]', 'content', 'Miete und verleihe Gegenstände lokal — direkt von Mensch zu Mensch.');
+      setMeta('meta[property="og:image"]', 'content', 'https://ria-rentitall.de/og-image.png');
+      setMeta('meta[name="twitter:title"]', 'content', 'ria — rent it all');
+      setMeta('meta[name="twitter:description"]', 'content', 'Miete und verleihe Gegenstände lokal — direkt von Mensch zu Mensch.');
+      setMeta('meta[name="twitter:image"]', 'content', 'https://ria-rentitall.de/og-image.png');
+      document.getElementById('ria-listing-jsonld')?.remove();
+    };
+  }, [listing?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load watchlist status
+  useEffect(() => {
+    if (!currentUser?.id || !listing?.id || listing.isAvailable !== false) return;
+    supabase
+      .from('watchlist')
+      .select('id')
+      .eq('user_id', currentUser.id)
+      .eq('listing_id', String(listing.id))
+      .maybeSingle()
+      .then(({ data }) => setOnWatchlist(!!data));
+  }, [currentUser?.id, listing?.id, listing?.isAvailable]);
+
+  async function toggleWatchlist() {
+    if (!currentUser?.id || !listing?.id) return;
+    if (onWatchlist) {
+      await supabase.from('watchlist').delete().eq('user_id', currentUser.id).eq('listing_id', String(listing.id));
+      setOnWatchlist(false);
+    } else {
+      await supabase.from('watchlist').upsert({ user_id: currentUser.id, listing_id: String(listing.id) });
+      setOnWatchlist(true);
+    }
+  }
 
   if (!listing) {
     return (
@@ -484,22 +559,46 @@ export default function ListingDetailPage({
                   </button>
                 </div>
               ) : listing.isAvailable === false ? (
-                <div
-                  style={{
-                    background: 'rgba(196,113,74,0.08)',
-                    border: `1px solid ${C.terra}`,
-                    borderRadius: 14,
-                    padding: '1.1rem',
-                    textAlign: 'center',
-                    marginBottom: '0.75rem',
-                  }}
-                >
-                  <div style={{ fontWeight: 800, color: C.terra, marginBottom: '0.2rem' }}>
-                    Momentan vergeben
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <div
+                    style={{
+                      background: 'rgba(196,113,74,0.08)',
+                      border: `1px solid ${C.terra}`,
+                      borderRadius: 14,
+                      padding: '1.1rem',
+                      textAlign: 'center',
+                      marginBottom: '0.6rem',
+                    }}
+                  >
+                    <div style={{ fontWeight: 800, color: C.terra, marginBottom: '0.2rem' }}>
+                      Momentan vergeben
+                    </div>
+                    <div style={{ fontSize: '0.82rem', color: C.muted }}>
+                      Dieses Inserat ist aktuell nicht verfügbar.
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.82rem', color: C.muted }}>
-                    Dieses Inserat ist aktuell nicht verfügbar.
-                  </div>
+                  {currentUser && (
+                    <button
+                      onClick={toggleWatchlist}
+                      style={{
+                        width: '100%',
+                        padding: '0.85rem',
+                        borderRadius: 14,
+                        border: `1px solid ${onWatchlist ? C.forest : C.line}`,
+                        background: onWatchlist ? C.sageLight : 'white',
+                        color: onWatchlist ? C.forest : C.muted,
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                      }}
+                    >
+                      🔔 {onWatchlist ? 'Wirst benachrichtigt' : 'Benachrichtigen wenn verfügbar'}
+                    </button>
+                  )}
                 </div>
               ) : (
                 <button
@@ -577,23 +676,26 @@ export default function ListingDetailPage({
               </p>
 
               {currentUser && currentUser.id !== listing.userId && listing.userId !== 'demo' && (
-                <button
-                  onClick={() => setShowReport(true)}
-                  style={{
-                    display: 'block',
-                    margin: '1rem auto 0',
-                    background: 'none',
-                    border: 'none',
-                    color: C.muted,
-                    fontSize: '0.78rem',
-                    cursor: 'pointer',
-                    padding: '0.25rem 0.5rem',
-                    textDecoration: 'underline',
-                    textUnderlineOffset: 3,
-                  }}
-                >
-                  ⚑ Inserat oder Nutzer melden
-                </button>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1rem' }}>
+                  <button
+                    onClick={() => setShowReport(true)}
+                    style={{ background: 'none', border: 'none', color: C.muted, fontSize: '0.78rem', cursor: 'pointer', padding: '0.25rem 0.5rem', textDecoration: 'underline', textUnderlineOffset: 3 }}
+                  >
+                    ⚑ Melden
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (!window.confirm(`${listing.ownerName} blockieren? Du siehst dann keine Nachrichten oder Inserate mehr von dieser Person.`)) return;
+                      const blocked = Array.isArray(currentUser.blockedIds) ? currentUser.blockedIds : [];
+                      if (blocked.includes(listing.userId)) return;
+                      await supabase.from('profiles').update({ blocked_user_ids: [...blocked, listing.userId] }).eq('id', currentUser.id);
+                      addToast(`${listing.ownerName} wurde blockiert.`, 'info');
+                    }}
+                    style={{ background: 'none', border: 'none', color: C.muted, fontSize: '0.78rem', cursor: 'pointer', padding: '0.25rem 0.5rem', textDecoration: 'underline', textUnderlineOffset: 3 }}
+                  >
+                    🚫 Blockieren
+                  </button>
+                </div>
               )}
             </div>
 
@@ -682,6 +784,7 @@ export default function ListingDetailPage({
         {/* Bewertungen */}
         <ReviewsSection
           listingId={listing.id}
+          listingUserId={listing.userId}
           currentUser={currentUser}
           addToast={addToast}
           onReviewAdded={onReviewAdded}
