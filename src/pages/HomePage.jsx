@@ -1,9 +1,23 @@
+import { useEffect, useState } from 'react';
 import { C, categories, steps } from '../constants';
 import { smartImageUrl } from '../lib/getImageUrl.js';
 import Logo from '../components/Logo';
 import AnimatedCounter from '../components/AnimatedCounter';
 import RatingStars from '../components/RatingStars';
 import ListingCard from '../components/ListingCard';
+
+async function reverseGeocode(lat, lon) {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=de`,
+      { headers: { 'User-Agent': 'ria-rentitall/1.0' } }
+    );
+    const data = await res.json();
+    return data.address?.city || data.address?.town || data.address?.village || data.address?.county || null;
+  } catch {
+    return null;
+  }
+}
 
 export default function HomePage({
   goTo,
@@ -12,7 +26,44 @@ export default function HomePage({
   onSearch,
   onSelectListing,
 }) {
+  const [nearbyCity, setNearbyCity] = useState(null);
+  const [locationDenied, setLocationDenied] = useState(false);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    // Check if permission was already granted (don't prompt on every visit)
+    if (navigator.permissions) {
+      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+        if (result.state === 'granted') {
+          navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+            const city = await reverseGeocode(coords.latitude, coords.longitude);
+            if (city) setNearbyCity(city);
+          });
+        } else if (result.state === 'denied') {
+          setLocationDenied(true);
+        }
+        // 'prompt' state → don't ask automatically, wait for user click
+      });
+    }
+  }, []);
+
+  function requestLocation() {
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        const city = await reverseGeocode(coords.latitude, coords.longitude);
+        if (city) setNearbyCity(city);
+        else setLocationDenied(true);
+      },
+      () => setLocationDenied(true)
+    );
+  }
+
+  const nearbyListings = nearbyCity
+    ? listings.filter((l) => l.location?.toLowerCase().includes(nearbyCity.toLowerCase()))
+    : [];
+
   const featuredListings = (() => {
+    if (nearbyCity && nearbyListings.length > 0) return nearbyListings.slice(0, 3);
     const f = listings.filter((item) => item.featured).slice(0, 3);
     return f.length > 0 ? f : listings.slice(0, 3);
   })();
@@ -287,24 +338,28 @@ export default function HomePage({
             }}
           >
             <div>
-              <p
-                style={{
-                  fontSize: '0.78rem',
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  color: C.sage,
-                  fontWeight: 700,
-                  marginBottom: '0.75rem',
-                }}
-              >
-                Beliebt in deiner Nähe
-              </p>
-              <h2
-                style={{ fontSize: '2.1rem', color: C.forest, margin: 0, letterSpacing: '-0.03em' }}
-              >
-                {listings.length > 0
-                  ? `${listings.length} Inserate in deiner Nähe`
-                  : 'Beliebte Inserate'}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+                <p style={{ fontSize: '0.78rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: C.sage, fontWeight: 700, margin: 0 }}>
+                  {nearbyCity ? `In deiner Nähe · ${nearbyCity}` : 'Beliebt in deiner Nähe'}
+                </p>
+                {!nearbyCity && !locationDenied && navigator.geolocation && (
+                  <button
+                    onClick={requestLocation}
+                    style={{ background: 'none', border: `1px solid ${C.sage}`, borderRadius: 999, padding: '0.2rem 0.7rem', fontSize: '0.72rem', fontWeight: 700, color: C.sage, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                  >
+                    📍 Standort nutzen
+                  </button>
+                )}
+                {locationDenied && (
+                  <span style={{ fontSize: '0.72rem', color: C.muted }}>Standort nicht verfügbar</span>
+                )}
+              </div>
+              <h2 style={{ fontSize: '2.1rem', color: C.forest, margin: 0, letterSpacing: '-0.03em' }}>
+                {nearbyCity && nearbyListings.length > 0
+                  ? `${nearbyListings.length} Inserate in ${nearbyCity}`
+                  : listings.length > 0
+                    ? `${listings.length} Inserate in deiner Nähe`
+                    : 'Beliebte Inserate'}
               </h2>
             </div>
             <button
