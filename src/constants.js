@@ -27,6 +27,8 @@ export const categoryImages = {
   Werkzeug: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1200&q=80',
   Technik: 'https://images.unsplash.com/photo-1528395874238-34ebe249b3f2?w=1200&q=80',
   Outdoor: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=1200&q=80',
+  Sport: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=1200&q=80',
+  // Legacy — bestehende Inserate mit alter Kategorie bleiben funktionsfähig
   'Outdoor & Sport': 'https://images.unsplash.com/photo-1533240332313-0db49b459ad6?w=1200&q=80',
   'Foto & Technik': 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1200&q=80',
   'Party & Events': 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=1200&q=80',
@@ -40,7 +42,8 @@ export const categoryImages = {
 export const allCategoryNames = [
   'Werkzeug',
   'Technik',
-  'Outdoor & Sport',
+  'Outdoor',
+  'Sport',
   'Foto & Technik',
   'Party & Events',
   'Musik',
@@ -48,10 +51,13 @@ export const allCategoryNames = [
   'Transport',
   'Gaming',
   'Sonstiges',
+  // Legacy-Wert damit alte Inserate nicht leer angezeigt werden
+  'Outdoor & Sport',
 ];
 
 export const categories = [
-  { name: 'Outdoor & Sport', img: categoryImages['Outdoor & Sport'] },
+  { name: 'Outdoor', img: categoryImages.Outdoor },
+  { name: 'Sport', img: categoryImages.Sport },
   { name: 'Werkzeug', img: categoryImages.Werkzeug },
   { name: 'Foto & Technik', img: categoryImages['Foto & Technik'] },
   { name: 'Party & Events', img: categoryImages['Party & Events'] },
