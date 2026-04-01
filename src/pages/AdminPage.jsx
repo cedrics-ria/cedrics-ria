@@ -119,7 +119,7 @@ export default function AdminPage({
       // Cumulative user count per month (all users up to & incl. that month)
       const memberData = months.map((m) => {
         const endOfMonth = new Date(m.year, m.month + 1, 0, 23, 59, 59, 999);
-        const total = allProfiles.filter(p => p.created_at && new Date(p.created_at) <= endOfMonth).length;
+        const total = allProfiles.filter(p => !p.created_at || new Date(p.created_at) <= endOfMonth).length;
         const newCount = allProfiles.filter(p => {
           if (!p.created_at) return false;
           const d = new Date(p.created_at);
@@ -127,12 +127,6 @@ export default function AdminPage({
         }).length;
         return { label: m.label, value: total, new: newCount };
       });
-
-      // If no profiles have created_at, fall back to total in current month
-      if (memberData.every(d => d.value === 0) && allProfiles.length > 0) {
-        memberData[memberData.length - 1].value = allProfiles.length;
-        memberData[memberData.length - 1].new = allProfiles.length;
-      }
 
       function bucket(rows, field) {
         return months.map(m => {
