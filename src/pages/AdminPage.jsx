@@ -189,6 +189,19 @@ export default function AdminPage({
     loadUsers();
   }, [isAdmin]);
 
+  // Realtime: new reports appear instantly
+  useEffect(() => {
+    if (!isAdmin) return;
+    const ch = supabase
+      .channel('admin-reports-live')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reports' }, (p) => {
+        setReports((prev) => prev.find((r) => r.id === p.new.id) ? prev : [p.new, ...prev]);
+        addToast(`Neue Meldung: ${p.new.reason}`, 'info');
+      })
+      .subscribe((status, err) => { if (err) console.error('[Realtime] reports:', err); });
+    return () => supabase.removeChannel(ch);
+  }, [isAdmin, addToast]);
+
   async function markReportHandled(id, status) {
     const { error } = await supabase.from('reports').update({ status }).eq('id', id);
     if (error) {
@@ -841,6 +854,26 @@ export default function AdminPage({
                               {users.find((u) => u.id === rep.reported_user_id)?.is_banned
                                 ? 'Entsperren'
                                 : 'Sperren'}
+                            </button>
+                          )}
+                          {rep.listing_id && rep.status !== 'resolved' && (
+                            <button
+                              onClick={async () => {
+                                await handleDeleteListing(rep.listing_id);
+                                markReportHandled(rep.id, 'resolved');
+                              }}
+                              style={{
+                                padding: '0.45rem 0.85rem',
+                                borderRadius: 10,
+                                border: '1px solid rgba(196,113,74,0.5)',
+                                background: C.terra,
+                                color: 'white',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                fontSize: '0.78rem',
+                              }}
+                            >
+                              Inserat löschen
                             </button>
                           )}
                         </div>
