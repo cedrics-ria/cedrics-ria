@@ -352,6 +352,21 @@ export default function ProfilePage({
               >
                 {editingProfile ? 'Abbrechen' : 'Profil bearbeiten'}
               </button>
+              <button
+                onClick={onLogout}
+                style={{
+                  padding: '0.6rem 1.1rem',
+                  borderRadius: 12,
+                  border: `1px solid rgba(196,113,74,0.3)`,
+                  background: 'white',
+                  color: C.terra,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                }}
+              >
+                Ausloggen
+              </button>
             </div>
           </div>
           {editingProfile && (

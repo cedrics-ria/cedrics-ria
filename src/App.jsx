@@ -107,9 +107,11 @@ export default function App() {
   // ── Computed ──────────────────────────────────────────────────────────────
   const unreadCount = useMemo(() => {
     if (!currentUser) return 0;
-    return messages.filter(
-      (m) => m.toUserId === currentUser.id && !m.read && !hiddenThreads.has(String(m.listingId))
-    ).length;
+    return messages.filter((m) => {
+      if (m.toUserId !== currentUser.id || m.read) return false;
+      const threadKey = `${String(m.listingId)}::${String(m.fromUserId)}`;
+      return !hiddenThreads.has(threadKey);
+    }).length;
   }, [messages, currentUser, hiddenThreads]);
 
   const unreadSupportCount = useMemo(
