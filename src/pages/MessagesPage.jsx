@@ -154,6 +154,17 @@ export default function MessagesPage({
       .sort((a, b) => new Date(b.lastAt) - new Date(a.lastAt));
   }, [messages, currentUser, listings, readThreads]);
 
+  const visibleThreads = useMemo(
+    () => threads.filter(
+      (t) =>
+        !hiddenThreads.has(t.key) &&
+        (!search ||
+          t.otherName?.toLowerCase().includes(search.toLowerCase()) ||
+          t.listingTitle?.toLowerCase().includes(search.toLowerCase()))
+    ),
+    [threads, hiddenThreads, search]
+  );
+
   const active = threads.find((t) => t.key === openThread);
 
   // Load avatars for all conversation partners (must be after threads is defined)
@@ -324,7 +335,7 @@ export default function MessagesPage({
         >
           Nachrichten
         </h1>
-        {threads.filter(t => !hiddenThreads.has(t.key)).length > 1 && (
+        {threads.filter(t => !hiddenThreads.has(t.key)).length > 1 && ( // show search if >1 non-hidden
           <div style={{ marginBottom: '1.25rem', position: 'relative' }}>
             <input
               type="search"
@@ -347,7 +358,7 @@ export default function MessagesPage({
           </div>
         )}
 
-        {threads.filter(t => !hiddenThreads.has(t.key) && (!search || t.otherName?.toLowerCase().includes(search.toLowerCase()) || t.listingTitle?.toLowerCase().includes(search.toLowerCase()))).length === 0 ? (
+        {visibleThreads.length === 0 ? (
           <EmptyState
             title="Noch keine Nachrichten"
             text="Schreib einem Verleiher oder erstelle ein Inserat, um Anfragen zu bekommen."
@@ -356,7 +367,7 @@ export default function MessagesPage({
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {threads.filter(t => !hiddenThreads.has(t.key) && (!search || t.otherName?.toLowerCase().includes(search.toLowerCase()) || t.listingTitle?.toLowerCase().includes(search.toLowerCase()))).map((thread) => {
+            {visibleThreads.map((thread) => {
               const isOpen = openThread === thread.key;
               const lastMsg = thread.msgs.length > 0 ? thread.msgs[thread.msgs.length - 1] : null;
               const isAccepted = thread.msgs.some(

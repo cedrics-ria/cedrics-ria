@@ -77,20 +77,24 @@ export default function AdminPage({
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
   async function loadStats() {
-    const [listingsRes, usersRes, messagesRes, supportRes, transactionsRes] = await Promise.all([
-      supabase.from('listings').select('id', { count: 'exact', head: true }),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }),
-      supabase.from('messages').select('id', { count: 'exact', head: true }),
-      supabase.from('support_requests').select('id', { count: 'exact', head: true }),
-      supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
-    ]);
-    setStats({
-      listings: listingsRes.count ?? 0,
-      users: usersRes.count ?? 0,
-      messages: messagesRes.count ?? 0,
-      support: supportRes.count ?? 0,
-      transactions: transactionsRes.count ?? 0,
-    });
+    try {
+      const [listingsRes, usersRes, messagesRes, supportRes, transactionsRes] = await Promise.all([
+        supabase.from('listings').select('id', { count: 'exact', head: true }),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }),
+        supabase.from('messages').select('id', { count: 'exact', head: true }),
+        supabase.from('support_requests').select('id', { count: 'exact', head: true }),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
+      ]);
+      setStats({
+        listings: listingsRes.count ?? 0,
+        users: usersRes.count ?? 0,
+        messages: messagesRes.count ?? 0,
+        support: supportRes.count ?? 0,
+        transactions: transactionsRes.count ?? 0,
+      });
+    } catch {
+      // Stats dashboard remains visible with previous values on network error
+    }
   }
 
   async function loadAnalytics() {
@@ -103,50 +107,53 @@ export default function AdminPage({
     }
     const cutoff = new Date(months[0].year, months[0].month, 1).toISOString();
 
-    const [allProfilesRes, listingsRes, bookingsRes] = await Promise.all([
-      supabase.from('profiles').select('created_at'),          // ALL — for cumulative
-      supabase.from('listings').select('created_at').gte('created_at', cutoff),
-      supabase.from('bookings').select('completed_at').eq('status', 'completed').gte('completed_at', cutoff),
-    ]);
+    try {
+      const [allProfilesRes, listingsRes, bookingsRes] = await Promise.all([
+        supabase.from('profiles').select('created_at'),          // ALL — for cumulative
+        supabase.from('listings').select('created_at').gte('created_at', cutoff),
+        supabase.from('bookings').select('completed_at').eq('status', 'completed').gte('completed_at', cutoff),
+      ]);
 
-    const allProfiles = allProfilesRes.data || [];
+      const allProfiles = allProfilesRes.data || [];
 
-    // Cumulative user count per month (all users up to & incl. that month)
-    const memberData = months.map((m) => {
-      const endOfMonth = new Date(m.year, m.month + 1, 0, 23, 59, 59, 999);
-      const total = allProfiles.filter(p => p.created_at && new Date(p.created_at) <= endOfMonth).length;
-      const newCount = allProfiles.filter(p => {
-        if (!p.created_at) return false;
-        const d = new Date(p.created_at);
-        return d.getFullYear() === m.year && d.getMonth() === m.month;
-      }).length;
-      return { label: m.label, value: total, new: newCount };
-    });
-
-    // If no profiles have created_at, fall back to total in current month
-    if (memberData.every(d => d.value === 0) && allProfiles.length > 0) {
-      memberData[memberData.length - 1].value = allProfiles.length;
-      memberData[memberData.length - 1].new = allProfiles.length;
-    }
-
-    function bucket(rows, field) {
-      return months.map(m => {
-        const count = (rows || []).filter(r => {
-          const val = r[field];
-          if (!val) return false;
-          const d = new Date(val);
+      // Cumulative user count per month (all users up to & incl. that month)
+      const memberData = months.map((m) => {
+        const endOfMonth = new Date(m.year, m.month + 1, 0, 23, 59, 59, 999);
+        const total = allProfiles.filter(p => p.created_at && new Date(p.created_at) <= endOfMonth).length;
+        const newCount = allProfiles.filter(p => {
+          if (!p.created_at) return false;
+          const d = new Date(p.created_at);
           return d.getFullYear() === m.year && d.getMonth() === m.month;
         }).length;
-        return { label: m.label, value: count, new: count };
+        return { label: m.label, value: total, new: newCount };
       });
-    }
 
-    setAnalyticsData({
-      members: memberData,
-      listings: bucket(listingsRes.data, 'created_at'),
-      transactions: bucket(bookingsRes.data, 'completed_at'),
-    });
-    setLoadingAnalytics(false);
+      // If no profiles have created_at, fall back to total in current month
+      if (memberData.every(d => d.value === 0) && allProfiles.length > 0) {
+        memberData[memberData.length - 1].value = allProfiles.length;
+        memberData[memberData.length - 1].new = allProfiles.length;
+      }
+
+      function bucket(rows, field) {
+        return months.map(m => {
+          const count = (rows || []).filter(r => {
+            const val = r[field];
+            if (!val) return false;
+            const d = new Date(val);
+            return d.getFullYear() === m.year && d.getMonth() === m.month;
+          }).length;
+          return { label: m.label, value: count, new: count };
+        });
+      }
+
+      setAnalyticsData({
+        members: memberData,
+        listings: bucket(listingsRes.data, 'created_at'),
+        transactions: bucket(bookingsRes.data, 'completed_at'),
+      });
+    } finally {
+      setLoadingAnalytics(false);
+    }
   }
 
   async function loadSupportRequests() {

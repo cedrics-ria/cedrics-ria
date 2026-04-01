@@ -20,6 +20,7 @@ export function useMessages(): UseMessagesReturn {
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   // Tracks the oldest loaded createdAt for cursor-based pagination
   const oldestCursorRef = useRef<string | null>(null);
+  const loadingMoreRef = useRef(false);
 
   const loadMessages = useCallback(async (userId: string) => {
     if (!userId) return;
@@ -41,7 +42,8 @@ export function useMessages(): UseMessagesReturn {
   }, []);
 
   const loadMoreMessages = useCallback(async (userId: string) => {
-    if (!userId || !oldestCursorRef.current) return;
+    if (!userId || !oldestCursorRef.current || loadingMoreRef.current) return;
+    loadingMoreRef.current = true;
     try {
       const { data, error } = await supabase
         .from('messages')
@@ -57,6 +59,8 @@ export function useMessages(): UseMessagesReturn {
       if (data?.length) oldestCursorRef.current = data[data.length - 1].created_at;
     } catch (err) {
       if (import.meta.env.DEV) console.warn('[useMessages] loadMoreMessages:', err);
+    } finally {
+      loadingMoreRef.current = false;
     }
   }, []);
 
