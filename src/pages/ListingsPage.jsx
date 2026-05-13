@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { C } from '../constants';
 import { inputBaseStyle, primaryButtonStyle, applyInputFocus, resetInputFocus } from '../styles';
 import SkeletonCard from '../components/SkeletonCard';
@@ -6,6 +6,32 @@ import ScrollReveal from '../components/ScrollReveal';
 import EmptyState from '../components/EmptyState';
 import ListingCard from '../components/ListingCard';
 import { useListingsSearch } from '../hooks/useListingsSearch.js';
+
+const ListingsMapView = lazy(() => import('../components/ListingsMapView'));
+
+// Sync filter state to/from URL search params
+function readUrlParams() {
+  const p = new URLSearchParams(window.location.search);
+  return {
+    q: p.get('q') || '',
+    cat: p.get('cat') || 'Alle',
+    loc: p.get('loc') || 'Alle',
+    sort: p.get('sort') || 'newest',
+    view: p.get('view') || 'grid',
+  };
+}
+
+function writeUrlParams(params) {
+  const p = new URLSearchParams();
+  if (params.q) p.set('q', params.q);
+  if (params.cat && params.cat !== 'Alle') p.set('cat', params.cat);
+  if (params.loc && params.loc !== 'Alle') p.set('loc', params.loc);
+  if (params.sort && params.sort !== 'newest') p.set('sort', params.sort);
+  if (params.view && params.view !== 'grid') p.set('view', params.view);
+  const str = p.toString();
+  const newUrl = str ? `${window.location.pathname}?${str}` : window.location.pathname;
+  window.history.replaceState(window.history.state, '', newUrl);
+}
 
 export default function ListingsPage({
   listings,
@@ -18,15 +44,17 @@ export default function ListingsPage({
   initCategory,
   initSearch,
 }) {
-  const [search, setSearch] = useState(initSearch || '');
+  const urlParams = readUrlParams();
+  const [search, setSearch] = useState(initSearch || urlParams.q);
   const [categoryFilter, setCategoryFilter] = useState(
-    initCategory && initCategory !== 'Alle' ? initCategory : 'Alle'
+    initCategory && initCategory !== 'Alle' ? initCategory : urlParams.cat
   );
-  const [locationFilter, setLocationFilter] = useState('Alle');
-  const [sort, setSort] = useState('newest');
+  const [locationFilter, setLocationFilter] = useState(urlParams.loc);
+  const [sort, setSort] = useState(urlParams.sort);
   const [mode, setMode] = useState('all');
   const [visibleCount, setVisibleCount] = useState(12);
   const [priceFilter, setPriceFilter] = useState('Alle');
+  const [viewMode, setViewMode] = useState(urlParams.view); // 'grid' | 'map'
 
   // Server-side search — pass normalized filter values (empty string = no filter)
   const searchQuery = search;
@@ -48,6 +76,11 @@ export default function ListingsPage({
     () => ['Alle', ...new Set(listings.filter((item) => item.location).map((item) => item.location))].slice(0, 8),
     [listings]
   );
+
+  // Sync filters to URL so links are shareable
+  useEffect(() => {
+    writeUrlParams({ q: search, cat: categoryFilter, loc: locationFilter, sort, view: viewMode });
+  }, [search, categoryFilter, locationFilter, sort, viewMode]);
 
   useEffect(() => {
     setVisibleCount(12);
@@ -124,36 +157,28 @@ export default function ListingsPage({
               Finde, was du brauchst.
             </h1>
           </div>
-          {currentUser ? (
-            <button
-              onClick={() => goTo('create-listing')}
-              style={{
-                ...primaryButtonStyle,
-                padding: '0.9rem 1.4rem',
-                borderRadius: 999,
-                fontSize: '0.95rem',
-              }}
-            >
-              Inserat erstellen
-            </button>
-          ) : (
-            <button
-              onClick={() => goTo('login')}
-              style={{
-                background: 'white',
-                color: C.forest,
-                padding: '0.9rem 1.4rem',
-                borderRadius: 999,
-                border: `1px solid ${C.line}`,
-                fontSize: '0.95rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 8px 20px rgba(28,58,46,0.06)',
-              }}
-            >
-              Einloggen zum Inserieren
-            </button>
-          )}
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            {/* Grid / Map toggle */}
+            <div style={{ display: 'inline-flex', background: 'rgba(28,58,46,0.07)', borderRadius: 999, padding: '0.2rem' }}>
+              {[
+                { val: 'grid', icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>, label: 'Raster' },
+                { val: 'map', icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>, label: 'Karte' },
+              ].map(({ val, icon, label }) => (
+                <button key={val} onClick={() => setViewMode(val)} aria-label={label} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', padding: '0.5rem 0.9rem', borderRadius: 999, border: 'none', background: viewMode === val ? 'white' : 'transparent', color: viewMode === val ? C.forest : C.muted, fontWeight: viewMode === val ? 700 : 500, cursor: 'pointer', fontSize: '0.82rem', boxShadow: viewMode === val ? '0 2px 8px rgba(28,58,46,0.10)' : 'none', transition: 'all 0.18s ease' }}>
+                  {icon} {label}
+                </button>
+              ))}
+            </div>
+            {currentUser ? (
+              <button onClick={() => goTo('create-listing')} style={{ ...primaryButtonStyle, padding: '0.9rem 1.4rem', borderRadius: 999, fontSize: '0.95rem' }}>
+                Inserat erstellen
+              </button>
+            ) : (
+              <button onClick={() => goTo('login')} style={{ background: 'white', color: C.forest, padding: '0.9rem 1.4rem', borderRadius: 999, border: `1px solid ${C.line}`, fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 20px rgba(28,58,46,0.06)' }}>
+                Einloggen zum Inserieren
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Filters row */}
@@ -361,29 +386,35 @@ export default function ListingsPage({
           </p>
         )}
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-            gap: '1.2rem',
-          }}
-        >
-          {loading || searching
-            ? [1, 2, 3, 4, 5, 6].map((n) => <SkeletonCard key={n} />)
-            : visibleListings.map((item, i) => (
-                <ScrollReveal key={item.id} delay={Math.min(i * 60, 300)}>
-                  <ListingCard
-                    listing={item}
-                    onSelect={onSelectListing}
-                    favorites={favorites}
-                    toggleFavorite={toggleFavorite}
-                  />
-                </ScrollReveal>
-              ))}
-        </div>
+        {viewMode === 'map' ? (
+          <Suspense fallback={<div style={{ height: 520, background: 'white', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.muted, border: `1px solid ${C.line}` }}>Karte wird geladen…</div>}>
+            <ListingsMapView listings={filteredListings} onSelectListing={onSelectListing} />
+          </Suspense>
+        ) : (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+              gap: '1.2rem',
+            }}
+          >
+            {loading || searching
+              ? [1, 2, 3, 4, 5, 6].map((n) => <SkeletonCard key={n} />)
+              : visibleListings.map((item, i) => (
+                  <ScrollReveal key={item.id} delay={Math.min(i * 60, 300)}>
+                    <ListingCard
+                      listing={item}
+                      onSelect={onSelectListing}
+                      favorites={favorites}
+                      toggleFavorite={toggleFavorite}
+                    />
+                  </ScrollReveal>
+                ))}
+          </div>
+        )}
 
         {/* Mehr laden */}
-        {!loading && hasMore && (
+        {viewMode === 'grid' && !loading && hasMore && (
           <div style={{ gridColumn: '1 / -1', textAlign: 'center', paddingTop: '1rem' }}>
             <button
               onClick={() => setVisibleCount((c) => c + 12)}

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { C, categories, steps } from '../constants';
+import { C, categories, steps, STORAGE_KEYS } from '../constants';
 import { smartImageUrl } from '../lib/getImageUrl.js';
 import Logo from '../components/Logo';
 import AnimatedCounter from '../components/AnimatedCounter';
 import ListingCard from '../components/ListingCard';
+import { supabase } from '../supabase';
 
 async function reverseGeocode(lat, lon) {
   try {
@@ -27,6 +28,31 @@ export default function HomePage({
 }) {
   const [nearbyCity, setNearbyCity] = useState(null);
   const [locationDenied, setLocationDenied] = useState(false);
+  const [stats, setStats] = useState({ listings: null, users: null });
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
+
+  // Load real platform stats
+  useEffect(() => {
+    Promise.all([
+      supabase.from('listings').select('*', { count: 'exact', head: true }),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+    ]).then(([l, u]) => {
+      setStats({ listings: l.count ?? 0, users: u.count ?? 0 });
+    });
+  }, []);
+
+  // Load recently viewed from localStorage + match to listings
+  useEffect(() => {
+    if (!listings.length) return;
+    try {
+      const ids = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENTLY_VIEWED) || '[]');
+      const matched = ids
+        .map((id) => listings.find((l) => String(l.id) === String(id)))
+        .filter(Boolean)
+        .slice(0, 4);
+      setRecentlyViewed(matched);
+    } catch {}
+  }, [listings]);
 
   useEffect(() => {
     if (!navigator.geolocation) return;
@@ -326,21 +352,22 @@ export default function HomePage({
 
       {/* Trust bar */}
       <section style={{ background: 'white', borderBottom: `1px solid ${C.line}` }}>
-        <div
-          style={{
-            maxWidth: 1100,
-            margin: '0 auto',
-            padding: '1.1rem 1.5rem',
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '2.5rem',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-          }}
-        >
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '1.1rem 1.5rem', display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          {stats.listings !== null && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.sage} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="2"/></svg>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: C.forest }}>{stats.listings.toLocaleString('de-DE')}</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 500, color: C.muted }}>Inserate</span>
+            </div>
+          )}
+          {stats.users !== null && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.sage} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: C.forest }}>{stats.users.toLocaleString('de-DE')}</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 500, color: C.muted }}>Nutzer</span>
+            </div>
+          )}
           {[
-            { icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.sage} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="2"/></svg>, label: 'Sicher & lokal' },
-            { icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.sage} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>, label: 'Geprüfte Nutzer' },
             { icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.sage} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>, label: 'Digitaler Mietvertrag' },
             { icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.sage} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>, label: 'Kostenlos inserieren' },
           ].map(({ icon, label }) => (
@@ -1071,6 +1098,32 @@ export default function HomePage({
           </div>
         </div>
       </section>
+
+      {/* Zuletzt gesehen */}
+      {recentlyViewed.length > 0 && (
+        <section style={{ padding: '3rem 1.5rem 0' }}>
+          <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div>
+                <p style={{ fontSize: '0.78rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: C.sage, fontWeight: 700, margin: '0 0 0.4rem' }}>
+                  Zuletzt angesehen
+                </p>
+                <h2 style={{ fontSize: '1.6rem', color: C.forest, margin: 0, letterSpacing: '-0.03em' }}>
+                  Weiter schauen?
+                </h2>
+              </div>
+              <button onClick={() => goTo('listings')} style={{ background: 'white', color: C.forest, border: `1px solid ${C.line}`, borderRadius: 999, padding: '0.7rem 1rem', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem' }}>
+                Alle Inserate
+              </button>
+            </div>
+            <div className="ria-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '1rem' }}>
+              {recentlyViewed.map((item) => (
+                <ListingCard key={item.id} listing={item} onSelect={onSelectListing} compact />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Testimonials */}
       <section style={{ background: 'white', padding: '5rem 1.5rem' }}>
