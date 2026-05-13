@@ -25,11 +25,13 @@ export interface Listing {
   paymentMethods: string[];
   plz: string;
   createdAt: string;
+  views: number;
 }
 
 export interface Message {
   id: string;
   fromUserId: string;
+  fromName: string;
   toUserId: string;
   text: string;
   messageType: 'normal' | 'booking_request' | 'booking_accepted' | 'booking_declined';

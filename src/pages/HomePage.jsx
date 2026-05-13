@@ -3,7 +3,6 @@ import { C, categories, steps } from '../constants';
 import { smartImageUrl } from '../lib/getImageUrl.js';
 import Logo from '../components/Logo';
 import AnimatedCounter from '../components/AnimatedCounter';
-import RatingStars from '../components/RatingStars';
 import ListingCard from '../components/ListingCard';
 
 async function reverseGeocode(lat, lon) {

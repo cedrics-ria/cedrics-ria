@@ -19,21 +19,31 @@ export function useListingsSearch(
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const doSearch = useCallback(async (q: string, cat: string, loc: string) => {
-    if (!q && !cat && !loc) {
-      setResults(allListings);
+    // No text query → filter client-side to preserve review/rating enrichment
+    if (!q) {
+      let filtered = allListings;
+      if (cat) filtered = filtered.filter((l) => l.category === cat);
+      if (loc) filtered = filtered.filter((l) => l.location?.toLowerCase().includes(loc.toLowerCase()));
+      setResults(filtered);
       setSearching(false);
       return;
     }
+    // Text query → hit Supabase for full-text match, then re-attach enriched data
     setSearching(true);
     try {
-      let qb = supabase.from('listings').select('*').eq('is_available', true);
-      if (q) qb = qb.or(`title.ilike.%${q}%,description.ilike.%${q}%`);
+      let qb = supabase.from('listings').select('*')
+        .or(`title.ilike.%${q}%,description.ilike.%${q}%`);
       if (cat) qb = qb.eq('category', cat);
       if (loc) qb = qb.ilike('location', `%${loc}%`);
       qb = qb.order('created_at', { ascending: false });
       const { data, error } = await qb;
       if (error) throw error;
-      setResults((data ?? []).map(mapListingFromDb));
+      // Merge DB results with enriched allListings to preserve ratings
+      const enrichedById = new Map(allListings.map((l) => [l.id, l]));
+      setResults((data ?? []).map((row) => {
+        const mapped = mapListingFromDb(row);
+        return enrichedById.get(mapped.id) ?? mapped;
+      }));
     } catch (err) {
       if (import.meta.env.DEV) console.warn('[useListingsSearch]', err);
       setResults([]);
