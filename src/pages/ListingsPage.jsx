@@ -295,79 +295,62 @@ export default function ListingsPage({
           ))}
         </div>
 
-        {/* Location filter */}
-        {locationOptions.length > 2 && (
-          <div
-            style={{
-              display: 'flex',
-              gap: '0.5rem',
-              flexWrap: 'wrap',
-              marginBottom: '1.5rem',
-              alignItems: 'center',
-            }}
-          >
-            <span
-              style={{ fontSize: '0.78rem', color: C.muted, fontWeight: 600, whiteSpace: 'nowrap' }}
-            >
-              📍 Ort:
+        {/* Location + Price filters */}
+        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '1.5rem', alignItems: 'flex-start' }}>
+          {locationOptions.length > 2 && (
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.78rem', color: C.muted, fontWeight: 600, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Ort:
+              </span>
+              {locationOptions.map((loc) => (
+                <button
+                  key={loc}
+                  onClick={() => setLocationFilter(loc)}
+                  style={{
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: 999,
+                    border: `1px solid ${C.line}`,
+                    background: locationFilter === loc ? C.terra : 'white',
+                    color: locationFilter === loc ? 'white' : C.muted,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.18s ease',
+                  }}
+                >
+                  {loc}
+                </button>
+              ))}
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.78rem', color: C.muted, fontWeight: 600, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Preis:
             </span>
-            {locationOptions.map((loc) => (
+            {['Alle', 'bis 5 €', 'bis 10 €', 'bis 20 €', 'über 20 €'].map((opt) => (
               <button
-                key={loc}
-                onClick={() => setLocationFilter(loc)}
+                key={opt}
+                onClick={() => setPriceFilter(opt)}
                 style={{
                   padding: '0.35rem 0.75rem',
                   borderRadius: 999,
                   border: `1px solid ${C.line}`,
-                  background: locationFilter === loc ? C.terra : 'white',
-                  color: locationFilter === loc ? 'white' : C.muted,
+                  background: priceFilter === opt ? C.gold : 'white',
+                  color: priceFilter === opt ? 'white' : C.muted,
                   fontWeight: 600,
                   cursor: 'pointer',
                   fontSize: '0.8rem',
                   whiteSpace: 'nowrap',
-                  transition: 'all 0.2s ease',
+                  transition: 'all 0.18s ease',
                 }}
               >
-                {loc}
+                {opt}
               </button>
             ))}
           </div>
-        )}
-        {/* Price filter */}
-        <div
-          style={{
-            display: 'flex',
-            gap: '0.5rem',
-            flexWrap: 'wrap',
-            marginBottom: '1.5rem',
-            alignItems: 'center',
-          }}
-        >
-          <span
-            style={{ fontSize: '0.78rem', color: C.muted, fontWeight: 600, whiteSpace: 'nowrap' }}
-          >
-            💶 Preis:
-          </span>
-          {['Alle', 'bis 5 €', 'bis 10 €', 'bis 20 €', 'über 20 €'].map((opt) => (
-            <button
-              key={opt}
-              onClick={() => setPriceFilter(opt)}
-              style={{
-                padding: '0.35rem 0.75rem',
-                borderRadius: 999,
-                border: `1px solid ${C.line}`,
-                background: priceFilter === opt ? C.gold : 'white',
-                color: priceFilter === opt ? 'white' : C.muted,
-                fontWeight: 600,
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              {opt}
-            </button>
-          ))}
         </div>
 
         {!loading && (

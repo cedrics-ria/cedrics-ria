@@ -325,6 +325,34 @@ export default function HomePage({
         </div>
       </section>
 
+      {/* Trust bar */}
+      <section style={{ background: 'white', borderBottom: `1px solid ${C.line}` }}>
+        <div
+          style={{
+            maxWidth: 1100,
+            margin: '0 auto',
+            padding: '1.1rem 1.5rem',
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '2.5rem',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+          }}
+        >
+          {[
+            { icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.sage} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="2"/></svg>, label: 'Sicher & lokal' },
+            { icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.sage} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>, label: 'Geprüfte Nutzer' },
+            { icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.sage} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>, label: 'Digitaler Mietvertrag' },
+            { icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.sage} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>, label: 'Kostenlos inserieren' },
+          ].map(({ icon, label }) => (
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {icon}
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: C.forest }}>{label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section style={{ padding: '3rem 1.5rem 1rem' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div
@@ -1041,6 +1069,76 @@ export default function HomePage({
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section style={{ background: 'white', padding: '5rem 1.5rem' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <p style={{ fontSize: '0.78rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: C.sage, fontWeight: 700, marginBottom: '0.75rem' }}>
+            Was Nutzer sagen
+          </p>
+          <h2 style={{ fontSize: '2.35rem', color: C.forest, marginTop: 0, marginBottom: '2.5rem', letterSpacing: '-0.03em' }}>
+            Echte Menschen. Echte Erfahrungen.
+          </h2>
+          <div className="ria-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '1rem' }}>
+            {[
+              { name: 'Lisa K.', city: 'Paderborn', text: 'Ich habe meinen Hochdruckreiniger für ein Wochenende ausgeliehen und einfach 15 € verdient. Dauerte 5 Minuten zum Inserieren.', rating: 5 },
+              { name: 'Tim B.', city: 'Bielefeld', text: 'Habe eine Kamera für mein Projekt gemietet statt 800 € auszugeben. Alles lief reibungslos — klasse Plattform!', rating: 5 },
+              { name: 'Sarah M.', city: 'Detmold', text: 'Super nette Community. Schon dreimal gemietet, immer pünktlich und unkompliziert. Der digitale Vertrag gibt mir Sicherheit.', rating: 5 },
+            ].map(({ name, city, text, rating }) => (
+              <div key={name} className="hover-card" style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 24, padding: '1.75rem', boxShadow: C.shadow }}>
+                <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '1rem' }}>
+                  {Array.from({ length: rating }).map((_, i) => (
+                    <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={C.gold} stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  ))}
+                </div>
+                <p style={{ color: C.ink, lineHeight: 1.7, fontSize: '0.95rem', margin: '0 0 1.25rem' }}>
+                  "{text}"
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #163126, #1C3A2E)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: '0.9rem', flexShrink: 0 }}>
+                    {name.charAt(0)}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, color: C.forest, fontSize: '0.9rem' }}>{name}</div>
+                    <div style={{ color: C.muted, fontSize: '0.8rem' }}>{city}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section style={{ padding: '5rem 1.5rem', background: 'linear-gradient(135deg, #173126 0%, #1C3A2E 100%)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -80, right: -80, width: 320, height: 320, borderRadius: '50%', background: 'rgba(200,169,107,0.07)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: -100, left: -60, width: 280, height: 280, borderRadius: '50%', background: 'rgba(122,158,126,0.08)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 700, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+          <p style={{ fontSize: '0.78rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(200,169,107,0.85)', fontWeight: 700, marginBottom: '1rem' }}>
+            Jetzt starten
+          </p>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', color: 'white', marginTop: 0, marginBottom: '1rem', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
+            Dein erstes Inserat in unter 5 Minuten.
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.62)', fontSize: '1.05rem', lineHeight: 1.7, marginBottom: '2.5rem', maxWidth: 520, margin: '0 auto 2.5rem' }}>
+            Kostenlos inserieren. Sofort verdienen. Nachhaltig handeln.
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => goTo('create-listing')}
+              style={{ background: C.terra, color: 'white', padding: '1.1rem 2rem', borderRadius: 14, border: 'none', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', boxShadow: '0 14px 34px rgba(196,113,74,0.38)' }}
+            >
+              Inserat erstellen →
+            </button>
+            <button
+              onClick={() => goTo('listings')}
+              style={{ background: 'rgba(255,255,255,0.08)', color: 'white', padding: '1.1rem 2rem', borderRadius: 14, border: '1px solid rgba(255,255,255,0.18)', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', backdropFilter: 'blur(6px)' }}
+            >
+              Inserate entdecken
+            </button>
           </div>
         </div>
       </section>

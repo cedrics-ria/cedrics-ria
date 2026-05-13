@@ -34,11 +34,12 @@ export default function ListingCard({
         background: 'white',
         borderRadius: 20,
         overflow: 'hidden',
-        border: `1px solid ${item.isAvailable === false ? C.terra : C.line}`,
+        border: `1px solid ${item.isAvailable === false ? 'rgba(196,113,74,0.3)' : C.line}`,
         boxShadow: C.shadow,
         cursor: 'pointer',
         height: '100%',
-        opacity: item.isAvailable === false ? 0.72 : 1,
+        opacity: item.isAvailable === false ? 0.75 : 1,
+        transition: 'transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease',
       }}
       onClick={() => onSelect && onSelect(item)}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect && onSelect(item); } }}
@@ -172,16 +173,20 @@ export default function ListingCard({
           >
             {item.title}
           </h2>
-          <span
-            style={{
-              color: C.terra,
-              fontWeight: 800,
-              fontSize: compact ? '0.9rem' : '1rem',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {item.price}
-          </span>
+          <div style={{ textAlign: 'right', flexShrink: 0 }}>
+            <span
+              style={{
+                color: C.terra,
+                fontWeight: 800,
+                fontSize: compact ? '0.9rem' : '1rem',
+                whiteSpace: 'nowrap',
+                display: 'block',
+              }}
+            >
+              {item.price}
+            </span>
+            <span style={{ fontSize: '0.7rem', color: C.muted, fontWeight: 500 }}>pro Tag</span>
+          </div>
         </div>
         <p style={{ color: C.muted, fontSize: '0.85rem', margin: '0 0 0.6rem' }}>
           {item.location}

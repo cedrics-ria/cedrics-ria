@@ -58,7 +58,7 @@ export default function TopBar({
         <nav
           aria-label="Hauptnavigation"
           className="ria-topbar-nav-group"
-          style={{ display: 'flex', gap: '0.5rem' }}
+          style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}
         >
           <NavButton
             label="Home"
@@ -72,6 +72,24 @@ export default function TopBar({
             onClick={() => goTo('listings')}
             aria-current={currentPage === 'listings' ? 'page' : undefined}
           />
+          <button
+            onClick={() => goTo('create-listing')}
+            style={{
+              background: 'linear-gradient(135deg, #C4714A, #A95A3A)',
+              color: 'white',
+              border: 'none',
+              borderRadius: 999,
+              padding: '0.55rem 1.1rem',
+              fontSize: '0.88rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              letterSpacing: '-0.01em',
+              boxShadow: '0 4px 14px rgba(196,113,74,0.28)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            + Inserieren
+          </button>
         </nav>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
